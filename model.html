@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Curiosity Sphere — Conditions for Curiosity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#050C16; --panel:#0A1523; --grid:rgba(237,193,96,.05);
+    --ink:#F6F5F2; --ink-soft:rgba(246,245,242,.62); --rule:rgba(237,193,96,.22);
+    --pen-blue:#6E9FE0; --pen-red:#E0796E; --pen-green:#6EC996;
+    --pen-violet:#B08CE0; --ochre:#EDC160; --warm:#FDD284;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+
+    color:var(--ink); font-family:"Karla",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1360px;margin:0 auto;padding:28px 22px 64px}
+  header{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;border-bottom:1.5px solid var(--ink);padding-bottom:12px;margin-bottom:14px}
+  h1{font-family:"Playfair Display",serif;font-weight:400;font-size:30px;letter-spacing:-.015em;margin:0}
+  .sub{font-size:11.5px;color:var(--ink-soft);letter-spacing:.02em;margin-left:auto}
+  .backlink{color:var(--ochre);text-decoration:none;border-bottom:1px solid rgba(237,193,96,.35);padding-bottom:2px}
+  .backlink:hover{color:var(--warm);border-color:var(--warm)}
+
+  .primer{border:1.5px solid var(--ink);border-radius:2px;background:var(--panel);margin-bottom:22px}
+  .primer summary{cursor:pointer;list-style:none;padding:11px 14px;font-size:12px;letter-spacing:.02em;display:flex;align-items:center;gap:9px;font-weight:600;color:var(--ochre)}
+  .primer summary::-webkit-details-marker{display:none}
+  .primer summary::after{content:"read";margin-left:auto;font-size:10px;color:var(--ink-soft);border:1.2px solid var(--rule);padding:2px 7px;border-radius:2px}
+  .primer[open] summary::after{content:"close"}
+  .primer summary:focus-visible{outline:2px solid var(--pen-blue);outline-offset:-2px}
+  .primer .body{padding:0 14px 16px;font-size:12.5px;line-height:1.75;max-width:none;color:var(--ink-soft)}
+  .primer .body p{margin:0 0 11px}
+  .primer .body strong{font-weight:600;color:var(--ink)}
+  @media (min-width:768px){
+    .primer{margin-bottom:28px}
+    .primer summary{padding:13px 18px;font-size:12.5px;letter-spacing:.01em}
+    .primer summary::after{font-size:10.5px;padding:3px 9px}
+    .primer .body{padding:0 18px 18px;font-size:13.5px;line-height:1.78}
+    .primer .body p{margin:0 0 13px}
+  }
+  @media (min-width:1200px){
+    .primer{margin:0 0 32px;border-width:1.8px}
+    .primer summary{padding:15px 22px;font-size:13.5px}
+    .primer summary::after{font-size:11px}
+    .primer .body{padding:0 22px 22px;font-size:14.5px;line-height:1.82}
+    .primer .body p{margin:0 0 14px}
+  }
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:26px;align-items:stretch}
+  .stagecol{min-width:0}
+  .stage{position:sticky;top:14px;z-index:5;background:var(--panel);border:1.5px solid var(--ink);border-radius:2px;overflow:hidden}
+  @media (max-width:960px){
+    .layout{display:block}
+    .stagecol{display:contents}
+    .stage{top:0;margin:0 -22px 20px;border-left:0;border-right:0;border-radius:0;box-shadow:0 10px 18px -14px rgba(0,0,0,.35)}
+  }
+  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+  canvas:active{cursor:grabbing}
+  .stagenote{position:absolute;left:12px;bottom:10px;font-size:10.5px;color:var(--ink-soft);letter-spacing:.04em;pointer-events:none}
+  .readout{position:absolute;right:12px;top:9px;font-size:10.5px;color:var(--ink-soft);text-align:right;line-height:1.65;pointer-events:none}
+  .readout b{color:var(--ink);font-weight:600}
+  .readout .score{font-family:"Playfair Display",serif;font-weight:400;font-size:36px;color:var(--ink);line-height:1;letter-spacing:-.02em}
+  .readout .score em{font-style:normal;font-size:14px;color:var(--ink-soft);font-weight:500}
+  .readout .scorelab{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+  @media (max-width:960px){ .readout .score{font-size:24px} }
+
+  .rail{display:flex;flex-direction:column;gap:20px}
+  .panel{border:1.5px solid var(--ink);border-radius:2px;background:var(--panel);padding:14px 14px 16px}
+  .panel h2{font-family:"Karla",sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ochre);margin:0 0 4px}
+  .panel p.hint{font-size:10.5px;color:var(--ink-soft);line-height:1.55;margin:0 0 12px}
+
+  .states{display:grid;grid-template-columns:1fr;gap:6px}
+  .staterow{display:flex;gap:5px}
+  .staterow > button.pick{
+    flex:1;font-family:"Karla",sans-serif;font-size:11.5px;
+    padding:8px 9px;background:transparent;color:var(--ink);
+    border:1.2px solid var(--rule);border-radius:2px;cursor:pointer;text-align:left;line-height:1.3;
+    transition:background .14s,border-color .14s;
+  }
+  .staterow > button.pick:hover{border-color:var(--ink)}
+  .staterow > button.pick[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .staterow > button.pick span{display:block;font-size:9.5px;color:var(--ink-soft);margin-top:2px}
+  .staterow > button.pick[aria-pressed="true"] span{color:rgba(246,245,242,.55)}
+  button.info{
+    width:30px;flex:none;font-family:"Karla",sans-serif;font-size:12px;
+    background:transparent;color:var(--ink-soft);border:1.2px solid var(--rule);
+    border-radius:2px;cursor:pointer;
+  }
+  button.info:hover{border-color:var(--ink);color:var(--ink)}
+  button.info[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--pen-blue);outline-offset:2px}
+
+  .detail{
+    border:1.2px dashed var(--rule);border-radius:2px;padding:11px 12px;margin-top:8px;
+    font-size:11.5px;line-height:1.65;color:var(--ink-soft);background:rgba(246,245,242,.045);
+  }
+  .detail[hidden]{display:none}
+  .detail h3{font-family:"Playfair Display",serif;font-size:15px;font-weight:500;margin:0 0 7px;letter-spacing:0;color:var(--ink)}
+  .detail p{margin:0 0 8px}
+  .detail p:last-child{margin:0}
+
+  .ctrl{margin-bottom:14px}
+  .ctrl:last-child{margin-bottom:0}
+  .ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;margin-bottom:5px;gap:8px}
+  .ctrl label b{font-weight:500}
+  .ctrl label i{font-style:normal;color:var(--ink-soft);font-size:10.5px}
+  .ctrl .desc{font-size:10px;color:var(--ink-soft);line-height:1.5;margin-top:4px}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;cursor:pointer;margin:0}
+  input[type=range]::-webkit-slider-runnable-track{height:1.5px;background:var(--ink)}
+  input[type=range]::-moz-range-track{height:1.5px;background:var(--ink)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink);margin-top:-6px}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink)}
+  input[type=range].violet::-webkit-slider-thumb{border-color:var(--pen-violet)}
+  input[type=range].violet::-moz-range-thumb{border-color:var(--pen-violet)}
+
+  .toggles{display:flex;flex-wrap:wrap;gap:5px}
+  .toggles button{
+    font-family:"Karla",sans-serif;font-size:10px;letter-spacing:.02em;
+    padding:5px 8px;background:transparent;color:var(--ink-soft);
+    border:1.2px solid var(--rule);border-radius:2px;cursor:pointer;
+  }
+  .toggles button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .actions{display:flex;gap:6px;margin-top:12px}
+  .actions button{
+    flex:1;font-family:"Karla",sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;padding:10px 6px;
+    background:var(--ochre);color:#050C16;border:1.5px solid var(--ochre);border-radius:2px;cursor:pointer;
+  }
+  .actions button:hover{background:var(--warm);border-color:var(--warm)}
+  .actions button.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+  .actions button.ghost:hover{background:transparent;border-color:var(--ink)}
+  .actions button.violet{background:var(--pen-violet);border-color:var(--pen-violet)}
+
+  details.panel > summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:9px;
+    font-family:"Karla",sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ochre)}
+  details.panel > summary::-webkit-details-marker{display:none}
+  details.panel > summary::after{content:"+";margin-left:auto;font-family:"Karla",sans-serif;
+    font-size:13px;color:var(--ink-soft);border:1.2px solid var(--rule);width:20px;height:20px;
+    display:flex;align-items:center;justify-content:center;border-radius:2px}
+  details.panel[open] > summary::after{content:"\2013"}
+  details.panel[open] > summary{margin-bottom:10px}
+
+  .legend{font-size:10.5px;line-height:1.85;color:var(--ink-soft)}
+  .legend div{display:flex;align-items:center;gap:8px}
+  .swatch{width:17px;height:0;border-top-width:2px;border-top-style:solid;flex:none}
+  .swatch.dash{border-top-style:dashed}
+  .swatch.fill{height:9px;border:none;border-radius:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Curiosity Sphere</h1>
+    <div class="sub"><a class="backlink" href="/">← Conditions for Curiosity</a> &nbsp;·&nbsp; drag to rotate</div>
+  </header>
+
+  <details class="primer">
+    <summary>New here? Start with this.</summary>
+    <div class="body">
+      <p>Think of every question you could possibly be curious about as pointing in a different direction from where you stand. Animals that way. Car engines that way. Why your friend went quiet at lunch, that way. There are infinite directions, so nobody covers them all.</p>
+      <p><strong>Each line in the drawing is one question you actually hold.</strong> Which way it points is what the question is about. How long it is, is how far you'll chase it. A short line means you'd nod if someone brought it up. A long line means you'd stay up reading about it.</p>
+      <p><strong>The dashed circle near the middle is the price of admission.</strong> A question has to get past it before you do anything about it. Grey dashed lines never made it — those are the things you find kind of interesting and never once looked up.</p>
+      <p><strong>The outer shape is not a ball you live inside. It's the shape your questions make.</strong> Go deep on one thing and it stretches out over there like a tent pole. Stop caring about something and a dent appears.</p>
+      <p><strong>The number in the corner is a made-up score, not a measurement.</strong> It adds up how far you're chasing things and puts it on a ten-point scale so you can watch it move. Treat it like a thermometer someone built in their garage: useful for spotting change, not for proving anything.</p>
+      <p><strong>The gold band is your ring.</strong> It's not drawn by hand — it's worked out from where your live questions actually sit. It's the answer to "which directions can curiosity still get in?" Wide band, lots of ways in. Thin band, only a few.</p>
+    </div>
+  </details>
+
+  <div class="layout">
+
+    <div class="stagecol">
+    <div class="stage">
+      <canvas id="cv" width="1200" height="900" aria-label="Rotatable three-dimensional model of the curiosity sphere"></canvas>
+      <div class="readout" id="readout"></div>
+      <div class="stagenote">Infinite directions exist. Only your reach is drawn.</div>
+    </div>
+    </div>
+
+    <div class="rail">
+
+      <div class="panel">
+        <h2>States</h2>
+        <p class="hint">Same model, different people. Press <b>?</b> for what each one means.</p>
+        <div class="states" id="states"></div>
+        <div class="detail" id="statedetail" hidden></div>
+      </div>
+
+      <details class="panel">
+        <summary>Build it on purpose</summary>
+        <p class="hint">Curiosity you decide to have, rather than curiosity you happen to have.</p>
+        <div class="actions" style="margin-top:0">
+          <button id="plant" class="violet">Plant a question</button>
+          <button id="clearplant" class="ghost" style="flex:0 0 78px">Clear</button>
+        </div>
+        <div class="ctrl" style="margin-top:14px">
+          <label for="eff"><b>Effort spent</b><i id="eff-v"></i></label>
+          <input type="range" id="eff" class="violet" min="0" max="100" value="0">
+          <div class="desc">It plants in your biggest dent — the direction you're most closed off in. Push effort up and watch what happens to the directions next door.</div>
+        </div>
+        <div class="detail" id="builddetail">
+          <h3>Why it fills more than one direction</h3>
+          <p>You can't decide to be curious about everything. You can decide to be curious about one thing.</p>
+          <p>Chase that one thing far enough and the questions beside it come along free — learn about birds and you end up wondering about dinosaurs, migration, why bones are hollow. That's the purple patch spreading.</p>
+          <p>Watch the score in the corner of the drawing. That number is the argument.</p>
+        </div>
+      </details>
+
+      <div class="panel">
+        <h2>Variables</h2>
+        <div class="ctrl">
+          <label for="thr"><b>Price of admission</b><i id="thr-v"></i></label>
+          <input type="range" id="thr" min="0" max="55" value="18">
+          <div class="desc">How hard it is to act on a question at all. Tired, stressed, rushed — the price goes up and things you care about go grey.</div>
+        </div>
+        <div class="ctrl">
+          <label for="rch"><b>Reach</b><i id="rch-v"></i></label>
+          <input type="range" id="rch" min="30" max="150" value="100">
+          <div class="desc">How far you follow a question once you've started.</div>
+        </div>
+        <div class="ctrl">
+          <label for="brd"><b>Breadth</b><i id="brd-v"></i></label>
+          <input type="range" id="brd" min="30" max="200" value="100">
+          <div class="desc">How much a question spills onto nearby questions.</div>
+        </div>
+        <div class="ctrl">
+          <label for="den"><b>Directions</b><i id="den-v"></i></label>
+          <input type="range" id="den" min="20" max="150" value="100">
+          <div class="desc">How many different things you hold questions about.</div>
+        </div>
+      </div>
+
+      <details class="panel">
+        <summary>Draw</summary>
+        <div class="toggles" id="toggles"></div>
+        <div class="actions">
+          <button id="spin" aria-pressed="true">Pause spin</button>
+          <button id="save" class="ghost">Save PNG</button>
+        </div>
+      </details>
+
+      <details class="panel" open>
+        <summary>Key</summary>
+        <div class="legend">
+          <div><svg width="17" height="9" viewBox="0 0 17 2" style="vertical-align:middle;margin-right:8px;display:inline-block;flex:none"><line x1="0" y1="1" x2="5.67" y2="1" stroke="#6E9FE0" stroke-width="2"/><line x1="5.67" y1="1" x2="11.33" y2="1" stroke="#E0796E" stroke-width="2"/><line x1="11.33" y1="1" x2="17" y2="1" stroke="#6EC996" stroke-width="2"/></svg> a question you chase</div>
+          <div><span class="swatch dash" style="border-top-color:rgba(246,245,242,.45)"></span> one you never got to</div>
+          <div><span class="swatch" style="border-top-color:#B08CE0"></span> one you chose on purpose</div>
+          <div><span class="swatch fill" style="background:rgba(237,193,96,.45)"></span> your ring</div>
+          <div><span class="swatch" style="border-top-color:rgba(246,245,242,.7)"></span> the shape you make</div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const V = {
+  fromSpherical(t,p){ const s=Math.sin(t); return [s*Math.cos(p), Math.cos(t), s*Math.sin(p)]; },
+  dot(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; },
+  norm(a){ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; },
+  cross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; },
+  scale(a,k){ return [a[0]*k,a[1]*k,a[2]*k]; },
+  add(a,b){ return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]; }
+};
+function rng(seed){
+  let s = seed>>>0;
+  return function(){ s^=s<<13;s>>>=0; s^=s>>17; s^=s<<5;s>>>=0; return s/4294967296; };
+}
+
+const PALETTE = ["#6E9FE0","#E0796E","#6EC996","#6E9FE0","#E0796E","#6EC996"];
+const VIOLET = "#B08CE0";
+const AXES = [[0.62,0.28],[1.15,1.85],[1.95,3.60],[1.05,5.05],[2.35,0.95],[0.45,3.10]];
+
+const STATES = {
+  child: {
+    label:"Wide open", note:"a young kid",
+    slots:[[16,.92,1.25],[15,.90,1.30],[16,.88,1.25],[15,.91,1.30],[14,.86,1.25],[15,.89,1.30]],
+    info:["You'll chase almost anything. Somebody mentions a word you've never heard and you want to know what it means, right then.",
+          "Nothing has been ruled out yet. No direction feels like it isn't for you.",
+          "This is the shape most people start with, and it's the one worth remembering when you look at the others."]
+  },
+  student: {
+    label:"Sorting it out", note:"a teenager, most adults",
+    slots:[[14,.86,1.00],[12,.72,.95],[11,.66,.90],[9,.55,.85],[7,.42,.75],[8,.48,.80]],
+    info:["A handful of things you genuinely care about, and a bunch you're lukewarm on.",
+          "You've started deciding what's worth your time. Some directions are getting quietly dropped.",
+          "Still plenty of ways in. The shape is uneven but it's big."]
+  },
+  phd: {
+    label:"Gone deep", note:"a specialist",
+    slots:[[26,.99,.38],[11,.52,.85],[9,.44,.80],[8,.40,.75],[7,.36,.70],[9,.46,.80]],
+    info:["One thing you've followed further than most people ever follow anything. That's the spike.",
+          "Everything else is still alive — you're interested in plenty. You just don't run as far with it.",
+          "Important: going deep is not the same as closing down. Compare this to the next state and look at how much is still lit up."]
+  },
+  spent: {
+    label:"Running on empty",  note:"tired, stretched, burnt out",
+    slots:[[11,.25,.72],[10,.23,.70],[9,.21,.66],[10,.24,.70],[9,.22,.66],[10,.23,.70]],
+    info:["Nothing gets chased far. Not one direction, not even the ones you used to love.",
+          "The whole shape shrank evenly. That's the difference between this and going deep — there's no spike here, just less of everything.",
+          "This is not about being less smart or caring less. It's about having nothing left to spend."]
+  },
+  reopen: {
+    label:"Coming back", note:"after a rough stretch",
+    slots:[[12,.62,.90],[11,.66,.95],[9,.21,.66],[10,.23,.70],[8,.20,.64],[9,.22,.68]],
+    info:["Two directions are alive again. The rest is still flat.",
+          "It doesn't come back all at once and it doesn't come back evenly. It comes back somewhere specific first.",
+          "Try the plant-a-question tool on the empty side and see what it takes to fill a dent."]
+  }
+};
+const ORDER = ["child","student","phd","spent","reopen"];
+
+const opts = { nodes:true, dormant:true, envelope:true, shell:true, ring:true };
+const TOGGLES = [["nodes","questions"],["dormant","the grey ones"],["envelope","outer shape"],["shell","price line"],["ring","ring"]];
+
+let current = STATES.child.slots.map(s=>s.slice());
+let from    = current.map(s=>s.slice());
+let target  = current.map(s=>s.slice());
+let morph = 1, activeState = "child";
+let threshold=.18, reachMul=1, breadthMul=1, densityMul=1;
+let effort = 0, plantAxis = null;
+let yaw=-0.55, pitch=0.30, spinning=true, dragging=false, lastX=0, lastY=0;
+
+if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) spinning = false;
+
+function clusterNodes(axis, count, vit, spr, seed, color, built){
+  const out = [];
+  const n = Math.max(0, Math.round(count * (built ? 1 : densityMul)));
+  if (!n) return out;
+  const r = rng(seed);
+  const helper = Math.abs(axis[1]) > .9 ? [1,0,0] : [0,1,0];
+  const u = V.norm(V.cross(axis, helper));
+  const w = V.cross(axis, u);
+  const spread = spr * (built ? 1 : breadthMul) * 0.62;
+  for (let i=0;i<n;i++){
+    const a = r()*Math.PI*2, rad = Math.sqrt(r())*spread;
+    const dir = V.norm(V.add(V.scale(axis, Math.cos(rad)),
+                 V.add(V.scale(u, Math.sin(rad)*Math.cos(a)),
+                       V.scale(w, Math.sin(rad)*Math.sin(a)))));
+    const jitter = .72 + r()*.56;
+    const len = Math.max(.05, Math.min(1, vit*jitter*(built?1:reachMul)));
+    out.push({ dir, len, color, live: len>=threshold, built:!!built });
+  }
+  return out;
+}
+
+function buildNodes(){
+  let nodes = [];
+  for (let c=0;c<6;c++){
+    const [count,vit,spr] = current[c];
+    nodes = nodes.concat(clusterNodes(V.fromSpherical(AXES[c][0],AXES[c][1]), count, vit, spr, 1013+c*7919, PALETTE[c], false));
+  }
+  if (plantAxis && effort > 0){
+    const e = effort/100;
+    const seedLen  = .12 + e*.84;
+    const nCount   = 1 + Math.round(e*e*15);
+    const spr      = .18 + e*.72;
+    const vit      = seedLen*.82;
+    nodes.push({ dir:plantAxis, len:seedLen, color:VIOLET, live:seedLen>=threshold, built:true });
+    if (nCount > 1)
+      nodes = nodes.concat(clusterNodes(plantAxis, nCount-1, vit, spr, 55501, VIOLET, true));
+  }
+  return nodes;
+}
+
+function envelopeRadius(d, live){
+  const BASE=0.13, P=5;
+  let acc = Math.pow(BASE,P);
+  for (let i=0;i<live.length;i++){
+    const n = live[i];
+    const c = Math.max(-1,Math.min(1,V.dot(d,n.dir)));
+    const ang = Math.acos(c);
+    const sigma = 0.42*breadthMul;
+    const k = Math.exp(-(ang*ang)/(2*sigma*sigma));
+    if (k>0.004) acc += Math.pow(n.len*k, P);
+  }
+  return Math.pow(acc,1/P);
+}
+
+function jacobi3(M){
+  let a=M.map(r=>r.slice()), v=[[1,0,0],[0,1,0],[0,0,1]];
+  for (let sw=0;sw<12;sw++){
+    const off = a[0][1]*a[0][1]+a[0][2]*a[0][2]+a[1][2]*a[1][2];
+    if (off<1e-12) break;
+    for (let p=0;p<2;p++) for (let q=p+1;q<3;q++){
+      if (Math.abs(a[p][q])<1e-14) continue;
+      const th=(a[q][q]-a[p][p])/(2*a[p][q]);
+      const t=Math.sign(th||1)/(Math.abs(th)+Math.sqrt(th*th+1));
+      const c=1/Math.sqrt(t*t+1), s=t*c;
+      for (let k=0;k<3;k++){ const kp=a[k][p],kq=a[k][q]; a[k][p]=c*kp-s*kq; a[k][q]=s*kp+c*kq; }
+      for (let k=0;k<3;k++){ const pk=a[p][k],qk=a[q][k]; a[p][k]=c*pk-s*qk; a[q][k]=s*pk+c*qk; }
+      for (let k=0;k<3;k++){ const kp=v[k][p],kq=v[k][q]; v[k][p]=c*kp-s*kq; v[k][q]=s*kp+c*kq; }
+    }
+  }
+  return { values:[a[0][0],a[1][1],a[2][2]], vectors:v };
+}
+
+function deriveRing(live){
+  if (live.length<3) return null;
+  const C=[[0,0,0],[0,0,0],[0,0,0]]; let wsum=0;
+  for (const n of live){
+    const w=n.len*n.len; wsum+=w;
+    for (let i=0;i<3;i++) for (let j=0;j<3;j++) C[i][j]+=w*n.dir[i]*n.dir[j];
+  }
+  if (wsum<=0) return null;
+  for (let i=0;i<3;i++) for (let j=0;j<3;j++) C[i][j]/=wsum;
+  const e=jacobi3(C);
+  let mi=0; for(let i=1;i<3;i++) if(e.values[i]<e.values[mi]) mi=i;
+  const normal=V.norm([e.vectors[0][mi],e.vectors[1][mi],e.vectors[2][mi]]);
+  const helper = Math.abs(normal[1])>.9 ? [1,0,0] : [0,1,0];
+  const eu=V.norm(V.cross(normal,helper)), ev=V.cross(normal,eu);
+  let s2=0; for(const n of live){ const d=V.dot(n.dir,normal); s2+=n.len*n.len*d*d; }
+  const rms=Math.sqrt(s2/wsum);
+  const half=Math.max(.06,Math.min(1.15, Math.asin(Math.min(1,rms))*1.7));
+  const BINS=96, dens=new Float32Array(BINS);
+  for (const n of live){
+    const x=V.dot(n.dir,eu), y=V.dot(n.dir,ev);
+    if (Math.hypot(x,y)<1e-6) continue;
+    const b=Math.round(((Math.atan2(y,x)/(Math.PI*2)+1)%1)*BINS);
+    for (let k=-8;k<=8;k++){
+      const idx=((b+k)%BINS+BINS)%BINS;
+      dens[idx]+=n.len*Math.exp(-(k*k)/(2*3.4*3.4));
+    }
+  }
+  let peak=0; for(let i=0;i<BINS;i++) peak=Math.max(peak,dens[i]);
+  if (peak<=0) return null;
+  const presence=new Float32Array(BINS);
+  for (let i=0;i<BINS;i++){
+    const t=dens[i]/peak;
+    presence[i]=Math.pow(Math.max(0,(t-0.16)/0.84),0.72);
+  }
+  return { normal, eu, ev, half, presence, BINS };
+}
+
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let W=1200,H=900,SC=300;
+function project(p){
+  const cy=Math.cos(yaw), sy=Math.sin(yaw);
+  const x1=p[0]*cy-p[2]*sy, z1=p[0]*sy+p[2]*cy;
+  const cp=Math.cos(pitch), sp=Math.sin(pitch);
+  const y2=p[1]*cp-z1*sp, z2=p[1]*sp+z1*cp;
+  return { x:W/2+x1*SC, y:H/2-y2*SC, z:z2 };
+}
+const depthAlpha=(z,near,far)=> far+(near-far)*((z+1)/2);
+
+function biggestDent(live){
+  let best=null, bestR=Infinity;
+  const GA=(1+Math.sqrt(5))/2;
+  for (let i=0;i<120;i++){
+    const t=Math.acos(1-2*(i+.5)/120), p=2*Math.PI*i/GA;
+    const d=V.fromSpherical(t,p);
+    const r=envelopeRadius(d,live);
+    if (r<bestR){ bestR=r; best=d; }
+  }
+  return best;
+}
+
+function draw(){
+  const nodes=buildNodes(), live=nodes.filter(n=>n.live);
+  ctx.clearRect(0,0,W,H);
+  ctx.lineJoin="round"; ctx.lineCap="round";
+  const ring = opts.ring ? deriveRing(live) : null;
+
+  if (opts.shell){
+    ctx.save(); ctx.setLineDash([3,5]);
+    ctx.strokeStyle="rgba(246,245,242,.30)"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(W/2,H/2,threshold*SC,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
+  if (opts.envelope){
+    const LAT=15, LON=34;
+    const surf=(t,p)=>{ const d=V.fromSpherical(t,p); return V.scale(d, envelopeRadius(d,live)); };
+    ctx.lineWidth=1.15;
+    for (let i=1;i<LAT;i++){
+      const t=Math.PI*i/LAT;
+      let prev=project(surf(t,0));
+      for (let j=1;j<=LON;j++){
+        const p=project(surf(t,Math.PI*2*j/LON));
+        ctx.strokeStyle=`rgba(246,245,242,${depthAlpha((prev.z+p.z)/2,.62,.10).toFixed(3)})`;
+        ctx.beginPath(); ctx.moveTo(prev.x,prev.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+        prev=p;
+      }
+    }
+    for (let j=0;j<LON;j+=2){
+      const ph=Math.PI*2*j/LON;
+      let prev=project(surf(0.001,ph));
+      for (let i=1;i<=LAT*2;i++){
+        const p=project(surf(Math.PI*i/(LAT*2),ph));
+        ctx.strokeStyle=`rgba(246,245,242,${depthAlpha((prev.z+p.z)/2,.55,.08).toFixed(3)})`;
+        ctx.beginPath(); ctx.moveTo(prev.x,prev.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+        prev=p;
+      }
+    }
+  }
+
+  if (ring){
+    const B=ring.BINS, quads=[];
+    for (let i=0;i<B;i++){
+      const pr=ring.presence[i], pr2=ring.presence[(i+1)%B];
+      if (pr<.04 && pr2<.04) continue;
+      const a0=Math.PI*2*i/B, a1=Math.PI*2*(i+1)/B;
+      const mk=(ang,off)=>{
+        const base=V.add(V.scale(ring.eu,Math.cos(ang)), V.scale(ring.ev,Math.sin(ang)));
+        const d=V.norm(V.add(V.scale(base,Math.cos(off)), V.scale(ring.normal,Math.sin(off))));
+        return V.scale(d, envelopeRadius(d,live));
+      };
+      const w0=ring.half*pr, w1=ring.half*pr2;
+      const c0=mk(a0,w0), c1=mk(a1,w1), d0=mk(a0,-w0), d1=mk(a1,-w1);
+      const P=[c0,c1,d1,d0].map(project);
+      const z=(P[0].z+P[1].z+P[2].z+P[3].z)/4;
+      quads.push({P,z,wedge:false});
+      quads.push({P:[project(c0),project(c1),project([0,0,0])], z:z-0.02, wedge:true});
+      quads.push({P:[project(d0),project(d1),project([0,0,0])], z:z-0.02, wedge:true});
+    }
+    quads.sort((a,b)=>a.z-b.z);
+    for (const q of quads){
+      const a=depthAlpha(q.z, q.wedge?.16:.40, q.wedge?.05:.13);
+      ctx.fillStyle=`rgba(237,193,96,${a.toFixed(3)})`;
+      ctx.beginPath(); ctx.moveTo(q.P[0].x,q.P[0].y);
+      for(let k=1;k<q.P.length;k++) ctx.lineTo(q.P[k].x,q.P[k].y);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  if (opts.nodes){
+    const drawn=nodes.filter(n=>n.live||opts.dormant)
+      .map(n=>({n, tip:project(V.scale(n.dir,n.len))}))
+      .sort((a,b)=>a.tip.z-b.tip.z);
+    const o=project([0,0,0]);
+    for (const {n,tip} of drawn){
+      const a=depthAlpha(tip.z, n.live?.95:.40, n.live?.22:.10);
+      ctx.save();
+      if (!n.live){ ctx.setLineDash([2.5,3]); ctx.strokeStyle=`rgba(246,245,242,${(a*0.55).toFixed(3)})`; ctx.lineWidth=1; }
+      else { ctx.strokeStyle=n.color; ctx.globalAlpha=a; ctx.lineWidth=n.built?1.9:1.5; }
+      ctx.beginPath(); ctx.moveTo(o.x,o.y); ctx.lineTo(tip.x,tip.y); ctx.stroke();
+      if (n.live){
+        if (n.built){
+          ctx.fillStyle="#050C16"; ctx.beginPath(); ctx.arc(tip.x,tip.y,3.1,0,Math.PI*2); ctx.fill();
+          ctx.strokeStyle=n.color; ctx.lineWidth=1.6; ctx.stroke();
+        } else {
+          ctx.fillStyle=n.color; ctx.beginPath(); ctx.arc(tip.x,tip.y,2.4,0,Math.PI*2); ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+    ctx.fillStyle="#F6F5F2"; ctx.beginPath(); ctx.arc(o.x,o.y,3.4,0,Math.PI*2); ctx.fill();
+  }
+
+  const pct = ring ? Math.round(Array.from(ring.presence).reduce((s,v)=>s+v,0)/ring.BINS*100) : 0;
+  let spend = 0; for (const n of live) spend += n.len;
+  const score = Math.max(0, Math.min(10, spend / 85 * 10));
+  document.getElementById("readout").innerHTML =
+    `<div class="scorelab">curiosity in play</div>` +
+    `<div class="score">${score.toFixed(1)}<em> / 10</em></div>` +
+    `<div style="margin-top:8px">chasing <b>${live.length}</b> of ${nodes.length} questions<br>` +
+    `open in <b>${pct}%</b> of directions</div>`;
+}
+
+function tick(){
+  if (morph<1){
+    morph=Math.min(1,morph+0.028);
+    const e = morph<.5 ? 4*morph**3 : 1-Math.pow(-2*morph+2,3)/2;
+    for (let c=0;c<6;c++) for (let k=0;k<3;k++)
+      current[c][k]=from[c][k]+(target[c][k]-from[c][k])*e;
+  }
+  if (spinning && !dragging) yaw += 0.0035;
+  draw();
+  requestAnimationFrame(tick);
+}
+
+function goto(key){
+  from=current.map(s=>s.slice());
+  target=STATES[key].slots.map(s=>s.slice());
+  morph=0; activeState=key;
+  document.querySelectorAll(".staterow .pick").forEach(b=>
+    b.setAttribute("aria-pressed", String(b.dataset.k===key)));
+}
+
+const statesEl=document.getElementById("states");
+const detailEl=document.getElementById("statedetail");
+let openInfo=null;
+ORDER.forEach(k=>{
+  const row=document.createElement("div"); row.className="staterow";
+  const b=document.createElement("button"); b.className="pick"; b.dataset.k=k;
+  b.innerHTML=STATES[k].label+"<span>"+STATES[k].note+"</span>";
+  b.setAttribute("aria-pressed", String(k==="child"));
+  b.addEventListener("click",()=>goto(k));
+  const inf=document.createElement("button"); inf.className="info"; inf.textContent="?";
+  inf.setAttribute("aria-label","What does "+STATES[k].label+" mean?");
+  inf.setAttribute("aria-expanded","false");
+  inf.addEventListener("click",()=>{
+    if (openInfo===k){
+      openInfo=null; detailEl.hidden=true;
+      document.querySelectorAll(".info").forEach(x=>x.setAttribute("aria-expanded","false"));
+      return;
+    }
+    openInfo=k;
+    document.querySelectorAll(".staterow").forEach(r=>{
+      const btn=r.querySelector(".info");
+      btn.setAttribute("aria-expanded", String(r.querySelector(".pick").dataset.k===k));
+    });
+    detailEl.hidden=false;
+    detailEl.innerHTML="<h3>"+STATES[k].label+"</h3>"+STATES[k].info.map(t=>"<p>"+t+"</p>").join("");
+  });
+  row.appendChild(b); row.appendChild(inf); statesEl.appendChild(row);
+});
+
+const togEl=document.getElementById("toggles");
+TOGGLES.forEach(([key,label])=>{
+  const b=document.createElement("button");
+  b.textContent=label; b.setAttribute("aria-pressed",String(opts[key]));
+  b.addEventListener("click",()=>{ opts[key]=!opts[key]; b.setAttribute("aria-pressed",String(opts[key])); });
+  togEl.appendChild(b);
+});
+
+function bind(id,fmt,apply){
+  const el=document.getElementById(id), out=document.getElementById(id+"-v");
+  const run=()=>{ apply(+el.value); out.textContent=fmt(+el.value); };
+  el.addEventListener("input",run); run();
+}
+bind("thr",v=>(v/100).toFixed(2), v=>threshold=v/100);
+bind("rch",v=>(v/100).toFixed(2)+"\u00D7", v=>reachMul=v/100);
+bind("brd",v=>(v/100).toFixed(2)+"\u00D7", v=>breadthMul=v/100);
+bind("den",v=>(v/100).toFixed(2)+"\u00D7", v=>densityMul=v/100);
+bind("eff",v=> v===0 ? "not planted" : v+"%", v=>effort=v);
+
+document.getElementById("plant").addEventListener("click",()=>{
+  const live=buildNodes().filter(n=>n.live && !n.built);
+  plantAxis=biggestDent(live);
+  const el=document.getElementById("eff");
+  if (+el.value===0){ el.value=45; el.dispatchEvent(new Event("input")); }
+});
+document.getElementById("clearplant").addEventListener("click",()=>{
+  plantAxis=null;
+  const el=document.getElementById("eff"); el.value=0; el.dispatchEvent(new Event("input"));
+});
+
+const spinBtn=document.getElementById("spin");
+spinBtn.setAttribute("aria-pressed",String(spinning));
+spinBtn.textContent = spinning ? "Pause spin" : "Resume spin";
+spinBtn.addEventListener("click",()=>{
+  spinning=!spinning;
+  spinBtn.setAttribute("aria-pressed",String(spinning));
+  spinBtn.textContent = spinning ? "Pause spin" : "Resume spin";
+});
+document.getElementById("save").addEventListener("click",()=>{
+  const out=document.createElement("canvas");
+  out.width=cv.width; out.height=cv.height;
+  const c=out.getContext("2d");
+  c.fillStyle="#050C16"; c.fillRect(0,0,out.width,out.height);
+  c.drawImage(cv,0,0);
+  const a=document.createElement("a");
+  a.download="curiosity-sphere-"+activeState+".png";
+  a.href=out.toDataURL("image/png"); a.click();
+});
+
+function down(e){ dragging=true; const p=e.touches?e.touches[0]:e; lastX=p.clientX; lastY=p.clientY; }
+function move(e){
+  if(!dragging) return;
+  const p=e.touches?e.touches[0]:e;
+  yaw += (p.clientX-lastX)*0.008;
+  pitch = Math.max(-1.35, Math.min(1.35, pitch+(p.clientY-lastY)*0.006));
+  lastX=p.clientX; lastY=p.clientY; e.preventDefault();
+}
+function up(){ dragging=false; }
+cv.addEventListener("pointerdown",down);
+window.addEventListener("pointermove",move);
+window.addEventListener("pointerup",up);
+cv.addEventListener("touchstart",down,{passive:true});
+cv.addEventListener("touchmove",move,{passive:false});
+cv.addEventListener("touchend",up);
+
+function resize(){
+  const rect=cv.parentElement.getBoundingClientRect();
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const narrow = window.innerWidth <= 960;
+  const cssW = rect.width;
+  const cssH = narrow
+    ? Math.max(280, Math.min(window.innerHeight*0.44, 400))
+    : Math.max(420, Math.min(700, cssW*0.72));
+  cv.style.height=cssH+"px";
+  cv.width=cssW*dpr; cv.height=cssH*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  W=cssW; H=cssH; SC=Math.min(W,H)*0.42;
+}
+window.addEventListener("resize",resize);
+resize(); tick();
+
+})();
+</script>
+</body>
+</html>

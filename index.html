@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditions for Curiosity — a podcast about what makes wondering possible</title>
+<meta name="description" content="A podcast arguing that curiosity is not a personality trait but a property of environments — and that those environments can be designed on purpose.">
+<link rel="icon" type="image/png" href="favicon.png">
+
+<meta property="og:title" content="Conditions for Curiosity">
+<meta property="og:description" content="Curiosity is not a trait people have. It is what happens when conditions are right.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://conditionsforcuriosity.netlify.app/">
+<meta property="og:image" content="https://conditionsforcuriosity.netlify.app/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Conditions for Curiosity">
+<meta name="twitter:description" content="Curiosity is not a trait people have. It is what happens when conditions are right.">
+<meta name="twitter:image" content="https://conditionsforcuriosity.netlify.app/og-image.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#050C16;
+  --navy-lift:#0A1523;
+  --gold:#EDC160;
+  --warm:#FDD284;
+  --off:#F6F5F2;
+  --off-mute:rgba(246,245,242,.62);
+  --off-faint:rgba(246,245,242,.34);
+  --gutter:100px;
+  --rule:rgba(237,193,96,.22);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--navy); color:var(--off);
+  font-family:"Karla",system-ui,sans-serif; font-weight:300;
+  font-size:17px; line-height:1.72; -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation:none!important;transition:none!important} }
+
+/* ── the spine: one hard left gutter, no exceptions ── */
+.spine{position:fixed;top:0;bottom:0;left:var(--gutter);width:1px;background:var(--rule);z-index:2;pointer-events:none}
+.page{position:relative;z-index:3}
+.bay{padding-left:var(--gutter);padding-right:clamp(24px,7vw,140px)}
+.inner{max-width:760px}
+
+/* ambient arc — echo of the sphere */
+.arc{position:fixed;right:-24vw;top:50%;transform:translateY(-50%);width:78vw;height:78vw;
+  border:1px solid rgba(237,193,96,.07);border-radius:50%;z-index:1;pointer-events:none}
+.arc::after{content:"";position:absolute;inset:16%;border:1px solid rgba(237,193,96,.045);border-radius:50%}
+
+/* ── type ── */
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin:0 0 26px}
+h1{font-family:"Playfair Display",serif;font-weight:400;
+  font-size:clamp(34px,5.6vw,68px);line-height:1.14;letter-spacing:-.015em;margin:0}
+h1 .line{display:block}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-family:"Playfair Display",serif;font-weight:400;
+  font-size:clamp(26px,3.4vw,40px);line-height:1.22;letter-spacing:-.01em;margin:0 0 26px}
+h3{font-family:"Playfair Display",serif;font-weight:500;font-size:20px;line-height:1.3;margin:0 0 8px}
+p{margin:0 0 20px;color:var(--off-mute);max-width:62ch}
+p.lead{font-size:19px;color:var(--off);max-width:56ch}
+strong{font-weight:600;color:var(--off)}
+
+section{padding:clamp(72px,10vw,132px) 0;position:relative}
+section + section{border-top:1px solid rgba(246,245,242,.07)}
+.tag{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--off-faint);margin:0 0 30px}
+
+/* ── hero ── */
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;padding-top:clamp(80px,12vh,150px)}
+.hero .sub{margin-top:38px;font-size:18px;color:var(--off-mute);max-width:50ch}
+.reveal{opacity:0;transform:translateY(14px);animation:rise .78s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* ── claim block: his own cadence, one sentence per line ── */
+.cadence{list-style:none;margin:0 0 32px;padding:0;max-width:58ch}
+.cadence li{font-family:"Playfair Display",serif;font-size:clamp(19px,2.2vw,25px);
+  line-height:1.5;color:var(--off);padding:11px 0 11px 26px;position:relative;border-left:1px solid rgba(246,245,242,.1)}
+.cadence li:last-child{color:var(--gold)}
+.cadence li.named{color:var(--off)}
+.cadence li.named::after{content:"the show is named for this line";display:block;font-family:"Karla",sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:9px}
+
+/* ── the model card ── */
+.model{border:1px solid var(--rule);background:var(--navy-lift);padding:clamp(26px,4vw,44px);max-width:720px}
+.model h3{color:var(--gold);margin-bottom:12px}
+.cta{display:inline-flex;align-items:center;gap:11px;margin-top:14px;
+  font-family:"Karla",sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--navy);background:var(--gold);text-decoration:none;padding:14px 24px;
+  transition:background .2s ease,transform .2s ease}
+.cta:hover{background:var(--warm);transform:translateX(3px)}
+.cta:focus-visible{outline:2px solid var(--warm);outline-offset:3px}
+.cta span{font-size:16px;line-height:1}
+
+/* ── season list ── */
+.season{list-style:none;margin:0;padding:0;max-width:820px}
+.season li{border-top:1px solid rgba(246,245,242,.08)}
+.season li:last-child{border-bottom:1px solid rgba(246,245,242,.08)}
+.season a.ep{display:grid;grid-template-columns:56px 1fr auto;gap:clamp(14px,3vw,30px);
+  padding:22px 4px;align-items:baseline;text-decoration:none;color:inherit;
+  transition:background .16s ease,padding-left .16s ease}
+.season a.ep:hover,.season a.ep:focus-visible{background:rgba(246,245,242,.035);padding-left:14px}
+.season a.ep:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.season span.unrel{display:grid;grid-template-columns:56px 1fr auto;gap:clamp(14px,3vw,30px);
+  padding:22px 4px;align-items:baseline;opacity:.68}
+.season .no{font-family:"Playfair Display",serif;font-size:15px;color:var(--off-faint);letter-spacing:.04em}
+.season .ttl{font-family:"Playfair Display",serif;font-size:clamp(18px,2.1vw,23px);color:var(--off);line-height:1.3}
+.season .gloss{display:block;font-family:"Karla",sans-serif;font-size:14.5px;color:var(--off-mute);margin-top:6px;max-width:54ch}
+.season .listen{font-family:"Karla",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);white-space:nowrap;align-self:center;opacity:0;transition:opacity .16s ease}
+.season a.ep:hover .listen,.season a.ep:focus-visible .listen{opacity:1}
+.season .soon{font-family:"Karla",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--off-faint);white-space:nowrap;align-self:center}
+.season a.ep.hinge{background:linear-gradient(90deg,rgba(237,193,96,.07),transparent 62%)}
+.season a.ep.hinge .no,.season a.ep.hinge .ttl{color:var(--gold)}
+.hingemark{display:inline-block;margin-left:12px;font-family:"Karla",sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--navy);background:var(--gold);padding:3px 8px;vertical-align:middle}
+@media (max-width:820px){
+  .season a.ep,.season span.unrel{grid-template-columns:38px 1fr}
+  .season .listen,.season .soon{grid-column:1/-1;justify-self:start;padding-left:54px;opacity:.85}
+}
+
+/* follow link, top of hero */
+.followrow{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:22px}
+.follow{display:inline-flex;align-items:center;gap:8px;
+  font-family:"Karla",sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(237,193,96,.35);padding-bottom:3px;
+  transition:border-color .16s ease,color .16s ease}
+.follow:hover{color:var(--warm);border-color:var(--warm)}
+.follow:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.follow svg{flex:none}
+.follow.alt{color:var(--off-mute);border-bottom-color:rgba(246,245,242,.22)}
+.follow.alt:hover{color:var(--off);border-bottom-color:var(--off-mute)}
+
+/* ── audience ── */
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(20px,3vw,36px);max-width:820px;margin-top:8px}
+.who div{border-top:1px solid var(--rule);padding-top:16px}
+.who h3{font-size:17px;margin-bottom:6px}
+.who p{font-size:14.5px;margin:0}
+
+/* ── signup ── */
+.signup{max-width:620px}
+.signup form{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.signup input[type=email]{
+  flex:1 1 260px;background:transparent;border:1px solid rgba(246,245,242,.24);
+  color:var(--off);font-family:"Karla",sans-serif;font-size:16px;padding:15px 16px;border-radius:0}
+.signup input[type=email]::placeholder{color:var(--off-faint)}
+.signup input[type=email]:focus{outline:none;border-color:var(--gold)}
+.signup button{
+  background:var(--gold);color:var(--navy);border:1px solid var(--gold);cursor:pointer;
+  font-family:"Karla",sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:15px 28px;transition:background .2s ease}
+.signup button:hover{background:var(--warm);border-color:var(--warm)}
+.signup button:focus-visible{outline:2px solid var(--warm);outline-offset:3px}
+.fineprint{font-size:13px;color:var(--off-faint);margin-top:16px}
+
+/* ── footer ── */
+footer{padding:52px 0 64px;border-top:1px solid rgba(246,245,242,.07)}
+footer p{font-size:13.5px;color:var(--off-faint);margin:0}
+footer a{color:var(--off-mute);text-decoration:none;border-bottom:1px solid var(--rule)}
+footer a:hover{color:var(--gold)}
+
+@media (max-width:820px){
+  :root{--gutter:28px}
+  body{font-size:16px}
+  .spine{left:var(--gutter)}
+  .arc{display:none}
+  .season li{grid-template-columns:38px 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="arc" aria-hidden="true"></div>
+<div class="spine" aria-hidden="true"></div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero bay">
+    <div class="inner">
+      <p class="eyebrow reveal" style="animation-delay:.05s">Conditions for Curiosity &nbsp;·&nbsp; a podcast in progress</p>
+      <h1>
+        <span class="line reveal" style="animation-delay:.18s">Curiosity is not a</span>
+        <span class="line reveal" style="animation-delay:.34s">personality trait.</span>
+        <span class="line reveal" style="animation-delay:.62s"><em>It is what a room</em></span>
+        <span class="line reveal" style="animation-delay:.78s"><em>makes possible.</em></span>
+      </h1>
+      <p class="sub reveal" style="animation-delay:1.05s">Twenty years in classrooms taught me that wondering shows up when the conditions are right and vanishes when they aren't. This show is about building those conditions on purpose.</p>
+      <div class="followrow">
+        <a class="follow reveal" style="animation-delay:1.25s" href="https://open.spotify.com/show/033PuhjdXwbaIlQVktfm1Z?si=7cd9f135e89847e5" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 9.5c4-1.2 8-1 11 .8M7 13c3.3-.9 6.6-.7 9 .7M7.6 16.2c2.7-.7 5-.5 6.8.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Follow on Spotify
+        </a>
+        <a class="follow alt reveal" style="animation-delay:1.35s" href="https://podcasts.apple.com/us/podcast/conditions-for-curiosity/id6790927800" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Follow on Apple Podcasts
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE CLAIM -->
+  <section class="bay">
+    <div class="inner">
+      <p class="tag">The argument</p>
+      <ul class="cadence">
+        <li>People don't simply have curiosity.</li>
+        <li class="named">Curiosity emerges when the conditions are right.</li>
+        <li>Those conditions can be designed.</li>
+      </ul>
+      <p>Psychologists have been measuring curiosity for fifty years. Nearly all of that work treats it as a trait. Something you score high or low on. Something sitting inside the person.</p>
+      <p>That research isn't wrong. It's answering a different question than the one I have.</p>
+      <p>My question is the one you have at 8:40 on a Tuesday. Not <em>which of these kids is curious.</em> <em>What would make curiosity likely in this room, with these thirty, today.</em> Almost nobody publishes on that. The people who know it are teaching fifth period. The people writing the papers aren't standing there when it falls apart.</p>
+      <p>I taught middle and high school math. I coached teachers for ten years. I led curriculum at a national level. I finished a master's in educational research to get closer to the problem.</p>
+      <p><strong>I'll talk about what I've seen and what some research points to.</strong> I'll identify where those agree and where I am still working it out. You will be able to tell which is which.</p>
+    </div>
+  </section>
+
+  <!-- THE MODEL -->
+  <section class="bay">
+    <div class="inner">
+      <p class="tag">Built in public</p>
+      <h2>I built a drawing of it. Go break it.</h2>
+      <div class="model">
+        <h3>The Curiosity Sphere</h3>
+        <p>Every question you could be curious about points in a direction. How far you'll chase it is how long the line runs. Go deep on one thing and the shape stretches out over there like a tent pole. Quit caring about something and a dent shows up. What's left is your ring: the directions curiosity can still get in.</p>
+        <p>I made it because I couldn't tell whether the idea held up until I tried to make it hold still. It's a working model, not a finding. Drag it around, and tell me where it stops making sense.</p>
+        <a class="cta" href="model.html">Open the model <span>&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEASON ONE -->
+  <section class="bay">
+    <div class="inner" style="max-width:none">
+      <p class="tag">Season one — all eight episodes</p>
+      <h2>The order matters</h2>
+      <p style="margin-bottom:38px">Every episode ends by handing you the question the next one takes up. Five is where it turns, and everything after it assumes you've been through it. The whole season is up now. Start at one.</p>
+      <ul class="season">
+        <li><a class="ep" href="https://open.spotify.com/episode/2aX0UyRYZUczw3F1YFmH7R?si=0e87d55740dc4204" target="_blank" rel="noopener"><span class="no">01</span><span class="ttl">Curiosity Isn't Magic<span class="gloss">If curiosity belongs to the room and not the kid, it can be built.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><a class="ep" href="https://open.spotify.com/episode/22w9Vtv8Q521Mf92g4H5LN?si=93ba4f486e3d4c04" target="_blank" rel="noopener"><span class="no">02</span><span class="ttl">The Engineer's Job<span class="gloss">Stop planning activities. Start naming the conditions you're actually building.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><a class="ep" href="https://open.spotify.com/episode/2owVhRm4QiisYzVGuOQe9O?si=fe26321bd9624193" target="_blank" rel="noopener"><span class="no">03</span><span class="ttl">The Information Gap<span class="gloss">Why a gap pulls at people, why the size of it decides everything, and how teachers found this before the research did.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><a class="ep" href="https://open.spotify.com/episode/11vOSFg1GkJR75OagiXXj0?si=b19fe44a57e14404" target="_blank" rel="noopener"><span class="no">04</span><span class="ttl">When Curiosity Doesn't Happen<span class="gloss">You set it up right and nothing happens anyway. This one costs me something to say.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><a class="ep hinge" href="https://open.spotify.com/episode/0FgSgJy199GzoJiRCERGqf?si=ff3aec84f8084122" target="_blank" rel="noopener"><span class="no">05</span><span class="ttl">Curiosity Is Contagious<span class="hingemark">the hinge</span><span class="gloss">You're the variable. An adult who stopped wondering can't see a kid doing it right in front of them.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><a class="ep" href="https://open.spotify.com/episode/3lVKbxVvpdrWaH4HbFxwyI" target="_blank" rel="noopener"><span class="no">06</span><span class="ttl">Finding the Sweet Spot<span class="gloss">The same question is a gift to one kid and a wall to the kid beside her.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><a class="ep" href="https://open.spotify.com/episode/6f1j46wM4mxYOB8RBgMczF?si=8459db417c094134" target="_blank" rel="noopener"><span class="no">07</span><span class="ttl">Designing Curious Environments<span class="gloss">Things you can do Monday. Classroom, kitchen table, or team.</span></span><span class="listen">Listen &rarr;</span></a></li>
+        <li><span class="unrel"><span class="no">08</span><span class="ttl">A Philosophy of Curiosity<span class="gloss">What it costs a family, a workplace, a town when people stop asking.</span></span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section class="bay">
+    <div class="inner" style="max-width:none">
+      <p class="tag">Who this is for</p>
+      <h2>The teacher who didn't sleep and the parent who didn't sleep are in different rooms with the same problem</h2>
+      <div class="who">
+        <div>
+          <h3>Teachers</h3>
+          <p>Where the stories come from. You'll recognize the rooms, and you'll know when I'm telling the truth.</p>
+        </div>
+        <div>
+          <h3>Parents</h3>
+          <p>You're running an environment too. Yours just has fewer people in it and no bell.</p>
+        </div>
+        <div>
+          <h3>Coaches</h3>
+          <p>Practice is a designed environment. Almost none of this needs translating.</p>
+        </div>
+        <div>
+          <h3>Leaders</h3>
+          <p>If nobody on your team asks questions anymore, you built that. So you can build something else.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNUP -->
+  <section class="bay">
+    <div class="inner signup">
+      <p class="tag">Season one is finished</p>
+      <h2>All eight are up. Season two is where this gets built.</h2>
+      <p>Episodes land on Spotify and Apple on Tuesdays. I send one email the next morning, Wednesday, with just that episode in it. Nothing else in your inbox. That's the whole cadence.</p>
+
+      <!-- TODO: replace YOUR_USERNAME with your Buttondown username -->
+      <form action="https://buttondown.email/api/emails/embed-subscribe/YOUR_USERNAME"
+            method="post" target="popupwindow"
+            onsubmit="window.open('https://buttondown.email/YOUR_USERNAME','popupwindow')">
+        <label for="bd-email" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email address</label>
+        <input type="email" name="email" id="bd-email" placeholder="you@example.com" required>
+        <button type="submit">Keep me posted</button>
+      </form>
+      <p class="fineprint">One click to unsubscribe. I don't share the list with anyone.</p>
+    </div>
+  </section>
+
+  <footer class="bay">
+    <div class="inner">
+      <p>Conditions for Curiosity — a show being built in public. <a href="#">Instagram</a></p>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
