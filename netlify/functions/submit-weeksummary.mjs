@@ -1,9 +1,5 @@
 import { appendRow } from "./_lib/google-sheets.mjs";
 
-function tagFor(q) {
-  return q ? `${q.domain} · ${q.bigIdea || q.category}` : "";
-}
-
 export default async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -16,8 +12,10 @@ export default async (req) => {
     return new Response("Bad request", { status: 400 });
   }
 
-  const { sessionId, name, email, ageBand, checkAnswers, questions, isEdit } = body;
-  const q = Array.isArray(questions) ? questions : [];
+  const { sessionId, name, email, ageBand, finalOrder, askedOrder } = body;
+  const fo = Array.isArray(finalOrder) ? finalOrder : [];
+  const ao = Array.isArray(askedOrder) ? askedOrder : [];
+  const matched = fo.length === ao.length && fo.every((q, i) => q?.id === ao[i]?.id);
 
   const row = [
     new Date().toISOString(),
@@ -25,20 +23,17 @@ export default async (req) => {
     name || "",
     email || "",
     ageBand || "",
-    isEdit ? "yes" : "no",
-    checkAnswers?.room?.correct ? "yes" : "no",
-    checkAnswers?.in?.correct ? "yes" : "no",
-    checkAnswers?.out?.correct ? "yes" : "no",
-    q[0]?.text || "",
-    tagFor(q[0]),
-    q[1]?.text || "",
-    tagFor(q[1]),
-    q[2]?.text || "",
-    tagFor(q[2]),
+    fo[0]?.text || "",
+    fo[1]?.text || "",
+    fo[2]?.text || "",
+    ao[0]?.text || "",
+    ao[1]?.text || "",
+    ao[2]?.text || "",
+    matched ? "yes" : "no",
   ];
 
   try {
-    await appendRow("Sheet1", row);
+    await appendRow("Week Summary", row);
   } catch (e) {
     console.error(e);
     return new Response("Failed to record submission", { status: 502 });
@@ -49,4 +44,4 @@ export default async (req) => {
   });
 };
 
-export const config = { path: "/api/submit-pick" };
+export const config = { path: "/api/submit-weeksummary" };

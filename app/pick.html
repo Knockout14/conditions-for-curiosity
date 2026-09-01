@@ -205,7 +205,7 @@
           pickedAt: new Date().toISOString(),
         },
       });
-      await CFC.submitPick(newState, rankedQuestions);
+      await CFC.submitPick(newState, rankedQuestions, active);
       location.href = CFC.resumeUrl(newState);
     });
   })();

@@ -56,7 +56,12 @@
         )
         .join("");
 
-      const allDone = asked.size >= questions.length;
+      // Checked against this week's specific three, not asked.size —
+      // askedQuestionIds only ever grows, across every week ever, so a
+      // size check alone would misfire "done" from week 2 onward before
+      // any of that week's three were actually asked.
+      const allDone = questions.every((q) => asked.has(q.id));
+      if (allDone) CFC.maybeSubmitWeekSummary(state, questions);
 
       screen.innerHTML = `
         <p class="eyebrow">This week's three</p>

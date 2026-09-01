@@ -145,10 +145,13 @@
   /* Records a confirmed weekly pick to the founder's spreadsheet (spec
      §2/§3e's "lightweight backend"). `questions` is the ranked array of
      full question objects (id, text, domain, bigIdea/category) the pick
-     screen already has in hand. Best-effort — a family's local state is
-     already saved by the time this is called, so a network hiccup here
-     shouldn't block them from moving on. */
-  function submitPick(state, questions) {
+     screen already has in hand. `isEdit` says whether this is changing
+     an already-confirmed pick rather than setting one fresh — without
+     it, an edited row and an original one look identical in the sheet.
+     Best-effort — a family's local state is already saved by the time
+     this is called, so a network hiccup here shouldn't block them from
+     moving on. */
+  function submitPick(state, questions, isEdit) {
     return postJSON("/api/submit-pick", {
       sessionId: state.sessionId,
       name: state.name,
@@ -156,6 +159,7 @@
       ageBand: state.ageBand,
       checkAnswers: state.checkAnswers,
       questions,
+      isEdit: Boolean(isEdit),
     }).catch((e) => console.error("submitPick failed (continuing anyway):", e));
   }
 
@@ -213,6 +217,37 @@
       ageBand: state.ageBand,
       ...payload,
     }).catch((e) => console.error("submitCircleBack failed (continuing anyway):", e));
+  }
+
+  /* Fires once, when a week's three are all asked: the final pick order
+     next to the order they were actually asked in. Every edit already
+     gets its own row in Sheet1 (spec — this doesn't replace that trail),
+     but this is the single row that answers "what actually happened,"
+     without reconstructing it from scattered edits — a mismatch here is
+     the signal for a question someone kept avoiding. Guarded by
+     weekSummarySentFor so revisiting the "all caught up" screen doesn't
+     write it twice for the same pick. */
+  function maybeSubmitWeekSummary(state, questions) {
+    const pickedAt = state.weeklyPick?.pickedAt;
+    if (!pickedAt || state.weekSummarySentFor === pickedAt) return state;
+
+    const byId = new Map(questions.map((q) => [q.id, q]));
+    const askedOrder = (state.askedQuestionIds || [])
+      .map((id) => byId.get(id))
+      .filter(Boolean)
+      .slice(-3); // this week's three, in the order they were actually asked
+    const finalOrder = state.weeklyPick.questionIds.map((id) => byId.get(id)).filter(Boolean);
+
+    postJSON("/api/submit-weeksummary", {
+      sessionId: state.sessionId,
+      name: state.name,
+      email: state.email,
+      ageBand: state.ageBand,
+      finalOrder,
+      askedOrder,
+    }).catch((e) => console.error("submitWeekSummary failed (continuing anyway):", e));
+
+    return patch({ weekSummarySentFor: pickedAt });
   }
 
   /* ── calendar reminders ──
@@ -319,6 +354,7 @@
     saveCurrentQuestion,
     loadCurrentQuestion,
     submitCircleBack,
+    maybeSubmitWeekSummary,
     nextEventStart,
     nextSundayNoon,
     wireCalendarButtons,

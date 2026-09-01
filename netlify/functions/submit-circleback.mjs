@@ -12,7 +12,7 @@ export default async (req) => {
     return new Response("Bad request", { status: 400 });
   }
 
-  const { sessionId, name, email, ageBand, question, adultAnswer, childAskedQuestion, note } = body;
+  const { sessionId, name, email, ageBand, question, rank, adultAnswer, childAskedQuestion, note } = body;
 
   const row = [
     new Date().toISOString(),
@@ -23,6 +23,7 @@ export default async (req) => {
     question?.id ?? "",
     question?.text || "",
     question ? `${question.domain} · ${question.bigIdea || question.category}` : "",
+    rank ?? "", // position (1/2/3) it held when asked — not wherever it ranks now, if it's since been reordered
     adultAnswer || "",
     childAskedQuestion ? "yes" : "no",
     note || "",

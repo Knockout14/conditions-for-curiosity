@@ -69,6 +69,7 @@
       const newState = CFC.markQuestionAsked(state, q.id);
       await CFC.submitCircleBack(newState, {
         question: q,
+        rank: current.index + 1, // the position it held when *this* session started — not whatever it is now, if it's since been reordered
         adultAnswer: current.adultAnswer,
         childAskedQuestion,
         note,

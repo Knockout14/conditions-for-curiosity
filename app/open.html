@@ -29,6 +29,7 @@
       const ORDINALS = ["one", "two", "three"];
 
       if (!next) {
+        CFC.maybeSubmitWeekSummary(state, questions);
         screen.innerHTML = `
           <p class="eyebrow">All caught up</p>
           <div class="center-stack">
