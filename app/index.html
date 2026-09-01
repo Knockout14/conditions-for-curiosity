@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>Before you begin — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen">
+  <p class="eyebrow">Before you begin</p>
+
+  <div class="center-stack">
+    <h1 class="headline">Have you gotten to <em>episode five</em>?</h1>
+    <p class="body-copy">"Curiosity Is Contagious" is where this whole approach gets explained. Everything here assumes you've heard it.</p>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn-primary" id="yes-btn">Yes — I've heard it</button>
+    <a class="link-secondary" href="https://open.spotify.com/episode/0FgSgJy199GzoJiRCERGqf?si=ff3aec84f8084122" target="_blank" rel="noopener">Not yet — take me to episode 5</a>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+  document.getElementById("yes-btn").addEventListener("click", () => {
+    CFC.patch({ episode5: true });
+    location.href = "details.html";
+  });
+</script>
+</body>
+</html>

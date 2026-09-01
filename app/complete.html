@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>You're set — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen" id="screen"></main>
+
+<script src="app.js"></script>
+<script>
+  const state = CFC.requireOnboarding();
+
+  state && (async () => {
+    const screen = document.getElementById("screen");
+    const hasPick = state.weeklyPick && (state.weeklyPick.usedCount || 0) < 3;
+
+    if (!hasPick) {
+      screen.innerHTML = `
+        <p class="eyebrow">You're set</p>
+        <div class="center-stack">
+          <h1 class="headline">Onboarding's <em>done</em>.</h1>
+          <p class="body-copy">Next: pick this week's three questions. You'll rank them once, and they run automatically from there — nothing to choose on any given night.</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-primary" id="pick-btn">Pick this week's three</button>
+          <a class="link-secondary" href="../index.html">Back to the podcast site</a>
+        </div>`;
+      document.getElementById("pick-btn").addEventListener("click", () => (location.href = "pick.html"));
+      return;
+    }
+
+    const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+
+    // Nothing writes to askedQuestionIds yet — that lands with the
+    // nightly loop's circle-back step. Wired here now so a completed
+    // question just starts showing grayed out the moment it does.
+    const asked = new Set(state.askedQuestionIds || []);
+    const items = questions
+      .map((q, i) => {
+        const done = asked.has(q.id);
+        return `
+      <div class="summary-item${done ? " done" : ""}">
+        <span class="summary-rank">${i + 1}</span>
+        <span>
+          <div class="summary-text">${q.text}</div>
+          <div class="summary-tag">${q.domain} · ${q.bigIdea || q.category}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
+        </span>
+      </div>`;
+      })
+      .join("");
+
+    screen.innerHTML = `
+      <p class="eyebrow">This week's three</p>
+      <p class="lede">Ranked, in the order they'll come up. The nightly loop — actually running them — isn't built yet, so this is as far as v1 goes for now.</p>
+      <div class="summary-list">${items}</div>
+      <div class="spacer"></div>
+      <div class="actions">
+        <a class="link-secondary" href="pick.html">Change your picks</a>
+        <a class="link-secondary" href="../index.html">Back to the podcast site</a>
+      </div>`;
+  })();
+</script>
+</body>
+</html>

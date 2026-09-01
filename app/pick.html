@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>Pick this week's three — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen tight">
+  <p class="eyebrow tight">Pick this week's three</p>
+  <p class="lede">Drag to set the order — first, second, third. One a week, whenever a night fits.</p>
+
+  <div class="pick-list" id="pick-list"></div>
+
+  <div class="spacer"></div>
+
+  <button type="button" class="btn-primary" id="continue-btn">Set this week's line-up</button>
+  <p class="helper-note">Change it anytime — nothing is locked in.</p>
+</main>
+
+<script src="app.js"></script>
+<script>
+  const state = CFC.requireOnboarding();
+  const GAP = 12; // must match .pick-list { gap: 12px } in style.css
+
+  function tagFor(q) {
+    return `${q.domain} · ${q.bigIdea || q.category}`;
+  }
+
+  state && (async () => {
+    // Editing an active pick (not yet fully used this week) re-shows the
+    // same three rather than sampling new ones — "editable anytime," not
+    // "reroll anytime." A pick with nothing left to use falls through to
+    // a fresh sample below.
+    const active = state.weeklyPick && (state.weeklyPick.usedCount || 0) < 3;
+    const candidates = active
+      ? await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds)
+      : await CFC.fetchWeeklyCandidates(state);
+    const byId = new Map(candidates.map((q) => [String(q.id), q]));
+
+    let order = candidates.map((q) => String(q.id));
+
+    const list = document.getElementById("pick-list");
+    const continueBtn = document.getElementById("continue-btn");
+
+    function buildCard(id) {
+      const q = byId.get(id);
+      const card = document.createElement("div");
+      card.className = "pick-card";
+      card.dataset.id = id;
+      card.innerHTML = `
+        <span class="pick-badge">1</span>
+        <span class="pick-body">
+          <span class="pick-text">${q.text}</span>
+          <span class="pick-tag">${tagFor(q)}</span>
+        </span>
+        <span class="pick-handle" aria-label="Drag to reorder">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
+            <circle cx="2" cy="2" r="1.6" fill="currentColor"/><circle cx="8" cy="2" r="1.6" fill="currentColor"/>
+            <circle cx="2" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/>
+            <circle cx="2" cy="14" r="1.6" fill="currentColor"/><circle cx="8" cy="14" r="1.6" fill="currentColor"/>
+          </svg>
+        </span>`;
+      return card;
+    }
+
+    function refreshBadges() {
+      Array.from(list.children).forEach((card, i) => {
+        card.querySelector(".pick-badge").textContent = String(i + 1);
+      });
+    }
+
+    function render() {
+      list.innerHTML = "";
+      order.forEach((id) => list.appendChild(buildCard(id)));
+      refreshBadges();
+      wireDragHandles();
+    }
+
+    // Pointer-based drag reorder (native HTML5 drag-and-drop doesn't work
+    // reliably on mobile touch, and this is mobile-first). The dragged
+    // card follows the pointer directly; the others animate out of its
+    // way, computed from each card's rect *before* the drag started so
+    // variable card heights (question text wraps to 1–2 lines) don't
+    // throw off the math. The DOM itself is only reordered once, on
+    // release — everything mid-drag is a CSS transform.
+    function wireDragHandles() {
+      list.querySelectorAll(".pick-handle").forEach((handle) => {
+        handle.addEventListener("pointerdown", onPointerDown);
+      });
+    }
+
+    function onPointerDown(e) {
+      const dragEl = e.currentTarget.closest(".pick-card");
+      const cardEls = Array.from(list.children);
+      const originals = cardEls.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { id: el.dataset.id, top: r.top, height: r.height };
+      });
+      const dragOriginal = originals.find((o) => o.id === dragEl.dataset.id);
+      const startY = e.clientY;
+      let visualOrder = originals.map((o) => o.id);
+
+      e.currentTarget.setPointerCapture(e.pointerId);
+      dragEl.classList.add("dragging");
+
+      function layoutFor(idsInOrder) {
+        const byOrigId = new Map(originals.map((o) => [o.id, o]));
+        const layout = new Map();
+        let top = originals[0].top;
+        for (const id of idsInOrder) {
+          const h = byOrigId.get(id).height;
+          layout.set(id, top);
+          top += h + GAP;
+        }
+        return layout;
+      }
+
+      function onMove(ev) {
+        const dy = ev.clientY - startY;
+        dragEl.style.transform = `translateY(${dy}px)`;
+
+        const dragCenter = dragOriginal.top + dragOriginal.height / 2 + dy;
+        const others = originals.filter((o) => o.id !== dragOriginal.id);
+        let targetIndex = 0;
+        for (const o of others) {
+          if (dragCenter > o.top + o.height / 2) targetIndex++;
+        }
+
+        visualOrder = others.map((o) => o.id);
+        visualOrder.splice(targetIndex, 0, dragOriginal.id);
+
+        const layout = layoutFor(visualOrder);
+        cardEls.forEach((el) => {
+          if (el === dragEl) return;
+          const id = el.dataset.id;
+          const orig = originals.find((o) => o.id === id);
+          el.style.transition = "transform .15s ease";
+          el.style.transform = `translateY(${layout.get(id) - orig.top}px)`;
+        });
+
+        visualOrder.forEach((id, i) => {
+          cardEls.find((el) => el.dataset.id === id).querySelector(".pick-badge").textContent = String(i + 1);
+        });
+      }
+
+      function onUp() {
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", onUp);
+        dragEl.classList.remove("dragging");
+        cardEls.forEach((el) => {
+          el.style.transition = "";
+          el.style.transform = "";
+        });
+        order = visualOrder;
+        render();
+      }
+
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+    }
+
+    render();
+
+    continueBtn.addEventListener("click", () => {
+      CFC.patch({
+        weeklyPick: {
+          questionIds: order.map(Number),
+          usedCount: 0,
+          pickedAt: new Date().toISOString(),
+        },
+      });
+      location.href = "complete.html";
+    });
+  })();
+</script>
+</body>
+</html>

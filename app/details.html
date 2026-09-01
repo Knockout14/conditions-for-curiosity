@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>One more thing — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen">
+  <p class="eyebrow tight">One more thing</p>
+
+  <div class="field">
+    <label class="field-label" for="name">Your first name</label>
+    <input class="field-input" type="text" id="name" name="name" placeholder="Priya" autocomplete="given-name">
+    <p class="field-hint">So we don't mix you up with another family — we'll say if it's already in use this week.</p>
+  </div>
+
+  <div class="field">
+    <div class="field-label-row">
+      <label class="field-label" for="email">Email</label>
+      <span class="field-optional">Optional</span>
+    </div>
+    <input class="field-input optional" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+    <p class="field-hint">So we can follow up if something in your feedback is worth asking about.</p>
+  </div>
+
+  <div class="field">
+    <span class="field-label">Your kid's age</span>
+    <div class="age-row" role="radiogroup" aria-label="Your kid's age">
+      <button type="button" class="age-pill" data-age="3-4" role="radio" aria-checked="false">3–4</button>
+      <button type="button" class="age-pill" data-age="5-6" role="radio" aria-checked="false">5–6</button>
+      <button type="button" class="age-pill" data-age="7-8" role="radio" aria-checked="false">7–8</button>
+    </div>
+    <p class="field-hint">Just a range — this only shapes which questions we offer.</p>
+  </div>
+
+  <div class="spacer"></div>
+
+  <button type="button" class="btn-primary" id="continue-btn" disabled>Continue</button>
+</main>
+
+<script src="app.js"></script>
+<script>
+  CFC.requireStep((s) => s.episode5, "index.html");
+
+  const nameInput = document.getElementById("name");
+  const emailInput = document.getElementById("email");
+  const agePills = Array.from(document.querySelectorAll(".age-pill"));
+  const continueBtn = document.getElementById("continue-btn");
+
+  const existing = CFC.load();
+  if (existing.name) nameInput.value = existing.name;
+  if (existing.email) emailInput.value = existing.email;
+  let ageBand = existing.ageBand || null;
+  if (ageBand) {
+    agePills.forEach((p) => {
+      const selected = p.dataset.age === ageBand;
+      p.classList.toggle("selected", selected);
+      p.setAttribute("aria-checked", String(selected));
+    });
+  }
+
+  function refreshContinue() {
+    continueBtn.disabled = !(nameInput.value.trim() && ageBand);
+  }
+
+  agePills.forEach((pill) => {
+    pill.addEventListener("click", () => {
+      ageBand = pill.dataset.age;
+      agePills.forEach((p) => {
+        const selected = p === pill;
+        p.classList.toggle("selected", selected);
+        p.setAttribute("aria-checked", String(selected));
+      });
+      refreshContinue();
+    });
+  });
+
+  nameInput.addEventListener("input", refreshContinue);
+  refreshContinue();
+
+  continueBtn.addEventListener("click", () => {
+    if (continueBtn.disabled) return;
+    CFC.patch({
+      name: nameInput.value.trim(),
+      email: emailInput.value.trim(),
+      ageBand,
+    });
+    location.href = "check.html";
+  });
+</script>
+</body>
+</html>

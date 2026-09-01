@@ -1,0 +1,127 @@
+/* Conditions for Curiosity — app
+   Shared client-side state. No backend yet (per app-v1-spec-2026-09-01.md
+   §2): continuity rests on this device, via a random session id and a
+   localStorage record of onboarding progress. Nothing here is sent
+   anywhere — it's a placeholder for the lightweight backend described
+   in the spec, so the shape (session id, name, email, age band) matches
+   what that backend will eventually receive. */
+
+(function (global) {
+  const STORAGE_KEY = "cfc_app_state";
+
+  function randomId() {
+    if (global.crypto && global.crypto.randomUUID) {
+      return global.crypto.randomUUID();
+    }
+    // Fallback for older mobile browsers without crypto.randomUUID.
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function load() {
+    let state = {};
+    try {
+      state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch (e) {
+      state = {};
+    }
+    if (!state.sessionId) {
+      state.sessionId = randomId();
+      save(state);
+    }
+    return state;
+  }
+
+  function save(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* private browsing / storage disabled — onboarding still works
+         within a single page-load, it just won't persist across screens */
+    }
+    return state;
+  }
+
+  function patch(partial) {
+    const state = Object.assign(load(), partial);
+    return save(state);
+  }
+
+  /* Redirects to `fallback` if `test(state)` fails, otherwise returns the
+     state. Use at the top of a screen that depends on an earlier one
+     having been completed, so a deep link can't strand someone on a
+     screen with nothing to show. */
+  function requireStep(test, fallback) {
+    const state = load();
+    if (!test(state)) {
+      location.replace(fallback);
+      return null;
+    }
+    return state;
+  }
+
+  /* Same idea as requireStep, but walks the whole onboarding chain, so a
+     screen past onboarding always bounces to the earliest incomplete
+     step rather than a generic fallback. */
+  function requireOnboarding() {
+    const state = load();
+    if (!state.episode5) return void location.replace("index.html");
+    if (!(state.name && state.ageBand)) return void location.replace("details.html");
+    if (!state.onboardingComplete) return void location.replace("check.html");
+    return state;
+  }
+
+  /* ── question bank access ──
+     The bank itself (all 165 questions, fully tagged) is proprietary and
+     lives only in Netlify Blobs, read by two Functions under
+     netlify/functions/ — never as a static file the browser can fetch
+     wholesale. Each endpoint hands back only the fields the calling
+     screen renders: candidates get text + tag, a confirmed pick's
+     questions get the seed/prep too, and questions-by-ids caps how many
+     ids it'll answer in one call so it can't be turned into a bulk dump
+     of the bank. These two calls are the entire surface the front-end
+     has onto the data — nothing here ever holds the full bank. */
+
+  async function postJSON(path, body) {
+    const res = await fetch(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    return res.json();
+  }
+
+  /* Three candidates for the weekly pick (spec §3b), sampled server-side:
+     one guaranteed Math question, one guaranteed General-or-Both, a
+     third from whatever's left in the age-matched Raw/Found pool.
+     Already-asked questions are excluded until the pool would come up
+     short. */
+  function fetchWeeklyCandidates(state) {
+    return postJSON("/api/weekly-candidates", {
+      ageBand: state.ageBand,
+      askedQuestionIds: state.askedQuestionIds || [],
+    });
+  }
+
+  /* Full fields for a specific, already-confirmed set of question ids —
+     used for the "you're set" summary, editing an active pick, and
+     later the nightly loop. Never for browsing the bank at large. */
+  function fetchQuestionsByIds(ids) {
+    if (!ids.length) return Promise.resolve([]);
+    return postJSON("/api/questions-by-ids", { ids });
+  }
+
+  global.CFC = {
+    load,
+    save,
+    patch,
+    requireStep,
+    requireOnboarding,
+    fetchWeeklyCandidates,
+    fetchQuestionsByIds,
+  };
+})(window);

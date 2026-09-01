@@ -1,0 +1,379 @@
+/* Conditions for Curiosity — app
+   Shares the site's navy/gold palette and Playfair Display / Karla pairing
+   (see ../index.html :root), extended with the two feedback accents used
+   in the onboarding comprehension check. */
+
+:root{
+  --navy:#050C16;
+  --gold:#EDC160;
+  --warm:#FDD284;
+  --off:#F6F5F2;
+  --off-mute:rgba(246,245,242,.62);
+  --off-faint:rgba(246,245,242,.34);
+  --off-dim:rgba(246,245,242,.4);
+  --line:rgba(237,193,96,.14);
+  --input-bg:rgba(246,245,242,.03);
+  --input-border:rgba(246,245,242,.18);
+  --input-border-gold:rgba(237,193,96,.32);
+  --green:#6EC996;
+  --green-bg:rgba(110,201,150,.08);
+  --coral:#E0796E;
+  --coral-bg:rgba(224,121,110,.08);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--navy);
+  color:var(--off);
+  font-family:"Karla",system-ui,sans-serif;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--warm)}
+:focus-visible{outline:1.5px solid var(--gold);outline-offset:2px}
+
+/* ── screen shell: full-height mobile card, centers on wider viewports ── */
+.screen{
+  min-height:100dvh;
+  max-width:480px;
+  margin:0 auto;
+  padding:40px 28px 32px;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.screen::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border:1px solid var(--line);
+  pointer-events:none;
+}
+.screen.tight{padding:36px 28px 28px}
+
+.eyebrow{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.eyebrow.tight{letter-spacing:.2em}
+
+.lede{
+  margin-top:9px;
+  font-size:13px;
+  line-height:1.55;
+  color:var(--off-mute);
+}
+
+.center-stack{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:22px;
+}
+
+.headline{
+  font-family:"Playfair Display",serif;
+  font-weight:400;
+  font-size:32px;
+  line-height:1.24;
+  letter-spacing:-.01em;
+  margin:0;
+}
+.headline em{font-style:italic;color:var(--gold)}
+
+.body-copy{
+  font-size:14.5px;
+  line-height:1.68;
+  color:var(--off-mute);
+  max-width:320px;
+  margin:0;
+}
+
+.spacer{flex:1}
+
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.btn-primary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--navy);
+  background:var(--gold);
+  padding:17px 24px;
+  border:none;
+  border-radius:2px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-primary:hover{background:var(--warm)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;background:var(--gold)}
+
+.link-secondary{
+  text-align:center;
+  align-self:center;
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:600;
+  letter-spacing:.04em;
+  color:var(--gold);
+  background:none;
+  border:none;
+  border-bottom:1px solid rgba(237,193,96,.35);
+  padding:0 0 3px;
+  cursor:pointer;
+}
+.link-secondary:hover{color:var(--warm);border-color:rgba(253,210,132,.5)}
+
+/* ── form fields (details screen) ── */
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  margin-top:22px;
+}
+.field:first-of-type{margin-top:24px}
+
+.field-label-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+}
+.field-label{
+  font-size:11.5px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--off-mute);
+}
+.field-optional{font-size:10.5px;color:var(--off-faint)}
+
+.field-input{
+  width:100%;
+  font-family:inherit;
+  border:1.2px solid var(--input-border-gold);
+  border-radius:2px;
+  padding:14px 15px;
+  font-size:15px;
+  color:var(--off);
+  background:var(--input-bg);
+}
+.field-input::placeholder{color:rgba(246,245,242,.34)}
+.field-input.optional{border-color:var(--input-border)}
+
+.field-hint{
+  font-size:12px;
+  line-height:1.55;
+  color:var(--off-faint);
+}
+.field-hint.notice{color:var(--gold)}
+
+.age-row{display:flex;gap:8px}
+.age-pill{
+  flex:1;
+  text-align:center;
+  padding:13px 0;
+  border-radius:2px;
+  border:1.2px solid var(--input-border);
+  background:none;
+  color:var(--off-dim);
+  font-family:inherit;
+  font-size:14px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.age-pill.selected{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:var(--navy);
+  font-weight:600;
+}
+
+/* ── comprehension check (three-variable screen) ── */
+.check-block{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  margin-top:20px;
+}
+.check-block:first-of-type{margin-top:20px}
+.check-tag{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:rgba(237,193,96,.7);
+}
+.check-q{
+  font-size:13.5px;
+  line-height:1.45;
+  color:var(--off);
+}
+.check-options{display:flex;flex-direction:column;gap:6px}
+.check-option{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width:100%;
+  text-align:left;
+  border:1.1px solid var(--input-border);
+  border-radius:2px;
+  padding:10px 12px;
+  font-family:inherit;
+  font-size:13px;
+  color:var(--off-dim);
+  background:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.check-option .icon{flex:none;display:none}
+.check-option.tapped{border-width:1.6px}
+.check-option.correct{
+  border-color:var(--green);
+  background:var(--green-bg);
+  color:var(--off);
+}
+.check-option.correct .icon.check{display:block}
+.check-option.incorrect{
+  border-color:var(--coral);
+  background:var(--coral-bg);
+  color:var(--off);
+}
+.check-option.incorrect .icon.cross{display:block}
+.check-option:disabled{cursor:default}
+
+.check-feedback{
+  font-size:11.5px;
+  line-height:1.5;
+  min-height:1.5em;
+  visibility:hidden;
+}
+.check-feedback.positive{color:var(--green)}
+.check-feedback.negative{color:var(--coral)}
+.check-feedback.show{visibility:visible}
+
+.helper-note{
+  text-align:center;
+  font-size:12px;
+  color:var(--off-faint);
+}
+
+/* ── weekly pick (rank three candidates) ── */
+.pick-list{
+  margin-top:26px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.pick-card{
+  display:flex;
+  gap:13px;
+  align-items:center;
+  width:100%;
+  border-radius:2px;
+  padding:15px;
+  font-family:inherit;
+  border:1.2px solid rgba(237,193,96,.4);
+  background:rgba(237,193,96,.06);
+  -webkit-user-select:none;
+  user-select:none;
+}
+.pick-card.dragging{
+  z-index:5;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.pick-badge{
+  flex:none;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:700;
+  background:var(--gold);
+  color:var(--navy);
+}
+.pick-body{flex:1;display:flex;flex-direction:column;min-width:0}
+.pick-text{
+  font-size:14.5px;
+  line-height:1.5;
+  color:var(--off);
+}
+.pick-tag{
+  margin-top:6px;
+  font-size:10.5px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--off-faint);
+}
+.pick-handle{
+  flex:none;
+  width:28px;
+  height:100%;
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(246,245,242,.3);
+  touch-action:none;
+  cursor:grab;
+}
+.pick-card.dragging .pick-handle{cursor:grabbing;color:var(--gold)}
+
+/* ── "you're set" summary list (complete screen, once a pick exists) ── */
+.summary-list{
+  margin-top:22px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.summary-item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  border:1px solid rgba(246,245,242,.14);
+  border-radius:2px;
+  padding:13px 14px;
+}
+.summary-item.done{opacity:.4}
+.summary-done-tag{color:var(--green)}
+.summary-rank{
+  flex:none;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:var(--gold);
+  color:var(--navy);
+  font-size:11px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.summary-text{font-size:13.5px;line-height:1.45;color:var(--off)}
+.summary-tag{
+  margin-top:4px;
+  font-size:10px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--off-faint);
+}

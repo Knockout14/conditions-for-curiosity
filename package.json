@@ -1,0 +1,8 @@
+{
+  "name": "conditions-for-curiosity",
+  "private": true,
+  "description": "Podcast site + companion app. Static site at the repo root; Netlify Functions under netlify/functions/ back the app's question data and (later) circle-back submissions.",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
