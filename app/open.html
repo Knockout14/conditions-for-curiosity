@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>Tonight — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen" id="screen"></main>
+
+<script src="app.js"></script>
+<script>
+  const state = CFC.load();
+  if (CFC.resumeUrl(state) !== "complete.html") {
+    location.replace(CFC.resumeUrl(state));
+  } else {
+    (async () => {
+      const screen = document.getElementById("screen");
+      const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      const next = CFC.nextQuestion(state, questions);
+      const ORDINALS = ["one", "two", "three"];
+
+      if (!next) {
+        screen.innerHTML = `
+          <p class="eyebrow">All caught up</p>
+          <div class="center-stack">
+            <h1 class="headline">That's all <em>three</em> for this week.</h1>
+            <p class="body-copy">Nothing more to ask until you pick again — whenever that is.</p>
+          </div>
+          <div class="actions">
+            <a class="link-secondary" href="pick.html">Pick again</a>
+            <a class="link-secondary" href="complete.html">Back to this week's three</a>
+          </div>`;
+        return;
+      }
+
+      CFC.saveCurrentQuestion({ question: next.question, index: next.index });
+
+      screen.innerHTML = `
+        <p class="eyebrow">Conditions for Curiosity</p>
+        <div class="center-stack">
+          <h1 class="headline">Tonight, ask <em>one</em> thing.</h1>
+          <p class="body-copy">Question ${ORDINALS[next.index]} of the three you picked. You answer first — always. No streak, no score.</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-primary" id="begin-btn">Begin question ${ORDINALS[next.index]} of three</button>
+          <p class="helper-caption">About 90 seconds</p>
+        </div>`;
+
+      document.getElementById("begin-btn").addEventListener("click", () => (location.href = "question.html"));
+    })();
+  }
+</script>
+</body>
+</html>

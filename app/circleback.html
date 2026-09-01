@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>One last thing — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen">
+  <p class="eyebrow tight">One last thing</p>
+
+  <h1 class="headline" style="margin-top:24px;font-size:26px">Did your child ask a question back?</h1>
+  <p class="lede">This is the one thing we actually track.</p>
+
+  <div class="yesno-row" style="margin-top:26px">
+    <button type="button" class="yesno-btn" id="yes-btn">Yes</button>
+    <button type="button" class="yesno-btn" id="no-btn">No</button>
+  </div>
+
+  <div class="field" style="margin-top:26px">
+    <label class="field-label" for="note">What did they say? <span class="field-optional">Optional</span></label>
+    <textarea class="field-input" id="note" placeholder="A word, a sentence — whatever's worth keeping." style="min-height:76px"></textarea>
+    <p class="voice-hint">💡 The mic on your keyboard works here too.</p>
+  </div>
+
+  <div class="spacer"></div>
+
+  <button type="button" class="btn-primary" id="done-btn" disabled>Done for tonight</button>
+</main>
+
+<script src="app.js"></script>
+<script>
+  const state = CFC.requireOnboarding();
+  const current = CFC.loadCurrentQuestion();
+
+  if (!current || current.adultAnswer === undefined) {
+    location.replace("open.html");
+  } else if (state) {
+    let childAskedQuestion = null;
+    const yesBtn = document.getElementById("yes-btn");
+    const noBtn = document.getElementById("no-btn");
+    const doneBtn = document.getElementById("done-btn");
+
+    function select(value, btn, other) {
+      childAskedQuestion = value;
+      btn.classList.add("selected");
+      other.classList.remove("selected");
+      doneBtn.disabled = false;
+    }
+    yesBtn.addEventListener("click", () => select(true, yesBtn, noBtn));
+    noBtn.addEventListener("click", () => select(false, noBtn, yesBtn));
+
+    doneBtn.addEventListener("click", async () => {
+      if (doneBtn.disabled) return;
+      doneBtn.disabled = true;
+      doneBtn.textContent = "Saving…";
+
+      const note = document.getElementById("note").value.trim();
+      const q = current.question;
+
+      const newState = CFC.markQuestionAsked(state, q.id);
+      await CFC.submitCircleBack(newState, {
+        question: q,
+        adultAnswer: current.adultAnswer,
+        childAskedQuestion,
+        note,
+      });
+      sessionStorage.removeItem("cfc_current_question");
+      location.href = "done.html";
+    });
+  }
+</script>
+</body>
+</html>

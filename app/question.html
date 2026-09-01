@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>Tonight's question — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen" id="screen"></main>
+
+<script src="app.js"></script>
+<script>
+  const state = CFC.requireOnboarding();
+  const current = CFC.loadCurrentQuestion();
+
+  // No in-progress question (e.g. a direct link, or a refresh after
+  // sessionStorage cleared) — start over from wherever's actually next.
+  if (!current) {
+    location.replace("open.html");
+  } else if (state) {
+    const q = current.question;
+    const screen = document.getElementById("screen");
+
+    screen.innerHTML = `
+      <div class="tag-row">
+        <p class="eyebrow tight">Tonight's question</p>
+        <span class="tag-row-meta">${q.domain} · Ages ${q.ages}</span>
+      </div>
+
+      <p class="question-text">${q.text}</p>
+
+      <div class="answer-field">
+        <label class="field-label" for="answer">Your answer — go first</label>
+        <textarea class="field-input" id="answer" placeholder="${(q.seed || "").replace(/"/g, "&quot;")}"></textarea>
+        <p class="voice-hint">💡 Faster than typing: tap the mic on your keyboard and just say it.</p>
+      </div>
+
+      <div class="hint-row">
+        <span class="hint-dot"></span>
+        Now ask them. Say it exactly like that — a question, not a quiz.
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" id="both-answered-btn">We both answered</button>
+        <p class="helper-caption">Nothing else appears until you've both gone.</p>
+      </div>`;
+
+    document.getElementById("both-answered-btn").addEventListener("click", () => {
+      const answer = document.getElementById("answer").value.trim();
+      CFC.saveCurrentQuestion({ question: q, index: current.index, adultAnswer: answer });
+      location.href = "reveal.html";
+    });
+  }
+</script>
+</body>
+</html>

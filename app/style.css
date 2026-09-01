@@ -434,3 +434,135 @@ a:hover{color:var(--warm)}
   text-transform:uppercase;
   color:var(--off-faint);
 }
+
+/* ── the nightly loop (open / the move / reveal / circle-back / done) ── */
+.tag-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.tag-row-meta{font-size:11px;color:var(--off-faint);white-space:nowrap}
+
+.question-text{
+  margin-top:26px;
+  font-family:"Playfair Display",serif;
+  font-weight:400;
+  font-size:26px;
+  line-height:1.34;
+  letter-spacing:-.01em;
+}
+
+.answer-field{
+  margin-top:28px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+textarea.field-input{
+  width:100%;
+  min-height:100px;
+  resize:vertical;
+  font-family:inherit;
+  border:1.2px solid var(--input-border-gold);
+  border-radius:2px;
+  padding:15px;
+  font-size:14.5px;
+  line-height:1.6;
+  color:var(--off);
+  background:var(--input-bg);
+}
+textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
+
+.voice-hint{
+  margin-top:7px;
+  font-size:11.5px;
+  color:var(--off-faint);
+}
+
+.hint-row{
+  margin-top:20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  color:var(--off-faint);
+}
+.hint-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+
+.helper-caption{
+  text-align:center;
+  margin-top:12px;
+  font-size:11.5px;
+  color:var(--off-faint);
+}
+
+.quote-block{
+  border-left:2px solid rgba(237,193,96,.4);
+  padding:2px 0 2px 14px;
+  font-size:13.5px;
+  line-height:1.6;
+  color:rgba(246,245,242,.7);
+}
+.quote-block + .quote-block{margin-top:10px;border-left-color:rgba(246,245,242,.16);color:var(--off-faint);font-style:italic}
+.quote-label{
+  font-size:10.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--off-faint);
+  display:block;
+  margin-bottom:4px;
+  font-style:normal;
+}
+
+.why-box{
+  border:1.2px dashed rgba(237,193,96,.4);
+  border-radius:2px;
+  padding:18px;
+  background:rgba(237,193,96,.05);
+}
+.why-box h3{
+  font-family:"Playfair Display",serif;
+  font-weight:500;
+  font-size:16px;
+  color:var(--gold);
+  margin:0 0 9px;
+}
+.why-box p{
+  font-size:13.5px;
+  line-height:1.68;
+  color:rgba(246,245,242,.78);
+  margin:0;
+}
+.why-box .citation{
+  margin-top:11px;
+  font-size:10.5px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:rgba(246,245,242,.38);
+}
+
+.yesno-row{display:flex;gap:10px}
+.yesno-btn{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px 0;
+  border-radius:2px;
+  border:1.2px solid rgba(237,193,96,.3);
+  background:none;
+  color:rgba(246,245,242,.7);
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+.yesno-btn.selected{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+
+.done-check{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1.4px solid var(--gold);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}

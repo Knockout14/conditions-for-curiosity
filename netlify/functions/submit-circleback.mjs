@@ -1,9 +1,5 @@
 import { appendRow } from "./_lib/google-sheets.mjs";
 
-function tagFor(q) {
-  return q ? `${q.domain} · ${q.bigIdea || q.category}` : "";
-}
-
 export default async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -16,8 +12,7 @@ export default async (req) => {
     return new Response("Bad request", { status: 400 });
   }
 
-  const { sessionId, name, email, ageBand, checkAnswers, questions } = body;
-  const q = Array.isArray(questions) ? questions : [];
+  const { sessionId, name, email, ageBand, question, adultAnswer, childAskedQuestion, note } = body;
 
   const row = [
     new Date().toISOString(),
@@ -25,19 +20,16 @@ export default async (req) => {
     name || "",
     email || "",
     ageBand || "",
-    checkAnswers?.room?.correct ? "yes" : "no",
-    checkAnswers?.in?.correct ? "yes" : "no",
-    checkAnswers?.out?.correct ? "yes" : "no",
-    q[0]?.text || "",
-    tagFor(q[0]),
-    q[1]?.text || "",
-    tagFor(q[1]),
-    q[2]?.text || "",
-    tagFor(q[2]),
+    question?.id ?? "",
+    question?.text || "",
+    question ? `${question.domain} · ${question.bigIdea || question.category}` : "",
+    adultAnswer || "",
+    childAskedQuestion ? "yes" : "no",
+    note || "",
   ];
 
   try {
-    await appendRow("Sheet1", row);
+    await appendRow("Circle-back", row);
   } catch (e) {
     console.error(e);
     return new Response("Failed to record submission", { status: 502 });
@@ -48,4 +40,4 @@ export default async (req) => {
   });
 };
 
-export const config = { path: "/api/submit-pick" };
+export const config = { path: "/api/submit-circleback" };

@@ -24,36 +24,52 @@
   const state = CFC.load();
   if (CFC.resumeUrl(state) !== "complete.html") {
     location.replace(CFC.resumeUrl(state));
+  } else if (new URLSearchParams(location.search).has("next")) {
+    // A calendar reminder link lands here with ?next=<id> — that id is
+    // just a hint (nextQuestion() recomputes the real answer from state
+    // regardless), so this hop straight into the loop rather than
+    // stopping at the summary.
+    location.replace("open.html");
   } else {
     (async () => {
       const screen = document.getElementById("screen");
       const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
-
-      // Nothing writes to askedQuestionIds yet — that lands with the
-      // nightly loop's circle-back step. Wired here now so a completed
-      // question just starts showing grayed out the moment it does, and
-      // so the reminder buttons below already point at whichever of the
-      // three is actually next.
       const asked = new Set(state.askedQuestionIds || []);
-      const items = questions
-        .map((q, i) => {
-          const done = asked.has(q.id);
-          return `
+
+      // Answered ones sink to the bottom rather than just graying out in
+      // place — original rank preserved as a stable sort key within each
+      // group, so ties don't reshuffle on every reload.
+      const ordered = questions
+        .map((q, i) => ({ q, rank: i + 1, done: asked.has(q.id) }))
+        .sort((a, b) => a.done - b.done || a.rank - b.rank);
+
+      const items = ordered
+        .map(
+          ({ q, rank, done }, i) => `
         <div class="summary-item${done ? " done" : ""}">
           <span class="summary-rank">${i + 1}</span>
           <span>
             <div class="summary-text">${q.text}</div>
             <div class="summary-tag">${q.domain} · ${q.bigIdea || q.category}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
           </span>
-        </div>`;
-        })
+        </div>`
+        )
         .join("");
+
+      const allDone = asked.size >= questions.length;
 
       screen.innerHTML = `
         <p class="eyebrow">This week's three</p>
-        <p class="lede">Ranked, in the order they'll come up. The nightly loop — actually running them — isn't built yet, so this is as far as v1 goes for now.</p>
+        <p class="lede">${allDone ? "All three asked. Nice." : "Ranked, in the order they'll come up."}</p>
         <div class="summary-list">${items}</div>
         <div class="spacer"></div>
+        ${
+          allDone
+            ? ""
+            : `<div class="actions" style="margin-bottom:20px">
+                 <button type="button" class="btn-primary" id="begin-btn">Begin tonight's question</button>
+               </div>`
+        }
         <p class="calendar-label">Add a reminder for your next question:</p>
         <div class="calendar-row">
           <a class="btn-outline" id="gcal-link" target="_blank" rel="noopener">Google Calendar</a>
@@ -64,20 +80,18 @@
           <a class="link-secondary" href="../index.html">Back to the podcast site</a>
         </div>`;
 
+      const beginBtn = document.getElementById("begin-btn");
+      if (beginBtn) beginBtn.addEventListener("click", () => (location.href = "open.html"));
+
       wireReminderButtons(questions, asked);
     })();
   }
 
   // Calendar reminders, not push/email ones — no new service, no
-  // permission prompt, work on any phone. One event, for whichever
-  // question is actually next — not just "first" — so this already
-  // behaves like it'll behave once the nightly loop exists to link into;
-  // today that link just lands on this summary screen instead of a
-  // specific per-night one.
-  function nextQuestionIndex(questions, asked) {
-    const idx = questions.findIndex((q) => !asked.has(q.id));
-    return idx === -1 ? 0 : idx; // week's fully asked — falls back to first rather than break
-  }
+  // permission prompt, work on any phone. Points at whichever question
+  // is actually next (CFC.nextQuestion), and at complete.html?next=<id>
+  // — which, as of the nightly loop existing, now redirects straight
+  // into the loop instead of just landing on this summary.
   const ORDINALS = ["first", "second", "third"];
 
   function pad(n) {
@@ -104,14 +118,13 @@
   }
 
   function wireReminderButtons(questions, asked) {
-    const idx = nextQuestionIndex(questions, asked);
-    const q = questions[idx];
-    // ?next=<id> is inert today — complete.html doesn't read it — but it's
-    // the seam the nightly loop can pick up later without changing this
-    // link-generation code at all.
+    const next = CFC.nextQuestion(state, questions);
+    if (!next) return; // all three done — nothing left to remind about
+    const q = next.question;
+
     const url = `${location.origin}/app/complete.html?next=${q.id}`;
     const title = `Tonight's question: ${q.text}`;
-    const description = `Your ${ORDINALS[idx] || "next"} pick this week. Open: ${url}`;
+    const description = `Your ${ORDINALS[next.index] || "next"} pick this week. Open: ${url}`;
     const start = nextEventStart();
     const end = new Date(start.getTime() + 15 * 60 * 1000);
 

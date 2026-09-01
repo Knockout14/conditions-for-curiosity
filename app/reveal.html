@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050C16">
+<title>Afterward — Conditions for Curiosity</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="screen" id="screen"></main>
+
+<script src="app.js"></script>
+<script>
+  const state = CFC.requireOnboarding();
+  const current = CFC.loadCurrentQuestion();
+
+  // Only reachable right after question.html sets an adult answer —
+  // never store the child's words here (that stays theirs); a stray or
+  // stale visit just restarts from whatever's next.
+  if (!current || current.adultAnswer === undefined) {
+    location.replace("open.html");
+  } else if (state) {
+    const q = current.question;
+
+    // Only four categories exist across the whole bank — a short, honest
+    // "why" per category rather than 165 bespoke paragraphs, paired with
+    // the question's own citation.
+    const WHY = {
+      Notice: "Naming what you noticed models the exact habit you want them to build — attention is contagious before it's ever taught.",
+      "Not-knowing": "Admitting you don't know keeps a kid trusting your answers later — a confidently wrong one costs more, even when it feels harder to say.",
+      Memory: "You went first. A kid who hears an adult be specific and honest about their own life keeps trusting that adult's answers.",
+      "Adult-life": "Letting them see you as a whole person — not just an authority — is what makes the exchange actually reciprocal.",
+    };
+    const why = WHY[q.category] || "Answering first, honestly, is the whole mechanism — everything else follows from that.";
+
+    document.getElementById("screen").innerHTML = `
+      <p class="eyebrow">Afterward</p>
+
+      <div style="margin-top:24px">
+        <div class="quote-block">
+          <span class="quote-label">You said</span>
+          ${current.adultAnswer || "(no answer typed)"}
+        </div>
+        <div class="quote-block">
+          <span class="quote-label">Their turn</span>
+          Whatever they said — that part stays theirs.
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="why-box">
+        <h3>Why this one works</h3>
+        <p>${why}</p>
+        ${q.citation ? `<div class="citation">${q.citation}</div>` : ""}
+      </div>
+
+      <div class="actions" style="margin-top:20px">
+        <button type="button" class="btn-primary" id="continue-btn">Continue</button>
+      </div>`;
+
+    document.getElementById("continue-btn").addEventListener("click", () => {
+      location.href = "circleback.html";
+    });
+  }
+</script>
+</body>
+</html>

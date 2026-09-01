@@ -159,6 +159,62 @@
     }).catch((e) => console.error("submitPick failed (continuing anyway):", e));
   }
 
+  /* ── the nightly loop ──
+     One question, in ranked order, per session (spec §3c). "Which one is
+     next" is always computed the same way — first of the week's three
+     not yet in askedQuestionIds — so the calendar buttons, the open
+     screen, and the summary screen can never disagree with each other. */
+  function nextQuestion(state, questions) {
+    const asked = new Set(state.askedQuestionIds || []);
+    const idx = questions.findIndex((q) => !asked.has(q.id));
+    return idx === -1 ? null : { question: questions[idx], index: idx };
+  }
+
+  /* The one write circle-back triggers (per this session's design
+     discussion): the question actually got asked, so it's crossed off
+     for good — excluded from future weeks' sampling, not just this
+     one's. usedCount advances one at a time, not by however many are
+     left, so pick.html's "week's still active" check stays accurate
+     after just one question instead of jumping straight to "done." */
+  function markQuestionAsked(state, questionId) {
+    const askedQuestionIds = (state.askedQuestionIds || []).concat(questionId);
+    const usedCount = Math.min(3, (state.weeklyPick.usedCount || 0) + 1);
+    return patch({
+      askedQuestionIds,
+      weeklyPick: Object.assign({}, state.weeklyPick, { usedCount }),
+    });
+  }
+
+  /* In-progress state for the current question, between the open screen
+     and circle-back — sessionStorage, not localStorage: it's scratch for
+     tonight's single pass through the loop, not something that should
+     outlive the tab or follow the family into next week. */
+  const SESSION_KEY = "cfc_current_question";
+  function saveCurrentQuestion(data) {
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+  function loadCurrentQuestion() {
+    try {
+      return JSON.parse(sessionStorage.getItem(SESSION_KEY)) || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /* Circle-back submissions (spec §3d) go to their own sheet tab — same
+     spreadsheet as the pick confirmations, different shape of row. */
+  function submitCircleBack(state, payload) {
+    return postJSON("/api/submit-circleback", {
+      sessionId: state.sessionId,
+      name: state.name,
+      email: state.email,
+      ageBand: state.ageBand,
+      ...payload,
+    }).catch((e) => console.error("submitCircleBack failed (continuing anyway):", e));
+  }
+
   global.CFC = {
     load,
     save,
@@ -170,5 +226,10 @@
     fetchQuestionsByIds,
     fetchReplacementCandidate,
     submitPick,
+    nextQuestion,
+    markQuestionAsked,
+    saveCurrentQuestion,
+    loadCurrentQuestion,
+    submitCircleBack,
   };
 })(window);
