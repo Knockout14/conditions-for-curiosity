@@ -115,6 +115,23 @@
     return postJSON("/api/questions-by-ids", { ids });
   }
 
+  /* Records a confirmed weekly pick to the founder's spreadsheet (spec
+     §2/§3e's "lightweight backend"). `questions` is the ranked array of
+     full question objects (id, text, domain, bigIdea/category) the pick
+     screen already has in hand. Best-effort — a family's local state is
+     already saved by the time this is called, so a network hiccup here
+     shouldn't block them from moving on. */
+  function submitPick(state, questions) {
+    return postJSON("/api/submit-pick", {
+      sessionId: state.sessionId,
+      name: state.name,
+      email: state.email,
+      ageBand: state.ageBand,
+      checkAnswers: state.checkAnswers,
+      questions,
+    }).catch((e) => console.error("submitPick failed (continuing anyway):", e));
+  }
+
   global.CFC = {
     load,
     save,
@@ -123,5 +140,6 @@
     requireOnboarding,
     fetchWeeklyCandidates,
     fetchQuestionsByIds,
+    submitPick,
   };
 })(window);

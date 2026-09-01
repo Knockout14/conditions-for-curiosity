@@ -170,14 +170,16 @@
 
     render();
 
-    continueBtn.addEventListener("click", () => {
-      CFC.patch({
+    continueBtn.addEventListener("click", async () => {
+      const rankedQuestions = order.map((id) => byId.get(id));
+      const newState = CFC.patch({
         weeklyPick: {
           questionIds: order.map(Number),
           usedCount: 0,
           pickedAt: new Date().toISOString(),
         },
       });
+      await CFC.submitPick(newState, rankedQuestions);
       location.href = "complete.html";
     });
   })();
