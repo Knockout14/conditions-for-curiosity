@@ -15,7 +15,10 @@
 <body>
 
 <main class="screen tight">
-  <p class="eyebrow tight">Pick this week's three</p>
+  <div class="eyebrow-row">
+    <p class="eyebrow tight">Pick this week's three</p>
+    <button type="button" class="edit-link" onclick="location.href='details.html'">Edit your details</button>
+  </div>
   <p class="lede">Drag to set the order — first, second, third. One a week, whenever a night fits.</p>
 
   <div class="pick-list" id="pick-list"></div>
@@ -47,6 +50,10 @@
     const byId = new Map(candidates.map((q) => [String(q.id), q]));
 
     let order = candidates.map((q) => String(q.id));
+    // Spec allows one swap across the three — not a reroll of the whole
+    // set. Once used, every remaining "swap" affordance disappears on
+    // the next render.
+    let swapUsed = false;
 
     const list = document.getElementById("pick-list");
     const continueBtn = document.getElementById("continue-btn");
@@ -61,6 +68,7 @@
         <span class="pick-body">
           <span class="pick-text">${q.text}</span>
           <span class="pick-tag">${tagFor(q)}</span>
+          ${swapUsed ? "" : '<button type="button" class="pick-swap">Not this one? Swap it</button>'}
         </span>
         <span class="pick-handle" aria-label="Drag to reorder">
           <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
@@ -69,7 +77,25 @@
             <circle cx="2" cy="14" r="1.6" fill="currentColor"/><circle cx="8" cy="14" r="1.6" fill="currentColor"/>
           </svg>
         </span>`;
+      if (!swapUsed) {
+        card.querySelector(".pick-swap").addEventListener("click", (e) => {
+          e.stopPropagation();
+          swapCandidate(id);
+        });
+      }
       return card;
+    }
+
+    async function swapCandidate(oldId) {
+      if (swapUsed) return;
+      const excludeIds = order.map(Number);
+      const replacement = await CFC.fetchReplacementCandidate(state, excludeIds);
+      if (!replacement) return; // pool exhausted — vanishingly unlikely, just leave it as-is
+      swapUsed = true;
+      byId.delete(oldId);
+      byId.set(String(replacement.id), replacement);
+      order = order.map((id) => (id === oldId ? String(replacement.id) : id));
+      render();
     }
 
     function refreshBadges() {
@@ -180,7 +206,7 @@
         },
       });
       await CFC.submitPick(newState, rankedQuestions);
-      location.href = "complete.html";
+      location.href = CFC.resumeUrl(newState);
     });
   })();
 </script>

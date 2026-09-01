@@ -18,57 +18,108 @@
 
 <script src="app.js"></script>
 <script>
-  const state = CFC.requireOnboarding();
+  // This is the resting state — reachable only once episode5, details,
+  // the check, a pick, and the commitment step are all done. Anything
+  // short of that bounces to wherever's actually next.
+  const state = CFC.load();
+  if (CFC.resumeUrl(state) !== "complete.html") {
+    location.replace(CFC.resumeUrl(state));
+  } else {
+    (async () => {
+      const screen = document.getElementById("screen");
+      const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
 
-  state && (async () => {
-    const screen = document.getElementById("screen");
-    const hasPick = state.weeklyPick && (state.weeklyPick.usedCount || 0) < 3;
+      // Nothing writes to askedQuestionIds yet — that lands with the
+      // nightly loop's circle-back step. Wired here now so a completed
+      // question just starts showing grayed out the moment it does.
+      const asked = new Set(state.askedQuestionIds || []);
+      const items = questions
+        .map((q, i) => {
+          const done = asked.has(q.id);
+          return `
+        <div class="summary-item${done ? " done" : ""}">
+          <span class="summary-rank">${i + 1}</span>
+          <span>
+            <div class="summary-text">${q.text}</div>
+            <div class="summary-tag">${q.domain} · ${q.bigIdea || q.category}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
+          </span>
+        </div>`;
+        })
+        .join("");
 
-    if (!hasPick) {
       screen.innerHTML = `
-        <p class="eyebrow">You're set</p>
-        <div class="center-stack">
-          <h1 class="headline">Onboarding's <em>done</em>.</h1>
-          <p class="body-copy">Next: pick this week's three questions. You'll rank them once, and they run automatically from there — nothing to choose on any given night.</p>
-        </div>
+        <p class="eyebrow">This week's three</p>
+        <p class="lede">Ranked, in the order they'll come up. The nightly loop — actually running them — isn't built yet, so this is as far as v1 goes for now.</p>
+        <div class="summary-list">${items}</div>
+        <div class="spacer"></div>
         <div class="actions">
-          <button type="button" class="btn-primary" id="pick-btn">Pick this week's three</button>
+          <a class="link-secondary" id="reminder-link" href="#">Remind me tonight</a>
+          <a class="link-secondary" href="pick.html">Change your picks</a>
           <a class="link-secondary" href="../index.html">Back to the podcast site</a>
         </div>`;
-      document.getElementById("pick-btn").addEventListener("click", () => (location.href = "pick.html"));
-      return;
-    }
 
-    const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      wireReminderLink();
+    })();
+  }
 
-    // Nothing writes to askedQuestionIds yet — that lands with the
-    // nightly loop's circle-back step. Wired here now so a completed
-    // question just starts showing grayed out the moment it does.
-    const asked = new Set(state.askedQuestionIds || []);
-    const items = questions
-      .map((q, i) => {
-        const done = asked.has(q.id);
-        return `
-      <div class="summary-item${done ? " done" : ""}">
-        <span class="summary-rank">${i + 1}</span>
-        <span>
-          <div class="summary-text">${q.text}</div>
-          <div class="summary-tag">${q.domain} · ${q.bigIdea || q.category}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
-        </span>
-      </div>`;
-      })
-      .join("");
-
-    screen.innerHTML = `
-      <p class="eyebrow">This week's three</p>
-      <p class="lede">Ranked, in the order they'll come up. The nightly loop — actually running them — isn't built yet, so this is as far as v1 goes for now.</p>
-      <div class="summary-list">${items}</div>
-      <div class="spacer"></div>
-      <div class="actions">
-        <a class="link-secondary" href="pick.html">Change your picks</a>
-        <a class="link-secondary" href="../index.html">Back to the podcast site</a>
-      </div>`;
-  })();
+  // A calendar reminder, not a push/email one — no service, no permission
+  // prompt, works on any phone. One event, for the first night only (spec
+  // asks for the "first nightly call back," not a running weekly series).
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+  function toICSDate(date) {
+    return (
+      date.getUTCFullYear() +
+      pad(date.getUTCMonth() + 1) +
+      pad(date.getUTCDate()) +
+      "T" +
+      pad(date.getUTCHours()) +
+      pad(date.getUTCMinutes()) +
+      pad(date.getUTCSeconds()) +
+      "Z"
+    );
+  }
+  function buildReminderICS(sessionId, url) {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(19, 0, 0, 0); // 7pm local — a default, editable in their own calendar app
+    if (start <= now) start.setDate(start.getDate() + 1);
+    const uid = `${sessionId || "cfc"}-first-reminder@conditionsforcuriosity.netlify.app`;
+    return [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Conditions for Curiosity//App//EN",
+      "BEGIN:VEVENT",
+      `UID:${uid}`,
+      `DTSTAMP:${toICSDate(now)}`,
+      `DTSTART:${toICSDate(start)}`,
+      "DURATION:PT15M",
+      "SUMMARY:Tonight's question — Conditions for Curiosity",
+      `DESCRIPTION:Time for your first question this week. Open: ${url}`,
+      `URL:${url}`,
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:Reminder",
+      "TRIGGER:-PT0M",
+      "END:VALARM",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+  }
+  function wireReminderLink() {
+    document.getElementById("reminder-link").addEventListener("click", (e) => {
+      e.preventDefault();
+      const url = location.origin + "/app/complete.html";
+      const ics = buildReminderICS(state.sessionId, url);
+      const blob = new Blob([ics], { type: "text/calendar" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "conditions-for-curiosity-reminder.ics";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+  }
 </script>
 </body>
 </html>

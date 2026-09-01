@@ -63,6 +63,21 @@ a:hover{color:var(--warm)}
 }
 .eyebrow.tight{letter-spacing:.2em}
 
+.eyebrow-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.edit-link{
+  font-family:inherit;
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--off-faint);
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+}
+.edit-link:hover{color:var(--gold)}
+
 .lede{
   margin-top:9px;
   font-size:13px;
@@ -325,6 +340,20 @@ a:hover{color:var(--warm)}
   text-transform:uppercase;
   color:var(--off-faint);
 }
+.pick-swap{
+  align-self:flex-start;
+  margin-top:8px;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:600;
+  color:var(--gold);
+  background:none;
+  border:none;
+  border-bottom:1px solid rgba(237,193,96,.35);
+  padding:0 0 2px;
+  cursor:pointer;
+}
+.pick-swap:hover{color:var(--warm);border-color:rgba(253,210,132,.5)}
 .pick-handle{
   flex:none;
   width:28px;

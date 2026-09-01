@@ -89,12 +89,12 @@
 
   continueBtn.addEventListener("click", () => {
     if (continueBtn.disabled) return;
-    CFC.patch({
+    const newState = CFC.patch({
       name: nameInput.value.trim(),
       email: emailInput.value.trim(),
       ageBand,
     });
-    location.href = "check.html";
+    location.href = CFC.resumeUrl(newState);
   });
 </script>
 </body>

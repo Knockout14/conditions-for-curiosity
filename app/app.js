@@ -74,6 +74,20 @@
     return state;
   }
 
+  /* The full chain through the one-time commitment moment: where should
+     someone land next, given what they've already done? Used so editing
+     your details from check/pick/confirm returns you to wherever you'd
+     actually gotten to, instead of re-running the whole sequence — and
+     so a page can guard itself by checking "is this actually my step." */
+  function resumeUrl(state) {
+    if (!state.episode5) return "index.html";
+    if (!(state.name && state.ageBand)) return "details.html";
+    if (!state.onboardingComplete) return "check.html";
+    if (!state.weeklyPick) return "pick.html";
+    if (!state.commitConfirmed) return "confirm.html";
+    return "complete.html";
+  }
+
   /* ── question bank access ──
      The bank itself (all 165 questions, fully tagged) is proprietary and
      lives only in Netlify Blobs, read by two Functions under
@@ -115,6 +129,19 @@
     return postJSON("/api/questions-by-ids", { ids });
   }
 
+  /* One replacement candidate for the weekly pick's "swap one" allowance
+     — same age-matched Raw/Found pool, excluding both already-asked
+     questions and whatever's currently on the table (so the replacement
+     can't just be one of the other two). */
+  function fetchReplacementCandidate(state, excludeIds) {
+    return postJSON("/api/weekly-candidates", {
+      ageBand: state.ageBand,
+      askedQuestionIds: state.askedQuestionIds || [],
+      excludeIds,
+      count: 1,
+    }).then((r) => r[0] || null);
+  }
+
   /* Records a confirmed weekly pick to the founder's spreadsheet (spec
      §2/§3e's "lightweight backend"). `questions` is the ranked array of
      full question objects (id, text, domain, bigIdea/category) the pick
@@ -138,8 +165,10 @@
     patch,
     requireStep,
     requireOnboarding,
+    resumeUrl,
     fetchWeeklyCandidates,
     fetchQuestionsByIds,
+    fetchReplacementCandidate,
     submitPick,
   };
 })(window);

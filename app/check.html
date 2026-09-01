@@ -15,7 +15,10 @@
 <body>
 
 <main class="screen tight">
-  <p class="eyebrow tight">Three quick ones</p>
+  <div class="eyebrow-row">
+    <p class="eyebrow tight">Three quick ones</p>
+    <button type="button" class="edit-link" onclick="location.href='details.html'">Edit your details</button>
+  </div>
   <p class="lede">Not a test — the three things you actually control, before we start.</p>
 
   <div class="check-block" data-key="room">
@@ -113,8 +116,12 @@
   });
 
   document.getElementById("continue-btn").addEventListener("click", () => {
-    CFC.patch({ checkAnswers: answers, onboardingComplete: true, onboardingCompletedAt: new Date().toISOString() });
-    location.href = "complete.html";
+    const newState = CFC.patch({
+      checkAnswers: answers,
+      onboardingComplete: true,
+      onboardingCompletedAt: new Date().toISOString(),
+    });
+    location.href = CFC.resumeUrl(newState);
   });
 </script>
 </body>

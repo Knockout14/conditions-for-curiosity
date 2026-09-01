@@ -49,7 +49,11 @@ export default async (req) => {
 
   const ageBand = typeof body.ageBand === "string" ? body.ageBand : null;
   const asked = new Set(Array.isArray(body.askedQuestionIds) ? body.askedQuestionIds : []);
-  const count = 3;
+  // Extra ids to exclude beyond what's been asked — used when fetching a
+  // single replacement for the weekly-pick "swap one" allowance, so the
+  // replacement can't just be one of the other two already on the table.
+  const exclude = new Set(Array.isArray(body.excludeIds) ? body.excludeIds : []);
+  const count = Number.isInteger(body.count) && body.count > 0 ? body.count : 3;
 
   const store = getStore("question-bank");
   const all = await store.get("all", { type: "json" });
@@ -58,17 +62,22 @@ export default async (req) => {
   const eligible = all.filter(
     (q) => (q.anchor === "RAW" || q.anchor === "FOUND") && ageOverlaps(ageBand, q.ages)
   );
-  let pool = eligible.filter((q) => !asked.has(q.id));
-  if (pool.length < count) pool = eligible;
+  let pool = eligible.filter((q) => !asked.has(q.id) && !exclude.has(q.id));
+  if (pool.length < count) pool = eligible.filter((q) => !exclude.has(q.id));
 
   const picks = [];
-  const takeFrom = (fromPool) => {
-    const options = shuffle(fromPool).filter((q) => !picks.some((p) => p.id === q.id));
-    if (options.length) picks.push(options[0]);
-  };
-  takeFrom(pool.filter((q) => q.domain === "Math"));
-  takeFrom(pool.filter((q) => q.domain !== "Math")); // General or Both
-  takeFrom(pool); // third slot: whatever's left, any domain
+
+  if (count === 3) {
+    // The full weekly pick: mix General/Math on purpose (spec §3b) rather
+    // than leaving it to chance.
+    const takeFrom = (fromPool) => {
+      const options = shuffle(fromPool).filter((q) => !picks.some((p) => p.id === q.id));
+      if (options.length) picks.push(options[0]);
+    };
+    takeFrom(pool.filter((q) => q.domain === "Math"));
+    takeFrom(pool.filter((q) => q.domain !== "Math")); // General or Both
+    takeFrom(pool); // third slot: whatever's left, any domain
+  }
 
   for (const q of shuffle(pool)) {
     if (picks.length >= count) break;
