@@ -32,13 +32,29 @@
         screen.innerHTML = `
           <p class="eyebrow">All caught up</p>
           <div class="center-stack">
-            <h1 class="headline">That's all <em>three</em> for this week.</h1>
-            <p class="body-copy">Nothing more to ask until you pick again — whenever that is.</p>
+            <h1 class="headline">When do you want to start <em>next week</em>?</h1>
+            <p class="body-copy">All three asked. Nothing due again until you're ready — anytime after Sunday works well for most families.</p>
           </div>
-          <div class="actions">
-            <a class="link-secondary" href="pick.html">Pick again</a>
+          <p class="calendar-label">Add a reminder for next week:</p>
+          <div class="calendar-row">
+            <a class="btn-outline" id="gcal-link" target="_blank" rel="noopener">Google Calendar</a>
+            <button type="button" class="btn-outline" id="ical-link">Apple Calendar</button>
+          </div>
+          <div class="actions" style="margin-top:20px">
+            <a class="link-secondary" href="pick.html">Pick again now</a>
             <a class="link-secondary" href="complete.html">Back to this week's three</a>
           </div>`;
+
+        const url = `${location.origin}/app/pick.html`;
+        CFC.wireCalendarButtons(document.getElementById("gcal-link"), document.getElementById("ical-link"), {
+          // Working title — still being decided; easy to change in one place.
+          title: "Conditions for Curiosity",
+          description: `Time to pick next week's three questions. Open: ${url}`,
+          url,
+          start: CFC.nextSundayNoon(),
+          durationMinutes: 30,
+          uid: `${state.sessionId || "cfc"}-next-week@conditionsforcuriosity.netlify.app`,
+        });
         return;
       }
 

@@ -215,6 +215,94 @@
     }).catch((e) => console.error("submitCircleBack failed (continuing anyway):", e));
   }
 
+  /* ── calendar reminders ──
+     No push/email service, no permission prompt — a real Google Calendar
+     prefill link plus an .ics download for Apple Calendar, the same
+     pair used for "remind me tonight" and now "when should next week
+     start." Shared here so both call sites build the exact same way. */
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+  function toStampDate(date) {
+    return (
+      date.getUTCFullYear() +
+      pad(date.getUTCMonth() + 1) +
+      pad(date.getUTCDate()) +
+      "T" +
+      pad(date.getUTCHours()) +
+      pad(date.getUTCMinutes()) +
+      pad(date.getUTCSeconds()) +
+      "Z"
+    );
+  }
+
+  function nextEventStart() {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(19, 0, 0, 0); // 7pm local — a default, editable in either calendar app
+    if (start <= now) start.setDate(start.getDate() + 1);
+    return start;
+  }
+
+  /* "Anytime after 12pm Sunday" (current working default for when a new
+     week should start) — the coming Sunday at noon, or the Sunday after
+     if it's already past noon today and today happens to be Sunday. */
+  function nextSundayNoon() {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(12, 0, 0, 0);
+    let daysUntilSunday = (7 - start.getDay()) % 7;
+    if (daysUntilSunday === 0 && start <= now) daysUntilSunday = 7;
+    start.setDate(start.getDate() + daysUntilSunday);
+    return start;
+  }
+
+  function wireCalendarButtons(gcalEl, icsBtnEl, { title, description, url, start, durationMinutes = 15, uid }) {
+    const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+
+    if (gcalEl) {
+      const gcal = new URL("https://calendar.google.com/calendar/render");
+      gcal.searchParams.set("action", "TEMPLATE");
+      gcal.searchParams.set("text", title);
+      gcal.searchParams.set("dates", `${toStampDate(start)}/${toStampDate(end)}`);
+      gcal.searchParams.set("details", description);
+      gcalEl.href = gcal.toString();
+    }
+
+    if (icsBtnEl) {
+      icsBtnEl.addEventListener("click", () => {
+        const esc = (s) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,");
+        const ics = [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//Conditions for Curiosity//App//EN",
+          "BEGIN:VEVENT",
+          `UID:${uid}`,
+          `DTSTAMP:${toStampDate(new Date())}`,
+          `DTSTART:${toStampDate(start)}`,
+          `DTEND:${toStampDate(end)}`,
+          `SUMMARY:${esc(title)}`,
+          `DESCRIPTION:${esc(description)}`,
+          `URL:${url}`,
+          "BEGIN:VALARM",
+          "ACTION:DISPLAY",
+          "DESCRIPTION:Reminder",
+          "TRIGGER:-PT0M",
+          "END:VALARM",
+          "END:VEVENT",
+          "END:VCALENDAR",
+        ].join("\r\n");
+
+        const blob = new Blob([ics], { type: "text/calendar" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "conditions-for-curiosity-reminder.ics";
+        link.click();
+        URL.revokeObjectURL(link.href);
+      });
+    }
+  }
+
   global.CFC = {
     load,
     save,
@@ -231,5 +319,8 @@
     saveCurrentQuestion,
     loadCurrentQuestion,
     submitCircleBack,
+    nextEventStart,
+    nextSundayNoon,
+    wireCalendarButtons,
   };
 })(window);
