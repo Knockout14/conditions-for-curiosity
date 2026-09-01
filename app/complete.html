@@ -31,7 +31,9 @@
 
       // Nothing writes to askedQuestionIds yet — that lands with the
       // nightly loop's circle-back step. Wired here now so a completed
-      // question just starts showing grayed out the moment it does.
+      // question just starts showing grayed out the moment it does, and
+      // so the reminder buttons below already point at whichever of the
+      // three is actually next.
       const asked = new Set(state.askedQuestionIds || []);
       const items = questions
         .map((q, i) => {
@@ -52,23 +54,36 @@
         <p class="lede">Ranked, in the order they'll come up. The nightly loop — actually running them — isn't built yet, so this is as far as v1 goes for now.</p>
         <div class="summary-list">${items}</div>
         <div class="spacer"></div>
-        <div class="actions">
-          <a class="link-secondary" id="reminder-link" href="#">Remind me tonight</a>
+        <p class="calendar-label">Add a reminder for your next question:</p>
+        <div class="calendar-row">
+          <a class="btn-outline" id="gcal-link" target="_blank" rel="noopener">Google Calendar</a>
+          <button type="button" class="btn-outline" id="ical-link">Apple Calendar</button>
+        </div>
+        <div class="actions" style="margin-top:20px">
           <a class="link-secondary" href="pick.html">Change your picks</a>
           <a class="link-secondary" href="../index.html">Back to the podcast site</a>
         </div>`;
 
-      wireReminderLink();
+      wireReminderButtons(questions, asked);
     })();
   }
 
-  // A calendar reminder, not a push/email one — no service, no permission
-  // prompt, works on any phone. One event, for the first night only (spec
-  // asks for the "first nightly call back," not a running weekly series).
+  // Calendar reminders, not push/email ones — no new service, no
+  // permission prompt, work on any phone. One event, for whichever
+  // question is actually next — not just "first" — so this already
+  // behaves like it'll behave once the nightly loop exists to link into;
+  // today that link just lands on this summary screen instead of a
+  // specific per-night one.
+  function nextQuestionIndex(questions, asked) {
+    const idx = questions.findIndex((q) => !asked.has(q.id));
+    return idx === -1 ? 0 : idx; // week's fully asked — falls back to first rather than break
+  }
+  const ORDINALS = ["first", "second", "third"];
+
   function pad(n) {
     return String(n).padStart(2, "0");
   }
-  function toICSDate(date) {
+  function toStampDate(date) {
     return (
       date.getUTCFullYear() +
       pad(date.getUTCMonth() + 1) +
@@ -80,38 +95,57 @@
       "Z"
     );
   }
-  function buildReminderICS(sessionId, url) {
+  function nextEventStart() {
     const now = new Date();
     const start = new Date(now);
-    start.setHours(19, 0, 0, 0); // 7pm local — a default, editable in their own calendar app
+    start.setHours(19, 0, 0, 0); // 7pm local — a default, editable in either calendar app
     if (start <= now) start.setDate(start.getDate() + 1);
-    const uid = `${sessionId || "cfc"}-first-reminder@conditionsforcuriosity.netlify.app`;
-    return [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Conditions for Curiosity//App//EN",
-      "BEGIN:VEVENT",
-      `UID:${uid}`,
-      `DTSTAMP:${toICSDate(now)}`,
-      `DTSTART:${toICSDate(start)}`,
-      "DURATION:PT15M",
-      "SUMMARY:Tonight's question — Conditions for Curiosity",
-      `DESCRIPTION:Time for your first question this week. Open: ${url}`,
-      `URL:${url}`,
-      "BEGIN:VALARM",
-      "ACTION:DISPLAY",
-      "DESCRIPTION:Reminder",
-      "TRIGGER:-PT0M",
-      "END:VALARM",
-      "END:VEVENT",
-      "END:VCALENDAR",
-    ].join("\r\n");
+    return start;
   }
-  function wireReminderLink() {
-    document.getElementById("reminder-link").addEventListener("click", (e) => {
-      e.preventDefault();
-      const url = location.origin + "/app/complete.html";
-      const ics = buildReminderICS(state.sessionId, url);
+
+  function wireReminderButtons(questions, asked) {
+    const idx = nextQuestionIndex(questions, asked);
+    const q = questions[idx];
+    // ?next=<id> is inert today — complete.html doesn't read it — but it's
+    // the seam the nightly loop can pick up later without changing this
+    // link-generation code at all.
+    const url = `${location.origin}/app/complete.html?next=${q.id}`;
+    const title = `Tonight's question: ${q.text}`;
+    const description = `Your ${ORDINALS[idx] || "next"} pick this week. Open: ${url}`;
+    const start = nextEventStart();
+    const end = new Date(start.getTime() + 15 * 60 * 1000);
+
+    const gcal = new URL("https://calendar.google.com/calendar/render");
+    gcal.searchParams.set("action", "TEMPLATE");
+    gcal.searchParams.set("text", title);
+    gcal.searchParams.set("dates", `${toStampDate(start)}/${toStampDate(end)}`);
+    gcal.searchParams.set("details", description);
+    document.getElementById("gcal-link").href = gcal.toString();
+
+    document.getElementById("ical-link").addEventListener("click", () => {
+      const icsEscape = (s) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,");
+      const uid = `${state.sessionId || "cfc"}-q${q.id}@conditionsforcuriosity.netlify.app`;
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Conditions for Curiosity//App//EN",
+        "BEGIN:VEVENT",
+        `UID:${uid}`,
+        `DTSTAMP:${toStampDate(new Date())}`,
+        `DTSTART:${toStampDate(start)}`,
+        `DTEND:${toStampDate(end)}`,
+        `SUMMARY:${icsEscape(title)}`,
+        `DESCRIPTION:${icsEscape(description)}`,
+        `URL:${url}`,
+        "BEGIN:VALARM",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:Reminder",
+        "TRIGGER:-PT0M",
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR",
+      ].join("\r\n");
+
       const blob = new Blob([ics], { type: "text/calendar" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
