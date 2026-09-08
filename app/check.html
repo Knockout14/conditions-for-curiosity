@@ -84,6 +84,7 @@
   <div class="spacer"></div>
 
   <button type="button" class="btn-primary" id="continue-btn">Start this week</button>
+  <button type="button" class="link-secondary" id="skip-link" style="display:block;margin:14px auto 0">Skip, I've got it &rarr;</button>
 </main>
 
 <script src="app.js"></script>
@@ -115,14 +116,25 @@
     });
   });
 
-  document.getElementById("continue-btn").addEventListener("click", () => {
+  // Fires from either the primary button or the skip link — either way,
+  // any block the person never tapped gets recorded as "skipped" rather
+  // than left absent (absent used to read identically to "answered
+  // wrong" downstream; now the sheet can actually tell the two apart).
+  function finishCheck() {
+    document.querySelectorAll(".check-block").forEach((block) => {
+      const key = block.dataset.key;
+      if (!(key in answers)) answers[key] = "skipped";
+    });
     const newState = CFC.patch({
       checkAnswers: answers,
       onboardingComplete: true,
       onboardingCompletedAt: new Date().toISOString(),
     });
     location.href = CFC.resumeUrl(newState);
-  });
+  }
+
+  document.getElementById("continue-btn").addEventListener("click", finishCheck);
+  document.getElementById("skip-link").addEventListener("click", finishCheck);
 </script>
 </body>
 </html>

@@ -4,6 +4,15 @@ function tagFor(q) {
   return q ? `${q.domain} · ${q.bigIdea || q.category}` : "";
 }
 
+// check.html now always fills all three keys — either an {selected,
+// correct} object or the literal string "skipped" — but this stays
+// permissive for any older client-side state that only sent whichever
+// keys were actually answered.
+function checkCol(v) {
+  if (v === "skipped") return "skipped";
+  return v?.correct ? "yes" : "no";
+}
+
 export default async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -26,9 +35,9 @@ export default async (req) => {
     email || "",
     ageBand || "",
     isEdit ? "yes" : "no",
-    checkAnswers?.room?.correct ? "yes" : "no",
-    checkAnswers?.in?.correct ? "yes" : "no",
-    checkAnswers?.out?.correct ? "yes" : "no",
+    checkCol(checkAnswers?.room),
+    checkCol(checkAnswers?.in),
+    checkCol(checkAnswers?.out),
     q[0]?.text || "",
     tagFor(q[0]),
     q[1]?.text || "",
