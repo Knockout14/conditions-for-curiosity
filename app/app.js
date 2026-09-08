@@ -84,7 +84,6 @@
     if (!(state.name && state.ageBand)) return "details.html";
     if (!state.onboardingComplete) return "check.html";
     if (!state.weeklyPick) return "pick.html";
-    if (!state.commitConfirmed) return "confirm.html";
     return "complete.html";
   }
 

@@ -516,13 +516,23 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
   padding:18px;
   background:rgba(237,193,96,.05);
 }
-.why-box h3{
+.why-box summary{
   font-family:"Playfair Display",serif;
   font-weight:500;
   font-size:16px;
   color:var(--gold);
-  margin:0 0 9px;
+  margin:0;
+  cursor:pointer;
+  list-style:none;
 }
+.why-box summary::-webkit-details-marker{display:none}
+.why-box summary::before{
+  content:"+ ";
+  font-family:"Karla",sans-serif;
+  font-weight:600;
+}
+.why-box[open] summary::before{content:"\2013 "}
+.why-box[open] summary{margin-bottom:9px}
 .why-box p{
   font-size:13.5px;
   line-height:1.68;
