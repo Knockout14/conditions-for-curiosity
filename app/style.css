@@ -9,8 +9,8 @@
   --warm:#FDD284;
   --off:#F6F5F2;
   --off-mute:rgba(246,245,242,.62);
-  --off-faint:rgba(246,245,242,.34);
-  --off-dim:rgba(246,245,242,.4);
+  --off-faint:rgba(246,245,242,.52); /* ~5:1 on navy (AA floor) — decorative/secondary chrome: tags, meta labels, attributions */
+  --off-instruct:rgba(246,245,242,.62); /* ~7.2:1 on navy (AAA, matches --off-mute) — anything instructional or interactive: hints, captions, selectable text */
   --line:rgba(237,193,96,.14);
   --input-bg:rgba(246,245,242,.03);
   --input-border:rgba(246,245,242,.18);
@@ -53,6 +53,9 @@ a:hover{color:var(--warm)}
   pointer-events:none;
 }
 .screen.tight{padding:36px 28px 28px}
+.screen > form{display:flex;flex-direction:column;flex:1}
+
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 .eyebrow{
   font-size:11px;
@@ -70,7 +73,7 @@ a:hover{color:var(--warm)}
   font-weight:600;
   letter-spacing:.06em;
   text-transform:uppercase;
-  color:var(--off-faint);
+  color:var(--off-instruct);
   background:none;
   border:none;
   padding:0;
@@ -143,7 +146,7 @@ a:hover{color:var(--warm)}
 .calendar-label{
   text-align:center;
   font-size:11.5px;
-  color:var(--off-faint);
+  color:var(--off-instruct);
   margin:0 0 10px;
 }
 .calendar-row{display:flex;gap:10px}
@@ -205,7 +208,7 @@ a:hover{color:var(--warm)}
   text-transform:uppercase;
   color:var(--off-mute);
 }
-.field-optional{font-size:10.5px;color:var(--off-faint)}
+.field-optional{font-size:10.5px;color:var(--off-instruct)}
 
 .field-input{
   width:100%;
@@ -223,7 +226,7 @@ a:hover{color:var(--warm)}
 .field-hint{
   font-size:12px;
   line-height:1.55;
-  color:var(--off-faint);
+  color:var(--off-instruct);
 }
 .field-hint.notice{color:var(--gold)}
 
@@ -235,18 +238,19 @@ a:hover{color:var(--warm)}
   border-radius:2px;
   border:1.2px solid var(--input-border);
   background:none;
-  color:var(--off-dim);
+  color:var(--off-instruct);
   font-family:inherit;
   font-size:14px;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
-.age-pill.selected{
+.age-radio:checked + .age-pill{
   background:var(--gold);
   border-color:var(--gold);
   color:var(--navy);
   font-weight:600;
 }
+.age-radio:focus-visible + .age-pill{outline:1.5px solid var(--gold);outline-offset:2px}
 
 /* ── comprehension check (three-variable screen) ── */
 .check-block{
@@ -281,7 +285,7 @@ a:hover{color:var(--warm)}
   padding:10px 12px;
   font-family:inherit;
   font-size:13px;
-  color:var(--off-dim);
+  color:var(--off-instruct);
   background:none;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
@@ -315,7 +319,7 @@ a:hover{color:var(--warm)}
 .helper-note{
   text-align:center;
   font-size:12px;
-  color:var(--off-faint);
+  color:var(--off-instruct);
 }
 
 /* ── weekly pick (rank three candidates) ── */
@@ -396,6 +400,28 @@ a:hover{color:var(--warm)}
 }
 .pick-card.dragging .pick-handle{cursor:grabbing;color:var(--gold)}
 
+/* Keyboard/screen-reader equivalent to the drag handle — the handle above
+   has no keyboard path at all, so these are the only way to reorder
+   without a pointer drag. */
+.pick-move{flex:none;display:flex;flex-direction:column;gap:4px}
+.pick-move-btn{
+  width:26px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  line-height:1;
+  color:var(--off-instruct);
+  background:none;
+  border:1px solid var(--input-border);
+  border-radius:2px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.pick-move-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.pick-move-btn:disabled{opacity:.25;cursor:default}
+
 /* ── "you're set" summary list (complete screen, once a pick exists) ── */
 .summary-list{
   margin-top:22px;
@@ -472,7 +498,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 .voice-hint{
   margin-top:7px;
   font-size:11.5px;
-  color:var(--off-faint);
+  color:var(--off-instruct);
 }
 
 .hint-row{
@@ -481,7 +507,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
   align-items:center;
   gap:10px;
   font-size:12px;
-  color:var(--off-faint);
+  color:var(--off-instruct);
 }
 .hint-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
 
@@ -489,7 +515,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
   text-align:center;
   margin-top:12px;
   font-size:11.5px;
-  color:var(--off-faint);
+  color:var(--off-instruct);
 }
 
 .quote-block{

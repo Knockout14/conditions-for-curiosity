@@ -58,19 +58,23 @@
     const list = document.getElementById("pick-list");
     const continueBtn = document.getElementById("continue-btn");
 
-    function buildCard(id) {
+    function buildCard(id, index, total) {
       const q = byId.get(id);
       const card = document.createElement("div");
       card.className = "pick-card";
       card.dataset.id = id;
       card.innerHTML = `
-        <span class="pick-badge">1</span>
+        <span class="pick-badge">${index + 1}</span>
         <span class="pick-body">
           <span class="pick-text">${q.text}</span>
           <span class="pick-tag">${tagFor(q)}</span>
           ${swapUsed ? "" : '<button type="button" class="pick-swap">Not this one? Swap it</button>'}
         </span>
-        <span class="pick-handle" aria-label="Drag to reorder">
+        <span class="pick-move">
+          <button type="button" class="pick-move-btn" data-dir="-1" ${index === 0 ? "disabled" : ""} aria-label="Move up, currently number ${index + 1} of ${total}">&#9650;</button>
+          <button type="button" class="pick-move-btn" data-dir="1" ${index === total - 1 ? "disabled" : ""} aria-label="Move down, currently number ${index + 1} of ${total}">&#9660;</button>
+        </span>
+        <span class="pick-handle" aria-hidden="true">
           <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
             <circle cx="2" cy="2" r="1.6" fill="currentColor"/><circle cx="8" cy="2" r="1.6" fill="currentColor"/>
             <circle cx="2" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/>
@@ -83,7 +87,25 @@
           swapCandidate(id);
         });
       }
+      card.querySelectorAll(".pick-move-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          moveCard(id, Number(btn.dataset.dir));
+        });
+      });
       return card;
+    }
+
+    // Keyboard/screen-reader path for reordering — the drag handle has no
+    // keyboard equivalent (pointerdown/pointermove only), so these buttons
+    // are the only way anyone who can't perform a pointer drag can rank
+    // the three questions at all.
+    function moveCard(id, dir) {
+      const i = order.indexOf(id);
+      const j = i + dir;
+      if (j < 0 || j >= order.length) return;
+      [order[i], order[j]] = [order[j], order[i]];
+      render();
     }
 
     async function swapCandidate(oldId) {
@@ -98,16 +120,9 @@
       render();
     }
 
-    function refreshBadges() {
-      Array.from(list.children).forEach((card, i) => {
-        card.querySelector(".pick-badge").textContent = String(i + 1);
-      });
-    }
-
     function render() {
       list.innerHTML = "";
-      order.forEach((id) => list.appendChild(buildCard(id)));
-      refreshBadges();
+      order.forEach((id, i) => list.appendChild(buildCard(id, i, order.length)));
       wireDragHandles();
     }
 

@@ -63,6 +63,11 @@
       const allDone = questions.every((q) => asked.has(q.id));
       if (allDone) CFC.maybeSubmitWeekSummary(state, questions);
 
+      // allDone reuses open.html's own "all caught up" screen for the next-week
+      // reminder (it wires a Sunday-noon calendar event that actually exists) —
+      // rendering this screen's own calendar-row here too would leave a
+      // Google/Apple Calendar pair with nothing to point at, since
+      // wireReminderButtons() has no next question to build an event from.
       screen.innerHTML = `
         <p class="eyebrow">This week's three</p>
         <p class="lede">${allDone ? "All three asked. Nice." : "Ranked, in the order they'll come up."}</p>
@@ -70,16 +75,18 @@
         <div class="spacer"></div>
         ${
           allDone
-            ? ""
+            ? `<div class="actions" style="margin-bottom:20px">
+                 <a class="link-secondary" href="open.html">Set a reminder for next week &rarr;</a>
+               </div>`
             : `<div class="actions" style="margin-bottom:20px">
                  <button type="button" class="btn-primary" id="begin-btn">Begin tonight's question</button>
+               </div>
+               <p class="calendar-label">Add a reminder for your next question:</p>
+               <div class="calendar-row">
+                 <a class="btn-outline" id="gcal-link" target="_blank" rel="noopener">Google Calendar</a>
+                 <button type="button" class="btn-outline" id="ical-link">Apple Calendar</button>
                </div>`
         }
-        <p class="calendar-label">Add a reminder for your next question:</p>
-        <div class="calendar-row">
-          <a class="btn-outline" id="gcal-link" target="_blank" rel="noopener">Google Calendar</a>
-          <button type="button" class="btn-outline" id="ical-link">Apple Calendar</button>
-        </div>
         <div class="actions" style="margin-top:20px">
           <a class="link-secondary" href="pick.html">Change your picks</a>
           <a class="link-secondary" href="../index.html">Back to the podcast site</a>
@@ -88,7 +95,7 @@
       const beginBtn = document.getElementById("begin-btn");
       if (beginBtn) beginBtn.addEventListener("click", () => (location.href = "open.html"));
 
-      wireReminderButtons(questions, asked);
+      if (!allDone) wireReminderButtons(questions, asked);
     })();
   }
 

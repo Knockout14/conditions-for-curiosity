@@ -17,78 +17,69 @@
 <main class="screen">
   <p class="eyebrow tight">One more thing</p>
 
-  <div class="field">
-    <label class="field-label" for="name">Your first name</label>
-    <input class="field-input" type="text" id="name" name="name" placeholder="Priya" autocomplete="given-name">
-    <p class="field-hint">So we don't mix you up with another family — we'll say if it's already in use this week.</p>
-  </div>
-
-  <div class="field">
-    <div class="field-label-row">
-      <label class="field-label" for="email">Email</label>
-      <span class="field-optional">Optional</span>
+  <form id="details-form" novalidate>
+    <div class="field">
+      <label class="field-label" for="name">Your first name</label>
+      <input class="field-input" type="text" id="name" name="name" placeholder="Priya" autocomplete="given-name" required>
+      <p class="field-hint">So we don't mix you up with another family.</p>
     </div>
-    <input class="field-input optional" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
-    <p class="field-hint">So we can follow up if something in your feedback is worth asking about.</p>
-  </div>
 
-  <div class="field">
-    <span class="field-label">Your kid's age</span>
-    <div class="age-row" role="radiogroup" aria-label="Your kid's age">
-      <button type="button" class="age-pill" data-age="3-4" role="radio" aria-checked="false">3–4</button>
-      <button type="button" class="age-pill" data-age="5-6" role="radio" aria-checked="false">5–6</button>
-      <button type="button" class="age-pill" data-age="7-8" role="radio" aria-checked="false">7–8</button>
+    <div class="field">
+      <div class="field-label-row">
+        <label class="field-label" for="email">Email</label>
+        <span class="field-optional">Optional</span>
+      </div>
+      <input class="field-input optional" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+      <p class="field-hint">So we can follow up if something in your feedback is worth asking about.</p>
     </div>
-    <p class="field-hint">Just a range — this only shapes which questions we offer.</p>
-  </div>
 
-  <div class="spacer"></div>
+    <div class="field" role="radiogroup" aria-label="Your kid's age">
+      <span class="field-label">Your kid's age</span>
+      <div class="age-row">
+        <input class="age-radio visually-hidden" type="radio" id="age-3-4" name="ageBand" value="3-4" required>
+        <label class="age-pill" for="age-3-4">3–4</label>
+        <input class="age-radio visually-hidden" type="radio" id="age-5-6" name="ageBand" value="5-6" required>
+        <label class="age-pill" for="age-5-6">5–6</label>
+        <input class="age-radio visually-hidden" type="radio" id="age-7-8" name="ageBand" value="7-8" required>
+        <label class="age-pill" for="age-7-8">7–8</label>
+      </div>
+      <p class="field-hint">Just a range — this only shapes which questions we offer.</p>
+    </div>
 
-  <button type="button" class="btn-primary" id="continue-btn" disabled>Continue</button>
+    <div class="spacer"></div>
+
+    <button type="submit" class="btn-primary" id="continue-btn">Continue</button>
+  </form>
 </main>
 
 <script src="app.js"></script>
 <script>
   CFC.requireStep((s) => s.episode5, "index.html");
 
+  const form = document.getElementById("details-form");
   const nameInput = document.getElementById("name");
   const emailInput = document.getElementById("email");
-  const agePills = Array.from(document.querySelectorAll(".age-pill"));
-  const continueBtn = document.getElementById("continue-btn");
 
+  // Restore anything already saved (e.g. returning to edit from a later screen).
   const existing = CFC.load();
   if (existing.name) nameInput.value = existing.name;
   if (existing.email) emailInput.value = existing.email;
-  let ageBand = existing.ageBand || null;
-  if (ageBand) {
-    agePills.forEach((p) => {
-      const selected = p.dataset.age === ageBand;
-      p.classList.toggle("selected", selected);
-      p.setAttribute("aria-checked", String(selected));
-    });
+  if (existing.ageBand) {
+    const radio = form.querySelector(`input[name="ageBand"][value="${existing.ageBand}"]`);
+    if (radio) radio.checked = true;
   }
 
-  function refreshContinue() {
-    continueBtn.disabled = !(nameInput.value.trim() && ageBand);
-  }
-
-  agePills.forEach((pill) => {
-    pill.addEventListener("click", () => {
-      ageBand = pill.dataset.age;
-      agePills.forEach((p) => {
-        const selected = p === pill;
-        p.classList.toggle("selected", selected);
-        p.setAttribute("aria-checked", String(selected));
-      });
-      refreshContinue();
-    });
-  });
-
-  nameInput.addEventListener("input", refreshContinue);
-  refreshContinue();
-
-  continueBtn.addEventListener("click", () => {
-    if (continueBtn.disabled) return;
+  // Native constraint validation (required name, required-as-a-group age
+  // radios, type=email format) does the checking — reportValidity() shows
+  // the browser's own inline message pointing at whichever field is
+  // actually incomplete, instead of a silently-disabled button.
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    const ageBand = form.querySelector('input[name="ageBand"]:checked').value;
     const newState = CFC.patch({
       name: nameInput.value.trim(),
       email: emailInput.value.trim(),
