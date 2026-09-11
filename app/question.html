@@ -32,14 +32,14 @@
     screen.innerHTML = `
       <div class="tag-row">
         <p class="eyebrow tight">Tonight's question</p>
-        <span class="tag-row-meta">${q.domain} · Ages ${q.ages}</span>
+        <span class="tag-row-meta">${CFC.escapeHtml(q.domain)} · Ages ${CFC.escapeHtml(q.ages)}</span>
       </div>
 
-      <p class="question-text">${q.text}</p>
+      <p class="question-text">${CFC.escapeHtml(q.text)}</p>
 
       <div class="answer-field">
         <label class="field-label" for="answer">Your answer — go first</label>
-        <textarea class="field-input" id="answer" placeholder="${(q.seed || "").replace(/"/g, "&quot;")}"></textarea>
+        <textarea class="field-input" id="answer" placeholder="${CFC.escapeHtml(q.seed || "")}"></textarea>
         <p class="voice-hint">💡 Faster than typing: tap the mic on your keyboard and just say it.</p>
       </div>
 

@@ -9,6 +9,22 @@
 (function (global) {
   const STORAGE_KEY = "cfc_app_state";
 
+  /* Every screen that renders a question interpolates bank-sourced text
+     (text/domain/tag/citation) straight into innerHTML template strings.
+     The bank is founder-curated today, not free user input, so this isn't
+     exploitable right now — but it's the same gap repeated across four
+     files, and the bank's editing path (a markdown file, hand-parsed) has
+     no HTML-safety review of its own. Escape once, share everywhere. */
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[c]));
+  }
+
   function randomId() {
     if (global.crypto && global.crypto.randomUUID) {
       return global.crypto.randomUUID();
@@ -338,6 +354,7 @@
   }
 
   global.CFC = {
+    escapeHtml,
     load,
     save,
     patch,

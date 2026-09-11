@@ -46,7 +46,7 @@
       <div style="margin-top:24px">
         <div class="quote-block">
           <span class="quote-label">You said</span>
-          ${current.adultAnswer || "(no answer typed)"}
+          ${current.adultAnswer ? CFC.escapeHtml(current.adultAnswer) : "(no answer typed)"}
         </div>
         <div class="quote-block">
           <span class="quote-label">Their turn</span>
@@ -59,7 +59,7 @@
       <details class="why-box">
         <summary>Why this one works</summary>
         <p>${why}</p>
-        ${q.citation ? `<div class="citation">${q.citation}</div>` : ""}
+        ${q.citation ? `<div class="citation">${CFC.escapeHtml(q.citation)}</div>` : ""}
       </details>
 
       <div class="actions" style="margin-top:20px">

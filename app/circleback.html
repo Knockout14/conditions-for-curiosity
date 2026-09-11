@@ -21,8 +21,8 @@
   <p class="lede">This is the one thing we actually track.</p>
 
   <div class="yesno-row" style="margin-top:26px">
-    <button type="button" class="yesno-btn" id="yes-btn">Yes</button>
-    <button type="button" class="yesno-btn" id="no-btn">No</button>
+    <button type="button" class="yesno-btn" id="yes-btn" aria-pressed="false">Yes</button>
+    <button type="button" class="yesno-btn" id="no-btn" aria-pressed="false">No</button>
   </div>
 
   <div class="field" style="margin-top:26px">
@@ -52,7 +52,9 @@
     function select(value, btn, other) {
       childAskedQuestion = value;
       btn.classList.add("selected");
+      btn.setAttribute("aria-pressed", "true");
       other.classList.remove("selected");
+      other.setAttribute("aria-pressed", "false");
       doneBtn.disabled = false;
     }
     yesBtn.addEventListener("click", () => select(true, yesBtn, noBtn));

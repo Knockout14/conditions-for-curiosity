@@ -92,6 +92,7 @@
   CFC.requireStep((s) => s.episode5, "index.html") && CFC.requireStep((s) => s.name && s.ageBand, "details.html");
 
   const answers = {};
+  const skipLink = document.getElementById("skip-link");
 
   document.querySelectorAll(".check-block").forEach((block) => {
     const options = Array.from(block.querySelectorAll(".check-option"));
@@ -112,6 +113,11 @@
         feedback.classList.add("show", isCorrect ? "positive" : "negative");
 
         answers[block.dataset.key] = { selected: opt.textContent.trim(), correct: isCorrect };
+
+        // "Skip, I've got it" only makes sense before engaging with the
+        // quiz at all — once any block's been answered, it's a second
+        // button doing the same thing as "Start this week."
+        skipLink.hidden = true;
       });
     });
   });

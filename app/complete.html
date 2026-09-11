@@ -49,8 +49,8 @@
         <div class="summary-item${done ? " done" : ""}">
           <span class="summary-rank">${i + 1}</span>
           <span>
-            <div class="summary-text">${q.text}</div>
-            <div class="summary-tag">${q.domain} · ${q.bigIdea || q.category}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
+            <div class="summary-text">${CFC.escapeHtml(q.text)}</div>
+            <div class="summary-tag">${CFC.escapeHtml(q.domain)} · ${CFC.escapeHtml(q.bigIdea || q.category)}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
           </span>
         </div>`
         )
