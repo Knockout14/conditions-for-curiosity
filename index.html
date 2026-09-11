@@ -40,7 +40,14 @@ body{
   font-size:17px; line-height:1.72; -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
-@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation:none!important;transition:none!important} }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+  /* Killing the animation above stops .reveal's rise keyframe from ever
+     running — including the opacity:0 -> 1 it's the only thing that sets.
+     Without this, reduced-motion visitors get an invisible hero forever. */
+  .reveal{opacity:1!important;transform:none!important}
+}
 
 /* ── the spine: one hard left gutter, no exceptions ── */
 .spine{position:fixed;top:0;bottom:0;left:var(--gutter);width:1px;background:var(--rule);z-index:2;pointer-events:none}

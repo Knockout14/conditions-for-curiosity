@@ -593,6 +593,29 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 }
 .yesno-btn.selected{background:var(--gold);color:var(--navy);border-color:var(--gold)}
 
+/* ── quiet "start over" utility, injected by app.js on every /app screen
+   that has saved state (see wireResetLink) — deliberately tucked in a
+   corner: a full reset is a recovery/testing affordance, not a primary
+   action, and "Edit your details" already covers routine corrections. */
+.cfc-reset-link{
+  position:fixed;
+  top:10px;
+  right:10px;
+  z-index:20;
+  font-family:"Karla",sans-serif;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--off-faint);
+  background:none;
+  border:none;
+  padding:8px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.cfc-reset-link:hover,.cfc-reset-link:focus-visible{color:var(--gold)}
+
 .done-check{
   width:44px;
   height:44px;

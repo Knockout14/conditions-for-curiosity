@@ -95,7 +95,7 @@
   }
   button.info:hover{border-color:var(--ink);color:var(--ink)}
   button.info[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-  button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--pen-blue);outline-offset:2px}
+  button:focus-visible,summary:focus-visible,input:focus-visible,canvas:focus-visible{outline:2px solid var(--pen-blue);outline-offset:2px}
 
   .detail{
     border:1.2px dashed var(--rule);border-radius:2px;padding:11px 12px;margin-top:8px;
@@ -179,7 +179,7 @@
 
     <div class="stagecol">
     <div class="stage">
-      <canvas id="cv" width="1200" height="900" aria-label="Rotatable three-dimensional model of the curiosity sphere"></canvas>
+      <canvas id="cv" width="1200" height="900" tabindex="0" aria-label="Rotatable three-dimensional model of the curiosity sphere. Drag to rotate, or focus this and use the arrow keys."></canvas>
       <div class="readout" id="readout"></div>
       <div class="stagenote">Infinite directions exist. Only your reach is drawn.</div>
     </div>
@@ -576,7 +576,9 @@ function tick(){
     for (let c=0;c<6;c++) for (let k=0;k<3;k++)
       current[c][k]=from[c][k]+(target[c][k]-from[c][k])*e;
   }
-  if (spinning && !dragging) yaw += 0.0035;
+  // Paused while focused, same as it's paused mid-drag — otherwise the
+  // auto-spin fights every arrow-key press a keyboard user makes.
+  if (spinning && !dragging && document.activeElement !== cv) yaw += 0.0035;
   draw();
   requestAnimationFrame(tick);
 }
@@ -682,6 +684,17 @@ window.addEventListener("pointerup",up);
 cv.addEventListener("touchstart",down,{passive:true});
 cv.addEventListener("touchmove",move,{passive:false});
 cv.addEventListener("touchend",up);
+
+// Keyboard equivalent to the drag — the canvas had no keyboard path at
+// all before this (not even focusable), so this was the only way to
+// rotate the model without a pointer.
+const KEY_STEP = 0.08;
+cv.addEventListener("keydown",(e)=>{
+  if (e.key==="ArrowLeft"){ yaw -= KEY_STEP; e.preventDefault(); }
+  else if (e.key==="ArrowRight"){ yaw += KEY_STEP; e.preventDefault(); }
+  else if (e.key==="ArrowUp"){ pitch = Math.max(-1.35, pitch-KEY_STEP); e.preventDefault(); }
+  else if (e.key==="ArrowDown"){ pitch = Math.min(1.35, pitch+KEY_STEP); e.preventDefault(); }
+});
 
 function resize(){
   const rect=cv.parentElement.getBoundingClientRect();
