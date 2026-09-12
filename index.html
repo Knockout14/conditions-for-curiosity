@@ -6,6 +6,10 @@
 <title>Conditions for Curiosity — a podcast about what makes wondering possible</title>
 <meta name="description" content="A podcast arguing that curiosity is not a personality trait but a property of environments — and that those environments can be designed on purpose.">
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 
 <meta property="og:title" content="Conditions for Curiosity">
 <meta property="og:description" content="Curiosity is not a trait people have. It is what happens when conditions are right.">
@@ -177,12 +181,36 @@ footer p{font-size:13.5px;color:var(--off-faint);margin:0}
 footer a{color:var(--off-mute);text-decoration:none;border-bottom:1px solid var(--rule)}
 footer a:hover{color:var(--gold)}
 
+/* ── sticky mobile CTA — desktop never sees this, [hidden] wins on mobile too ── */
+.sticky-cta{display:none}
+
 @media (max-width:820px){
   :root{--gutter:28px}
   body{font-size:16px}
   .spine{left:var(--gutter)}
   .arc{display:none}
   .season li{grid-template-columns:38px 1fr}
+
+  .sticky-cta:not([hidden]){
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    position:fixed;left:0;right:0;bottom:0;z-index:20;
+    background:var(--navy-lift);border-top:1px solid var(--rule);
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 24px rgba(0,0,0,.3);
+  }
+  .sticky-cta p{margin:0;font-size:13px;color:var(--off);max-width:none;flex:1}
+  .sticky-cta-actions{display:flex;align-items:center;gap:10px;flex:none}
+  .sticky-cta-actions a{
+    display:inline-flex;align-items:center;
+    font-family:"Karla",sans-serif;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--navy);background:var(--gold);text-decoration:none;padding:10px 16px;white-space:nowrap}
+  .sticky-cta-actions a:hover{background:var(--warm)}
+  .sticky-cta-actions a:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+  .sticky-cta-actions button{
+    background:none;border:none;color:var(--off-faint);font-size:20px;line-height:1;
+    padding:4px 6px;cursor:pointer}
+  .sticky-cta-actions button:hover{color:var(--off)}
+  .sticky-cta-actions button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 }
 </style>
 </head>
@@ -294,11 +322,11 @@ footer a:hover{color:var(--gold)}
   </section>
 
   <!-- SIGNUP -->
-  <section class="bay">
+  <section class="bay" id="signup">
     <div class="inner signup">
       <p class="tag">Season one is finished</p>
       <h2>All eight are up. Season two is where this gets built.</h2>
-      <p>Episodes land on Spotify and Apple on Tuesdays. I send one email the next morning, Wednesday, with just that episode in it. Nothing else in your inbox. That's the whole cadence.</p>
+      <p>All eight are already out, so this isn't an episode-alert list anymore. Once a week: something I'm reading about curiosity in kids, one thing to actually try with yours that night, and an open question about how the app's working — or not — for you.</p>
 
       <form action="https://buttondown.email/api/emails/embed-subscribe/CuriosityConditions"
             method="post" target="popupwindow"
@@ -348,10 +376,65 @@ footer a:hover{color:var(--gold)}
 
   <footer class="bay">
     <div class="inner">
-      <p>Conditions for Curiosity — a show being built in public. <a href="https://www.instagram.com/curiosityconditions/" target="_blank" rel="noopener">Instagram</a></p>
+      <p>Conditions for Curiosity — a show being built in public. <a href="https://www.instagram.com/curiosityconditions/" target="_blank" rel="noopener">Instagram</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="mailto:conditionsforcuriosity@gmail.com">conditionsforcuriosity@gmail.com</a></p>
     </div>
   </footer>
 
 </div>
+
+<div class="sticky-cta" id="sticky-cta" hidden>
+  <p>One weekly email — a prompt to try, not episode alerts.</p>
+  <div class="sticky-cta-actions">
+    <a href="#signup" id="sticky-cta-link">Keep me posted</a>
+    <button type="button" id="sticky-cta-dismiss" aria-label="Dismiss">&times;</button>
+  </div>
+</div>
+<script>
+  // Mobile-only (the CSS media query is the real gate — this just decides
+  // *when* to reveal it): stays hidden until the hero has scrolled by, so
+  // it's not competing with the hero's own follow links, and stays gone
+  // for the rest of this browsing session once dismissed or once the
+  // signup section itself is reached (no point pointing at a form you're
+  // already looking at).
+  (function () {
+    var bar = document.getElementById("sticky-cta");
+    var dismissBtn = document.getElementById("sticky-cta-dismiss");
+    var link = document.getElementById("sticky-cta-link");
+    var hero = document.querySelector(".hero");
+    var signup = document.getElementById("signup");
+    if (!bar || !hero || !signup) return;
+
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem("cfc_sticky_cta_dismissed") === "1"; } catch (e) {}
+
+    function update() {
+      if (dismissed) { bar.hidden = true; return; }
+      var heroBottom = hero.getBoundingClientRect().bottom;
+      var signupTop = signup.getBoundingClientRect().top;
+      var viewportH = window.innerHeight;
+      bar.hidden = heroBottom > 0 || signupTop < viewportH;
+    }
+
+    dismissBtn.addEventListener("click", function () {
+      dismissed = true;
+      bar.hidden = true;
+      try { sessionStorage.setItem("cfc_sticky_cta_dismissed", "1"); } catch (e) {}
+    });
+
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      dismissed = true;
+      bar.hidden = true;
+      try { sessionStorage.setItem("cfc_sticky_cta_dismissed", "1"); } catch (e) {}
+      signup.scrollIntoView({ behavior: "smooth", block: "start" });
+      var emailInput = document.getElementById("bd-email");
+      if (emailInput) setTimeout(function () { emailInput.focus(); }, 400);
+    });
+
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  })();
+</script>
 </body>
 </html>
