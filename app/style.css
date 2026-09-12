@@ -63,6 +63,12 @@ a:hover{color:var(--warm)}
   letter-spacing:.24em;
   text-transform:uppercase;
   color:var(--gold);
+  /* Explicit rather than left to the UA default: six screens use this on
+     an <h1> (their only heading) so a screen-reader's heading list has
+     something to land on; the rest still use it on a <p> next to their
+     own separate <h1 class="headline">. Pinning the margin here keeps
+     both cases pixel-identical to how this always looked as a <p>. */
+  margin:11px 0;
 }
 .eyebrow.tight{letter-spacing:.2em}
 
