@@ -70,6 +70,7 @@
   .readout .score em{font-style:normal;font-size:14px;color:var(--ink-soft);font-weight:500}
   .readout .scorelab{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
   @media (max-width:960px){ .readout .score{font-size:24px} }
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
   .rail{display:flex;flex-direction:column;gap:20px}
   .panel{border:1.5px solid var(--ink);border-radius:2px;background:var(--panel);padding:14px 14px 16px}
@@ -181,6 +182,7 @@
     <div class="stage">
       <canvas id="cv" width="1200" height="900" tabindex="0" aria-label="Rotatable three-dimensional model of the curiosity sphere. Drag to rotate, or focus this and use the arrow keys."></canvas>
       <div class="readout" id="readout"></div>
+      <div id="readout-sr" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
       <div class="stagenote">Infinite directions exist. Only your reach is drawn.</div>
     </div>
     </div>
@@ -562,11 +564,32 @@ function draw(){
   const pct = ring ? Math.round(Array.from(ring.presence).reduce((s,v)=>s+v,0)/ring.BINS*100) : 0;
   let spend = 0; for (const n of live) spend += n.len;
   const score = Math.max(0, Math.min(10, spend / 85 * 10));
+  paintReadout(score, live.length, nodes.length, pct);
+}
+
+// The visual number updates every frame (that's the point — "watch the
+// score move" is the intended experience). A screen reader has no use for
+// 60 announcements a second of the same thing mid-rotation, so its text
+// equivalent is diffed against the last *value* (not repainted just because
+// a frame ran) and trailing-debounced so a state-change tween settles to
+// one announcement instead of narrating every in-between frame.
+let readoutLast=null, readoutSrTimer=null;
+function paintReadout(score, liveCount, totalCount, pct){
+  const key = score.toFixed(1)+"|"+liveCount+"|"+totalCount+"|"+pct;
+  if (key===readoutLast) return;
+  readoutLast=key;
   document.getElementById("readout").innerHTML =
     `<div class="scorelab">curiosity in play</div>` +
     `<div class="score">${score.toFixed(1)}<em> / 10</em></div>` +
-    `<div style="margin-top:8px">chasing <b>${live.length}</b> of ${nodes.length} questions<br>` +
+    `<div style="margin-top:8px">chasing <b>${liveCount}</b> of ${totalCount} questions<br>` +
     `open in <b>${pct}%</b> of directions</div>`;
+  clearTimeout(readoutSrTimer);
+  readoutSrTimer=setTimeout(()=>{
+    document.getElementById("readout-sr").textContent =
+      `Curiosity in play: ${score.toFixed(1)} out of 10. `+
+      `Chasing ${liveCount} of ${totalCount} questions. `+
+      `Open in ${pct}% of directions.`;
+  }, 500);
 }
 
 function tick(){

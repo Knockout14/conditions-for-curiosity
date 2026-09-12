@@ -29,6 +29,7 @@
   --off:#F6F5F2;
   --off-mute:rgba(246,245,242,.62);
   --off-faint:rgba(246,245,242,.52); /* was .34 — ~2.9:1 on navy, failed WCAG AA; .52 ≈ 4.5:1+ */
+  --error:#E38176;
   --gutter:100px;
   --rule:rgba(237,193,96,.22);
 }
@@ -163,6 +164,12 @@ section + section{border-top:1px solid rgba(246,245,242,.07)}
 .signup button:hover{background:var(--warm);border-color:var(--warm)}
 .signup button:focus-visible{outline:2px solid var(--warm);outline-offset:3px}
 .fineprint{font-size:13px;color:var(--off-faint);margin-top:16px}
+.signup-status{font-size:14px;margin-top:14px}
+.signup-status.ok{color:var(--off-mute)}
+.signup-status.error{color:var(--error)}
+.signup-status a{color:var(--gold);text-decoration:underline;text-underline-offset:2px}
+.signup-status a:hover{color:var(--warm)}
+.signup-status a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 /* ── footer ── */
 footer{padding:52px 0 64px;border-top:1px solid rgba(246,245,242,.07)}
@@ -295,12 +302,47 @@ footer a:hover{color:var(--gold)}
 
       <form action="https://buttondown.email/api/emails/embed-subscribe/CuriosityConditions"
             method="post" target="popupwindow"
-            onsubmit="window.open('https://buttondown.email/CuriosityConditions','popupwindow')">
+            onsubmit="return handleSignupSubmit(event)">
         <label for="bd-email" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email address</label>
         <input type="email" name="email" id="bd-email" placeholder="you@example.com" required>
         <button type="submit">Keep me posted</button>
       </form>
+      <p class="signup-status" id="signup-status" role="status" aria-live="polite" hidden></p>
       <p class="fineprint">One click to unsubscribe. I don't share the list with anyone.</p>
+      <script>
+        // The actual subscribe POST always targets the "popupwindow" pop-up
+        // (that's Buttondown's embed mechanism, unchanged). What was missing
+        // is any on-page sign of whether that popup actually opened — a
+        // blocked popup (common in the Instagram/Facebook in-app browser
+        // this show's traffic partly comes from) previously failed silently:
+        // the button click appeared to do nothing at all.
+        function handleSignupSubmit(e){
+          var status = document.getElementById('signup-status');
+          var showBlocked = function(){
+            status.hidden = false;
+            status.className = 'signup-status error';
+            status.innerHTML = 'Your browser blocked the signup window. '
+              + '<a href="https://buttondown.email/CuriosityConditions" target="_blank" rel="noopener">Subscribe directly here instead &rarr;</a>';
+          };
+          var popup;
+          try { popup = window.open('https://buttondown.email/CuriosityConditions', 'popupwindow'); }
+          catch (err) { popup = null; }
+          if (!popup) {
+            e.preventDefault();
+            showBlocked();
+            return false;
+          }
+          // Some blockers (in-app browsers especially) hand back a window
+          // that quietly closes itself a moment later instead of returning
+          // null outright — catch that case too, even though by then the
+          // form's own POST has already gone out to it.
+          setTimeout(function(){ if (popup.closed) showBlocked(); }, 400);
+          status.hidden = false;
+          status.className = 'signup-status ok';
+          status.textContent = 'Almost done — finish up in the window that just opened.';
+          return true;
+        }
+      </script>
     </div>
   </section>
 
