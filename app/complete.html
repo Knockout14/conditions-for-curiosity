@@ -31,9 +31,16 @@
     // stopping at the summary.
     location.replace("open.html");
   } else {
-    (async () => {
+    (async function load() {
       const screen = document.getElementById("screen");
-      const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      let questions;
+      try {
+        questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      } catch (e) {
+        console.error("fetchQuestionsByIds failed:", e);
+        CFC.renderLoadError(screen, "Couldn't load this week's three — check your connection.", load);
+        return;
+      }
       const asked = new Set(state.askedQuestionIds || []);
 
       // Answered ones sink to the bottom rather than just graying out in

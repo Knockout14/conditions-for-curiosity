@@ -15,6 +15,22 @@
      exploitable right now — but it's the same gap repeated across four
      files, and the bank's editing path (a markdown file, hand-parsed) has
      no HTML-safety review of its own. Escape once, share everywhere. */
+  /* Shared failure UI for the three screens that load bank data over the
+     network (open/complete/pick, via fetchWeeklyCandidates or
+     fetchQuestionsByIds). Before this, an unreachable Function just left
+     whatever container it was filling permanently blank — no message, no
+     way forward but reloading and hoping. `container` can be the whole
+     #screen or a smaller region (pick.html's #pick-list, so the rest of
+     that page's chrome stays put); `onRetry` re-runs the same load. */
+  function renderLoadError(container, message, onRetry) {
+    container.innerHTML = `
+      <p class="body-copy" style="text-align:center">${escapeHtml(message)}</p>
+      <div class="actions" style="margin-top:16px">
+        <button type="button" class="btn-primary" id="load-retry-btn">Try again</button>
+      </div>`;
+    document.getElementById("load-retry-btn").addEventListener("click", onRetry);
+  }
+
   function escapeHtml(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
       "&": "&amp;",
@@ -114,14 +130,30 @@
      of the bank. These two calls are the entire surface the front-end
      has onto the data — nothing here ever holds the full bank. */
 
+  // 15s is generous for a Netlify Function cold start, but still bounded —
+  // without this, a stalled (not failed, just silent) connection left a
+  // caller `await`-ing forever, with nothing else here to catch that: an
+  // outright network error rejects on its own, but a hang never does.
+  const POST_TIMEOUT_MS = 15000;
+
   async function postJSON(path, body) {
-    const res = await fetch(path, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`${path} → ${res.status}`);
-    return res.json();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), POST_TIMEOUT_MS);
+    try {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`${path} → ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      if (e.name === "AbortError") throw new Error(`${path} → timed out after ${POST_TIMEOUT_MS}ms`);
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /* Three candidates for the weekly pick (spec §3b), sampled server-side:
@@ -163,9 +195,11 @@
      screen already has in hand. `isEdit` says whether this is changing
      an already-confirmed pick rather than setting one fresh — without
      it, an edited row and an original one look identical in the sheet.
-     Best-effort — a family's local state is already saved by the time
-     this is called, so a network hiccup here shouldn't block them from
-     moving on. */
+     A family's local state is already saved by the time this is called,
+     so a failure here doesn't cost them their pick locally — but it does
+     mean the founder's copy never arrives, so this now rejects instead of
+     swallowing the error, and the caller shows it rather than plowing on
+     as if it succeeded. */
   function submitPick(state, questions, isEdit) {
     return postJSON("/api/submit-pick", {
       sessionId: state.sessionId,
@@ -175,7 +209,7 @@
       checkAnswers: state.checkAnswers,
       questions,
       isEdit: Boolean(isEdit),
-    }).catch((e) => console.error("submitPick failed (continuing anyway):", e));
+    });
   }
 
   /* ── the nightly loop ──
@@ -264,7 +298,12 @@
   }
 
   /* Circle-back submissions (spec §3d) go to their own sheet tab — same
-     spreadsheet as the pick confirmations, different shape of row. */
+     spreadsheet as the pick confirmations, different shape of row. This is
+     the one write that actually crosses a question off (see
+     markQuestionAsked, called by the caller before this), so a swallowed
+     failure here used to mean "done." screen with nothing actually saved —
+     this now rejects instead, and the caller shows that rather than
+     silently moving on. */
   function submitCircleBack(state, payload) {
     return postJSON("/api/submit-circleback", {
       sessionId: state.sessionId,
@@ -272,7 +311,7 @@
       email: state.email,
       ageBand: state.ageBand,
       ...payload,
-    }).catch((e) => console.error("submitCircleBack failed (continuing anyway):", e));
+    });
   }
 
   /* Fires once, when a week's three are all asked: the final pick order
@@ -294,6 +333,12 @@
       .slice(-3); // this week's three, in the order they were actually asked
     const finalOrder = state.weeklyPick.questionIds.map((id) => byId.get(id)).filter(Boolean);
 
+    // Only marked sent once the write actually succeeds — this fires from
+    // a couple of read-only screens (open/complete) with nothing the user
+    // is waiting on here, so there's no UI to put an error in. Leaving
+    // weekSummarySentFor unset on failure means the next time either
+    // screen loads, this just tries again instead of the row being
+    // silently skipped forever.
     postJSON("/api/submit-weeksummary", {
       sessionId: state.sessionId,
       name: state.name,
@@ -301,9 +346,11 @@
       ageBand: state.ageBand,
       finalOrder,
       askedOrder,
-    }).catch((e) => console.error("submitWeekSummary failed (continuing anyway):", e));
+    })
+      .then(() => patch({ weekSummarySentFor: pickedAt }))
+      .catch((e) => console.error("submitWeekSummary failed, will retry on next load:", e));
 
-    return patch({ weekSummarySentFor: pickedAt });
+    return state;
   }
 
   /* ── calendar reminders ──
@@ -396,6 +443,7 @@
 
   global.CFC = {
     escapeHtml,
+    renderLoadError,
     load,
     save,
     patch,

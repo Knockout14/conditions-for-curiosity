@@ -22,9 +22,16 @@
   if (CFC.resumeUrl(state) !== "complete.html") {
     location.replace(CFC.resumeUrl(state));
   } else {
-    (async () => {
+    (async function load() {
       const screen = document.getElementById("screen");
-      const questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      let questions;
+      try {
+        questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      } catch (e) {
+        console.error("fetchQuestionsByIds failed:", e);
+        CFC.renderLoadError(screen, "Couldn't load tonight's question — check your connection.", load);
+        return;
+      }
       const next = CFC.nextQuestion(state, questions);
       const ORDINALS = ["one", "two", "three"];
 

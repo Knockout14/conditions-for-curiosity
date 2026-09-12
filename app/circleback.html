@@ -33,6 +33,7 @@
 
   <div class="spacer"></div>
 
+  <p class="inline-error" id="save-error" hidden>Couldn't save that — check your connection and try again. Your answer isn't lost, it just hasn't reached us yet.</p>
   <button type="button" class="btn-primary" id="done-btn" disabled>Done for tonight</button>
 </main>
 
@@ -48,6 +49,7 @@
     const yesBtn = document.getElementById("yes-btn");
     const noBtn = document.getElementById("no-btn");
     const doneBtn = document.getElementById("done-btn");
+    const errorEl = document.getElementById("save-error");
 
     function select(value, btn, other) {
       childAskedQuestion = value;
@@ -60,25 +62,44 @@
     yesBtn.addEventListener("click", () => select(true, yesBtn, noBtn));
     noBtn.addEventListener("click", () => select(false, noBtn, yesBtn));
 
-    doneBtn.addEventListener("click", async () => {
+    // Only this part is locked at the first click, and only because it has
+    // to be: markQuestionAsked() isn't idempotent (it appends to
+    // askedQuestionIds and increments usedCount every time it runs), so
+    // calling it again on a retry would double-count the question as asked
+    // twice. Everything else below (note text, yes/no) is read fresh on
+    // every attempt — if a save fails, editing the note before hitting
+    // "Try again" isn't silently thrown away.
+    let lockedState = null;
+
+    doneBtn.addEventListener("click", () => {
       if (doneBtn.disabled) return;
+      if (!lockedState) lockedState = CFC.markQuestionAsked(state, current.question.id);
+      attemptSave();
+    });
+
+    async function attemptSave() {
       doneBtn.disabled = true;
       doneBtn.textContent = "Saving…";
-
+      errorEl.hidden = true;
       const note = document.getElementById("note").value.trim();
       const q = current.question;
-
-      const newState = CFC.markQuestionAsked(state, q.id);
-      await CFC.submitCircleBack(newState, {
-        question: q,
-        rank: current.index + 1, // the position it held when *this* session started — not whatever it is now, if it's since been reordered
-        adultAnswer: current.adultAnswer,
-        childAskedQuestion,
-        note,
-      });
-      sessionStorage.removeItem("cfc_current_question");
-      location.href = "done.html";
-    });
+      try {
+        await CFC.submitCircleBack(lockedState, {
+          question: q,
+          rank: current.index + 1, // the position it held when *this* session started — not whatever it is now, if it's since been reordered
+          adultAnswer: current.adultAnswer,
+          childAskedQuestion,
+          note,
+        });
+        sessionStorage.removeItem("cfc_current_question");
+        location.href = "done.html";
+      } catch (e) {
+        console.error("submitCircleBack failed:", e);
+        doneBtn.disabled = false;
+        doneBtn.textContent = "Try again";
+        errorEl.hidden = false;
+      }
+    }
   }
 </script>
 </body>

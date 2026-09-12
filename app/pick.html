@@ -25,6 +25,7 @@
 
   <div class="spacer"></div>
 
+  <p class="inline-error" id="save-error" hidden>Couldn't save that — check your connection and try again. Your ranking is kept, it just hasn't reached us yet.</p>
   <button type="button" class="btn-primary" id="continue-btn">Set this week's line-up</button>
   <p class="helper-note">Change it anytime — nothing is locked in.</p>
 </main>
@@ -38,15 +39,30 @@
     return `${CFC.escapeHtml(q.domain)} · ${CFC.escapeHtml(q.bigIdea || q.category)}`;
   }
 
-  state && (async () => {
+  state && (async function load() {
+    const list = document.getElementById("pick-list");
+    // Grabbed and disabled up front — this button is always in the static
+    // markup below the (async-filled) list, so without this it sits there
+    // looking clickable but silently does nothing until its real listener
+    // is wired further down, past the fetch.
+    const continueBtn = document.getElementById("continue-btn");
+    continueBtn.disabled = true;
+
     // Editing an active pick (not yet fully used this week) re-shows the
     // same three rather than sampling new ones — "editable anytime," not
     // "reroll anytime." A pick with nothing left to use falls through to
     // a fresh sample below.
     const active = state.weeklyPick && (state.weeklyPick.usedCount || 0) < 3;
-    const candidates = active
-      ? await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds)
-      : await CFC.fetchWeeklyCandidates(state);
+    let candidates;
+    try {
+      candidates = active
+        ? await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds)
+        : await CFC.fetchWeeklyCandidates(state);
+    } catch (e) {
+      console.error("fetching pick candidates failed:", e);
+      CFC.renderLoadError(list, "Couldn't load this week's candidates — check your connection.", load);
+      return;
+    }
     const byId = new Map(candidates.map((q) => [String(q.id), q]));
 
     let order = candidates.map((q) => String(q.id));
@@ -54,9 +70,7 @@
     // set. Once used, every remaining "swap" affordance disappears on
     // the next render.
     let swapUsed = false;
-
-    const list = document.getElementById("pick-list");
-    const continueBtn = document.getElementById("continue-btn");
+    continueBtn.disabled = false;
 
     function buildCard(id, index, total) {
       const q = byId.get(id);
@@ -223,7 +237,25 @@
 
     render();
 
-    continueBtn.addEventListener("click", async () => {
+    const errorEl = document.getElementById("save-error");
+
+    continueBtn.addEventListener("click", () => {
+      if (continueBtn.disabled) return;
+      attemptSubmit();
+    });
+
+    // Re-reads `order` fresh on every call, including a retry after a
+    // failed save — unlike circleback.html's equivalent, CFC.patch() just
+    // overwrites rather than accumulating, so there's no correctness
+    // reason to lock this to what it was on the first click. That matters
+    // here specifically: the cards (drag, swap) stay interactive behind
+    // the error message, so someone who keeps adjusting the order while
+    // looking at "couldn't save" gets that adjustment submitted, not
+    // whatever it was a moment ago.
+    async function attemptSubmit() {
+      continueBtn.disabled = true;
+      continueBtn.textContent = "Saving…";
+      errorEl.hidden = true;
       const rankedQuestions = order.map((id) => byId.get(id));
       const newState = CFC.patch({
         weeklyPick: {
@@ -232,9 +264,16 @@
           pickedAt: new Date().toISOString(),
         },
       });
-      await CFC.submitPick(newState, rankedQuestions, active);
-      location.href = CFC.resumeUrl(newState);
-    });
+      try {
+        await CFC.submitPick(newState, rankedQuestions, active);
+        location.href = CFC.resumeUrl(newState);
+      } catch (e) {
+        console.error("submitPick failed:", e);
+        continueBtn.disabled = false;
+        continueBtn.textContent = "Try again";
+        errorEl.hidden = false;
+      }
+    }
   })();
 </script>
 </body>

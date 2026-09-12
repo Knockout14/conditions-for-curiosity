@@ -322,6 +322,18 @@ a:hover{color:var(--warm)}
   color:var(--off-instruct);
 }
 
+.inline-error{
+  border:1.1px solid var(--coral);
+  background:var(--coral-bg);
+  color:var(--off);
+  border-radius:2px;
+  padding:10px 12px;
+  font-size:12.5px;
+  line-height:1.5;
+  text-align:center;
+  margin:0 0 12px;
+}
+
 /* ── weekly pick (rank three candidates) ── */
 .pick-list{
   margin-top:26px;
