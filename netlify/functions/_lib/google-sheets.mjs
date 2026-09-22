@@ -12,9 +12,23 @@ function base64url(input) {
   return Buffer.from(input).toString("base64url");
 }
 
+// Preferred: GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_B64 — the whole PEM, base64-
+// encoded, as one unbroken string with no embedded newlines to mangle in an
+// env-var textarea. Generate it locally (never through an AI session) with
+// the private_key field straight out of the downloaded service-account JSON.
+// Falls back to the older raw-PEM-with-escaped-\n var for compatibility,
+// but a key rotation on 2026-09-22 got corrupted going through that path
+// (Node's crypto decoder rejected it — ERR_OSSL_UNSUPPORTED) even though the
+// paste looked correct, which is why the B64 form is now preferred.
+function loadPrivateKey() {
+  const b64 = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_B64;
+  if (b64) return Buffer.from(b64, "base64").toString("utf8");
+  return (process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+}
+
 async function getAccessToken() {
   const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = (process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+  const privateKey = loadPrivateKey();
   if (!clientEmail || !privateKey) throw new Error("Google service account env vars not set");
 
   const now = Math.floor(Date.now() / 1000);
