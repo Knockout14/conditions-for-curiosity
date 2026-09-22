@@ -28,7 +28,12 @@ export async function checkRateLimit(req, bucket, limit) {
   const key = `${bucket}:${day}:${identity}`;
 
   const store = getStore("rate-limits");
-  const current = parseInt((await store.get(key, { type: "text" })) || "0", 10);
+  // Blobs defaults to eventual consistency, which is fine for the question
+  // bank itself (rarely written, read constantly) but wrong for a counter —
+  // a read landing on a stale replica would silently undercount and let
+  // the limit be bypassed. Strong consistency forces this read to reflect
+  // the latest write regardless of which edge node serves it.
+  const current = parseInt((await store.get(key, { type: "text", consistency: "strong" })) || "0", 10);
   const count = current + 1;
   await store.set(key, String(count));
 
