@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { checkRateLimit } from "./_lib/rate-limit.mjs";
 
 // Full question fields — used once a question is part of a family's
 // *confirmed* pick (the "you're set" summary, and later the nightly
@@ -15,6 +16,13 @@ const MAX_IDS = 10; // a week is 3; room for the odd edit/retry, nothing more
 export default async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
+  }
+
+  // The MAX_IDS cap alone only bounds one call, not repeated ones — the
+  // rate limit is what actually stops someone walking every id 1..165
+  // across many calls. Same 20/day/IP budget as weekly-candidates.
+  if (!(await checkRateLimit(req, "questions-by-ids", 20))) {
+    return new Response("Too many requests", { status: 429 });
   }
 
   let body;

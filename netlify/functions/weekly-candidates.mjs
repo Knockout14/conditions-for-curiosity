@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { checkRateLimit } from "./_lib/rate-limit.mjs";
 
 // Mirrors the sampling rule agreed for the weekly pick (spec §3b): one
 // guaranteed Math question, one guaranteed General-or-Both, a third from
@@ -38,6 +39,15 @@ function toCandidate(q) {
 export default async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
+  }
+
+  // This endpoint returns real question text with no per-call cap — the
+  // rate limit is what stops it from being scraped into a full copy of the
+  // (proprietary) bank via repeated calls. 20/day/IP is generous for a
+  // real family (a pick plus an occasional swap, a couple of times a
+  // week) and expensive for bulk harvesting.
+  if (!(await checkRateLimit(req, "weekly-candidates", 20))) {
+    return new Response("Too many requests", { status: 429 });
   }
 
   let body;
