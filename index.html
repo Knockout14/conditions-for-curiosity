@@ -297,6 +297,37 @@ footer a:hover{color:var(--gold)}
     </div>
   </section>
 
+  <!-- TRY THE APP -->
+  <section class="bay">
+    <div class="inner">
+      <p class="tag">Try it tonight</p>
+      <h2>A question to ask, not an app to hand them</h2>
+      <div class="model">
+        <h3>The nightly companion</h3>
+        <p>Three questions a week, one a night — for you to ask your kid, not for them to tap through. No account for the child, no screen in their hands, no streak to keep. Just a good question and a few minutes.</p>
+        <p>It's early. I'm building this in the open the same way as everything else here, with a small group actually using it right now.</p>
+        <a class="cta" href="app/index.html" id="try-app-cta">Try tonight's question <span>&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+  <script>
+    // GA4 event on the app CTA — fires only if analytics consent has
+    // already been granted (window.gtag only exists once cookie-consent.js
+    // has loaded GA; that file's whole rule is nothing loads before
+    // Accept, so this stays silent for anyone who declined or hasn't
+    // answered). No navigation delay: gtag.js sends this via a beacon that
+    // survives the page unload, so the link just navigates normally.
+    (function () {
+      var link = document.getElementById("try-app-cta");
+      if (!link) return;
+      link.addEventListener("click", function () {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", "try_app_click", { event_category: "engagement" });
+        }
+      });
+    })();
+  </script>
+
   <!-- WHO IT'S FOR -->
   <section class="bay">
     <div class="inner" style="max-width:none">
