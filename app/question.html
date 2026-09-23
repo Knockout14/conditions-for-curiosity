@@ -35,13 +35,29 @@
     // Never render q.seed here, even behind a tap — spec §3c: the seed is
     // a post-answer object, never shown before or alongside the question.
     //
+    // Stopgap until the corrected source bank (early math curiosity
+    // question bank v2.md.docx) is re-ingested into production Blobs: these
+    // three prep entries were rewritten for clarity after a coherence
+    // review, but the live data store still has the old wording. Rewrite
+    // them at render time instead of writing to Blobs directly. Safe to
+    // delete once Blobs is updated — a non-matching entry is a no-op.
+    const PREP_OVERRIDES = {
+      "Requires the thing in view or freshly experienced.":
+        "Point at something in view, or bring up something you just did together.",
+      "Any two points. Guess your own step count first.":
+        "Guess your own step count first.",
+      "Just be somewhere with things in it.":
+        "Scan the room yourself first so you have your answer ready to share.",
+    };
+
     // The bank encodes prep as either a bare "None", or "None" followed by
     // an adult-only note that still applies even though no object is
     // needed — e.g. "None. Land it soon after a mistake, not during." The
     // leading "None" is a flag, not part of the sentence to show; strip it
     // (and a trailing "but") and keep whatever note follows, if any.
-    let prepText = (q.prep || "")
-      .trim()
+    let prepText = (q.prep || "").trim();
+    prepText = PREP_OVERRIDES[prepText] || prepText;
+    prepText = prepText
       .replace(/^none[\s.,\-–—]*\s*(?:but\s+)?/i, "")
       .trim();
     if (prepText) prepText = prepText.charAt(0).toUpperCase() + prepText.slice(1);
