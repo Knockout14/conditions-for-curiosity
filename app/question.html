@@ -32,18 +32,23 @@
   } else if (state) {
     const q = current.question;
     const screen = document.getElementById("screen");
+    // Never render q.seed here, even behind a tap — spec §3c: the seed is
+    // a post-answer object, never shown before or alongside the question.
+    const prepText = (q.prep || "").trim();
+    const showPrep = prepText && prepText.toLowerCase() !== "none";
 
     screen.innerHTML = `
       <div class="tag-row">
         <h1 class="eyebrow tight">Tonight's question</h1>
-        <span class="tag-row-meta">${CFC.escapeHtml(q.domain)} · Ages ${CFC.escapeHtml(q.ages)}</span>
+        <span class="tag-row-meta">Ages ${CFC.escapeHtml(q.ages)}</span>
       </div>
 
+      ${showPrep ? `<p class="prep-line">Before you ask: ${CFC.escapeHtml(prepText)}</p>` : ""}
       <p class="question-text">${CFC.escapeHtml(q.text)}</p>
 
       <div class="answer-field">
         <label class="field-label" for="answer">Your answer — go first</label>
-        <textarea class="field-input" id="answer" placeholder="${CFC.escapeHtml(q.seed || "")}"></textarea>
+        <textarea class="field-input" id="answer" placeholder="Say it in your own words"></textarea>
         <p class="voice-hint">💡 Faster than typing: tap the mic on your keyboard and just say it.</p>
       </div>
 

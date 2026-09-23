@@ -61,7 +61,7 @@
           <span class="summary-rank">${i + 1}</span>
           <span>
             <div class="summary-text">${CFC.escapeHtml(q.text)}</div>
-            <div class="summary-tag">${CFC.escapeHtml(q.domain)} · ${CFC.escapeHtml(q.bigIdea || q.category)}${done ? ' · <span class="summary-done-tag">done</span>' : ""}</div>
+            ${done ? '<div class="summary-tag"><span class="summary-done-tag">done</span></div>' : ""}
           </span>
         </div>`
         )

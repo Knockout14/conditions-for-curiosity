@@ -482,6 +482,11 @@ a:hover{color:var(--warm)}
 /* ── the nightly loop (open / the move / reveal / circle-back / done) ── */
 .tag-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .tag-row-meta{font-size:11px;color:var(--off-faint);white-space:nowrap}
+.prep-line{
+  margin-top:14px;
+  font-size:13px;
+  color:var(--off-instruct);
+}
 
 .question-text{
   margin-top:26px;

@@ -39,10 +39,6 @@
   const state = CFC.requireOnboarding();
   const GAP = 12; // must match .pick-list { gap: 12px } in style.css
 
-  function tagFor(q) {
-    return `${CFC.escapeHtml(q.domain)} · ${CFC.escapeHtml(q.bigIdea || q.category)}`;
-  }
-
   state && (async function load() {
     const list = document.getElementById("pick-list");
     // Grabbed and disabled up front — this button is always in the static
@@ -85,7 +81,6 @@
         <span class="pick-badge">${index + 1}</span>
         <span class="pick-body">
           <span class="pick-text">${CFC.escapeHtml(q.text)}</span>
-          <span class="pick-tag">${tagFor(q)}</span>
           ${swapUsed ? "" : '<button type="button" class="pick-swap">Not this one? Swap it</button>'}
         </span>
         <span class="pick-move">
