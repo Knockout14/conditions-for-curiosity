@@ -91,6 +91,7 @@
                </div>`
             : `<div class="actions" style="margin-bottom:20px">
                  <button type="button" class="btn-primary" id="begin-btn">Begin tonight's question</button>
+                 <p class="helper-caption">About 90 seconds</p>
                </div>
                <p class="calendar-label">Add a reminder for your next question:</p>
                <div class="calendar-row">
@@ -103,8 +104,22 @@
           <a class="link-secondary" href="../index.html">Back to the podcast site</a>
         </div>`;
 
+      // Skips open.html's interstitial entirely — same next-question logic
+      // it uses, just without the extra stop. open.html is still reachable
+      // directly (e.g. from a calendar reminder) and still owns the
+      // "all caught up" state once every question this week is asked.
       const beginBtn = document.getElementById("begin-btn");
-      if (beginBtn) beginBtn.addEventListener("click", () => (location.href = "open.html"));
+      if (beginBtn) {
+        beginBtn.addEventListener("click", () => {
+          const next = CFC.nextQuestion(state, questions);
+          if (!next) {
+            location.href = "open.html";
+            return;
+          }
+          CFC.saveCurrentQuestion({ question: next.question, index: next.index });
+          location.href = "question.html";
+        });
+      }
 
       if (!allDone) wireReminderButtons(questions, asked);
     })();
