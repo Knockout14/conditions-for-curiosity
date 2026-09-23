@@ -54,7 +54,7 @@
         </div>
         <div class="quote-block">
           <span class="quote-label">Their turn</span>
-          Whatever they said — that part stays theirs.
+          You don't need to write it down unless you want to.
         </div>
       </div>
 
@@ -64,6 +64,9 @@
         <summary>Why this one works</summary>
         <p>${why}</p>
         ${q.citation ? `<div class="citation">${CFC.escapeHtml(q.citation)}</div>` : ""}
+        ${q.seed ? `
+        <p style="margin-top:14px">You've both already answered, so this can't script anyone — it's not the "right" answer, just another angle:</p>
+        <p style="margin-top:6px"><strong>One possible answer:</strong> ${CFC.escapeHtml(q.seed)}</p>` : ""}
       </details>
 
       <div class="actions" style="margin-top:20px">
