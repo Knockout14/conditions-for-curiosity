@@ -43,8 +43,8 @@
         <span class="tag-row-meta">Ages ${CFC.escapeHtml(q.ages)}</span>
       </div>
 
-      ${showPrep ? `<p class="prep-line">Before you ask: ${CFC.escapeHtml(prepText)}</p>` : ""}
       <p class="question-text">${CFC.escapeHtml(q.text)}</p>
+      ${showPrep ? `<p class="prep-line">Before you ask: ${CFC.escapeHtml(prepText)}</p>` : ""}
 
       <div class="answer-field">
         <label class="field-label" for="answer">Your answer — go first</label>
