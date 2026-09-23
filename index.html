@@ -169,7 +169,6 @@ section + section{border-top:1px solid rgba(246,245,242,.07)}
 /* ── audience ── */
 .who{display:grid;grid-template-columns:1fr;gap:clamp(20px,3vw,36px);max-width:820px;margin-top:8px}
 @media (min-width:600px){.who{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:1040px){.who{grid-template-columns:repeat(4,1fr)}}
 .who div{border-top:1px solid var(--rule);padding-top:16px}
 .who h3{font-size:17px;margin-bottom:6px}
 .who p{font-size:14.5px;margin:0}
@@ -246,20 +245,20 @@ footer a:hover{color:var(--gold)}
   <!-- HERO -->
   <section class="hero bay">
     <div class="inner">
-      <p class="eyebrow reveal" style="animation-delay:.05s">Conditions for Curiosity &nbsp;·&nbsp; All 8 episodes out</p>
+      <p class="eyebrow reveal" style="animation-delay:.03s">Conditions for Curiosity &nbsp;·&nbsp; All 8 episodes out</p>
       <h1>
-        <span class="line reveal" style="animation-delay:.18s">Curiosity is not a</span>
-        <span class="line reveal" style="animation-delay:.34s">personality trait.</span>
-        <span class="line reveal" style="animation-delay:.62s"><em>It is what a room</em></span>
-        <span class="line reveal" style="animation-delay:.78s"><em>makes possible.</em></span>
+        <span class="line reveal" style="animation-delay:.08s">Curiosity is not a</span>
+        <span class="line reveal" style="animation-delay:.14s">personality trait.</span>
+        <span class="line reveal" style="animation-delay:.2s"><em>It is what a room</em></span>
+        <span class="line reveal" style="animation-delay:.27s"><em>makes possible.</em></span>
       </h1>
-      <p class="sub reveal" style="animation-delay:1.05s">Twenty years in classrooms taught me that wondering shows up when the conditions are right and vanishes when they aren't. This show is about building those conditions on purpose.</p>
+      <p class="sub reveal" style="animation-delay:.33s">Twenty years in classrooms taught me that wondering shows up when the conditions are right and vanishes when they aren't. This show is about building those conditions on purpose.</p>
       <div class="followrow">
-        <a class="follow reveal" style="animation-delay:1.25s" href="https://open.spotify.com/show/033PuhjdXwbaIlQVktfm1Z?si=7cd9f135e89847e5" target="_blank" rel="noopener">
+        <a class="follow reveal" style="animation-delay:.4s" href="https://open.spotify.com/show/033PuhjdXwbaIlQVktfm1Z?si=7cd9f135e89847e5" target="_blank" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 9.5c4-1.2 8-1 11 .8M7 13c3.3-.9 6.6-.7 9 .7M7.6 16.2c2.7-.7 5-.5 6.8.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           Follow on Spotify
         </a>
-        <a class="follow alt reveal" style="animation-delay:1.35s" href="https://podcasts.apple.com/us/podcast/conditions-for-curiosity/id6790927800" target="_blank" rel="noopener">
+        <a class="follow alt reveal" style="animation-delay:.46s" href="https://podcasts.apple.com/us/podcast/conditions-for-curiosity/id6790927800" target="_blank" rel="noopener">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v6l4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           Follow on Apple Podcasts
         </a>
@@ -386,14 +385,6 @@ footer a:hover{color:var(--gold)}
           <h3>Parents</h3>
           <p>You're running an environment too. Yours just has fewer people in it and no bell.</p>
         </div>
-        <div>
-          <h3>Coaches</h3>
-          <p>Practice is a designed environment. Almost none of this needs translating.</p>
-        </div>
-        <div>
-          <h3>Leaders</h3>
-          <p>If nobody on your team asks questions anymore, you built that. So you can build something else.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -460,9 +451,9 @@ footer a:hover{color:var(--gold)}
 </div>
 
 <div class="sticky-cta" id="sticky-cta" hidden>
-  <p>One weekly email — a prompt to try, not episode alerts.</p>
+  <p>One question to ask your kid, tonight.</p>
   <div class="sticky-cta-actions">
-    <a href="#signup" id="sticky-cta-link">Keep me posted</a>
+    <a href="app/index.html" id="sticky-cta-link">Try it tonight</a>
     <button type="button" id="sticky-cta-dismiss" aria-label="Dismiss">&times;</button>
   </div>
 </div>
@@ -478,8 +469,11 @@ footer a:hover{color:var(--gold)}
     var dismissBtn = document.getElementById("sticky-cta-dismiss");
     var link = document.getElementById("sticky-cta-link");
     var hero = document.querySelector(".hero");
-    var signup = document.getElementById("signup");
-    if (!bar || !hero || !signup) return;
+    // Hides once the page's own "Try tonight's question" CTA is on screen —
+    // no point pointing at the app from a sticky bar when the real button
+    // is already visible.
+    var appCta = document.getElementById("try-app-cta");
+    if (!bar || !hero || !appCta) return;
 
     var dismissed = false;
     try { dismissed = sessionStorage.getItem("cfc_sticky_cta_dismissed") === "1"; } catch (e) {}
@@ -487,9 +481,9 @@ footer a:hover{color:var(--gold)}
     function update() {
       if (dismissed) { bar.hidden = true; return; }
       var heroBottom = hero.getBoundingClientRect().bottom;
-      var signupTop = signup.getBoundingClientRect().top;
+      var appCtaTop = appCta.getBoundingClientRect().top;
       var viewportH = window.innerHeight;
-      bar.hidden = heroBottom > 0 || signupTop < viewportH;
+      bar.hidden = heroBottom > 0 || appCtaTop < viewportH;
     }
 
     dismissBtn.addEventListener("click", function () {
@@ -498,14 +492,11 @@ footer a:hover{color:var(--gold)}
       try { sessionStorage.setItem("cfc_sticky_cta_dismissed", "1"); } catch (e) {}
     });
 
-    link.addEventListener("click", function (e) {
-      e.preventDefault();
-      dismissed = true;
-      bar.hidden = true;
+    link.addEventListener("click", function () {
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "try_app_click", { event_category: "engagement", event_label: "sticky_cta" });
+      }
       try { sessionStorage.setItem("cfc_sticky_cta_dismissed", "1"); } catch (e) {}
-      signup.scrollIntoView({ behavior: "smooth", block: "start" });
-      var emailInput = document.getElementById("bd-email");
-      if (emailInput) setTimeout(function () { emailInput.focus(); }, 400);
     });
 
     window.addEventListener("scroll", update, { passive: true });

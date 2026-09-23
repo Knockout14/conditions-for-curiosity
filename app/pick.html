@@ -37,7 +37,6 @@
 <script src="app.js"></script>
 <script>
   const state = CFC.requireOnboarding();
-  const GAP = 12; // must match .pick-list { gap: 12px } in style.css
 
   state && (async function load() {
     const list = document.getElementById("pick-list");
@@ -86,13 +85,6 @@
         <span class="pick-move">
           <button type="button" class="pick-move-btn" data-dir="-1" ${index === 0 ? "disabled" : ""} aria-label="Move up, currently number ${index + 1} of ${total}">&#9650;</button>
           <button type="button" class="pick-move-btn" data-dir="1" ${index === total - 1 ? "disabled" : ""} aria-label="Move down, currently number ${index + 1} of ${total}">&#9660;</button>
-        </span>
-        <span class="pick-handle" aria-hidden="true">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
-            <circle cx="2" cy="2" r="1.6" fill="currentColor"/><circle cx="8" cy="2" r="1.6" fill="currentColor"/>
-            <circle cx="2" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/>
-            <circle cx="2" cy="14" r="1.6" fill="currentColor"/><circle cx="8" cy="14" r="1.6" fill="currentColor"/>
-          </svg>
         </span>`;
       if (!swapUsed) {
         const swapBtn = card.querySelector(".pick-swap");
@@ -110,10 +102,10 @@
       return card;
     }
 
-    // Keyboard/screen-reader path for reordering — the drag handle has no
-    // keyboard equivalent (pointerdown/pointermove only), so these buttons
-    // are the only way anyone who can't perform a pointer drag can rank
-    // the three questions at all.
+    // The only way to reorder — a drag handle used to sit alongside these
+    // (removed: it fought the page's own scroll on a touch phone, this
+    // app's primary device, and these arrows already covered every case,
+    // including keyboard/screen-reader use the drag never did).
     function moveCard(id, dir) {
       const i = order.indexOf(id);
       const j = i + dir;
@@ -148,90 +140,6 @@
     function render() {
       list.innerHTML = "";
       order.forEach((id, i) => list.appendChild(buildCard(id, i, order.length)));
-      wireDragHandles();
-    }
-
-    // Pointer-based drag reorder (native HTML5 drag-and-drop doesn't work
-    // reliably on mobile touch, and this is mobile-first). The dragged
-    // card follows the pointer directly; the others animate out of its
-    // way, computed from each card's rect *before* the drag started so
-    // variable card heights (question text wraps to 1–2 lines) don't
-    // throw off the math. The DOM itself is only reordered once, on
-    // release — everything mid-drag is a CSS transform.
-    function wireDragHandles() {
-      list.querySelectorAll(".pick-handle").forEach((handle) => {
-        handle.addEventListener("pointerdown", onPointerDown);
-      });
-    }
-
-    function onPointerDown(e) {
-      const dragEl = e.currentTarget.closest(".pick-card");
-      const cardEls = Array.from(list.children);
-      const originals = cardEls.map((el) => {
-        const r = el.getBoundingClientRect();
-        return { id: el.dataset.id, top: r.top, height: r.height };
-      });
-      const dragOriginal = originals.find((o) => o.id === dragEl.dataset.id);
-      const startY = e.clientY;
-      let visualOrder = originals.map((o) => o.id);
-
-      e.currentTarget.setPointerCapture(e.pointerId);
-      dragEl.classList.add("dragging");
-
-      function layoutFor(idsInOrder) {
-        const byOrigId = new Map(originals.map((o) => [o.id, o]));
-        const layout = new Map();
-        let top = originals[0].top;
-        for (const id of idsInOrder) {
-          const h = byOrigId.get(id).height;
-          layout.set(id, top);
-          top += h + GAP;
-        }
-        return layout;
-      }
-
-      function onMove(ev) {
-        const dy = ev.clientY - startY;
-        dragEl.style.transform = `translateY(${dy}px)`;
-
-        const dragCenter = dragOriginal.top + dragOriginal.height / 2 + dy;
-        const others = originals.filter((o) => o.id !== dragOriginal.id);
-        let targetIndex = 0;
-        for (const o of others) {
-          if (dragCenter > o.top + o.height / 2) targetIndex++;
-        }
-
-        visualOrder = others.map((o) => o.id);
-        visualOrder.splice(targetIndex, 0, dragOriginal.id);
-
-        const layout = layoutFor(visualOrder);
-        cardEls.forEach((el) => {
-          if (el === dragEl) return;
-          const id = el.dataset.id;
-          const orig = originals.find((o) => o.id === id);
-          el.style.transition = "transform .15s ease";
-          el.style.transform = `translateY(${layout.get(id) - orig.top}px)`;
-        });
-
-        visualOrder.forEach((id, i) => {
-          cardEls.find((el) => el.dataset.id === id).querySelector(".pick-badge").textContent = String(i + 1);
-        });
-      }
-
-      function onUp() {
-        document.removeEventListener("pointermove", onMove);
-        document.removeEventListener("pointerup", onUp);
-        dragEl.classList.remove("dragging");
-        cardEls.forEach((el) => {
-          el.style.transition = "";
-          el.style.transform = "";
-        });
-        order = visualOrder;
-        render();
-      }
-
-      document.addEventListener("pointermove", onMove);
-      document.addEventListener("pointerup", onUp);
     }
 
     render();
@@ -247,7 +155,7 @@
     // failed save — unlike circleback.html's equivalent, CFC.patch() just
     // overwrites rather than accumulating, so there's no correctness
     // reason to lock this to what it was on the first click. That matters
-    // here specifically: the cards (drag, swap) stay interactive behind
+    // here specifically: the cards (reorder, swap) stay interactive behind
     // the error message, so someone who keeps adjusting the order while
     // looking at "couldn't save" gets that adjustment submitted, not
     // whatever it was a moment ago.
