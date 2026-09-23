@@ -34,8 +34,18 @@
     const screen = document.getElementById("screen");
     // Never render q.seed here, even behind a tap — spec §3c: the seed is
     // a post-answer object, never shown before or alongside the question.
-    const prepText = (q.prep || "").trim();
-    const showPrep = prepText && prepText.toLowerCase() !== "none";
+    //
+    // The bank encodes prep as either a bare "None", or "None" followed by
+    // an adult-only note that still applies even though no object is
+    // needed — e.g. "None. Land it soon after a mistake, not during." The
+    // leading "None" is a flag, not part of the sentence to show; strip it
+    // (and a trailing "but") and keep whatever note follows, if any.
+    let prepText = (q.prep || "")
+      .trim()
+      .replace(/^none[\s.,\-–—]*\s*(?:but\s+)?/i, "")
+      .trim();
+    if (prepText) prepText = prepText.charAt(0).toUpperCase() + prepText.slice(1);
+    const showPrep = Boolean(prepText);
 
     screen.innerHTML = `
       <div class="tag-row">
