@@ -57,7 +57,14 @@
     ".cfc-cc button.cfc-cc-accept{background:#EDC160;border-color:#EDC160;color:#050C16}" +
     ".cfc-cc button.cfc-cc-accept:hover{background:#FDD284;border-color:#FDD284}" +
     ".cfc-cc button:focus-visible{outline:2px solid #EDC160;outline-offset:2px}" +
-    "@media (max-width:480px){.cfc-cc{flex-direction:column;align-items:stretch}" +
+    "@media (max-width:480px){.cfc-cc{flex-direction:column;align-items:stretch;" +
+    "padding:12px 16px calc(12px + env(safe-area-inset-bottom));gap:10px}" +
+    // `.cfc-cc p{flex:1 1 280px}` sets a 280px *width* basis for the row
+    // layout above — harmless there, but flex-basis controls the main axis,
+    // and flipping to flex-direction:column makes that axis vertical. Left
+    // unset here, the paragraph was being told to claim up to 280px of
+    // *height* on a phone, which is the actual banner-too-tall bug.
+    ".cfc-cc p{flex-basis:auto}" +
     ".cfc-cc-actions{justify-content:stretch}.cfc-cc button{flex:1}}";
 
   function ensureStyle() {

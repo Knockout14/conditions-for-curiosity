@@ -257,16 +257,16 @@
   }
 
   /* ── quiet "start over" affordance ──
-     Injected here, once, rather than added to each screen's markup — every
-     page that loads app.js gets it for free, none needed touching. Appended
-     as a sibling of .screen, not a child: four screens (open/question/
-     reveal/complete) replace #screen's entire innerHTML from their own
-     script, which runs after this one — a child here would just get wiped
-     the moment those render. Hidden entirely when there's nothing saved
-     yet, since a fresh visitor has nothing to reset. A real confirm() gates
-     it: unlike an in-progress, unsaved pick reorder, this actually destroys
-     something — name, age band, the weekly pick, the whole cross-week
-     asked-question history. */
+     Only called on details.html (see the call site at the bottom of this
+     file) — a destructive control has no business sitting top-right on the
+     question or circle-back screens, mid-conversation with a kid. Appended
+     as a sibling of .screen, not a child, since details.html doesn't
+     replace #screen's innerHTML the way open/question/reveal/complete do.
+     Hidden entirely when there's nothing saved yet, since a fresh visitor
+     has nothing to reset. A real confirm() gates it: unlike an
+     in-progress, unsaved pick reorder, this actually destroys something —
+     name, age band, the weekly pick, the whole cross-week asked-question
+     history. */
   function wireResetLink() {
     let hasState;
     try {
@@ -465,7 +465,8 @@
     wireCalendarButtons,
   };
 
-  // Auto-runs on every page that loads this file — see wireResetLink above
-  // for why this isn't left to each screen to call individually.
-  wireResetLink();
+  // Scoped to details.html only — see wireResetLink above for why. Checked
+  // by pathname rather than a per-screen call so every screen still just
+  // loads the same app.js with nothing extra to remember.
+  if (/details\.html$/.test(location.pathname)) wireResetLink();
 })(window);

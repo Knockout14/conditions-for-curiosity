@@ -87,6 +87,7 @@
   .readout .score{font-family:"Playfair Display",serif;font-weight:400;font-size:36px;color:var(--ink);line-height:1;letter-spacing:-.02em}
   .readout .score em{font-style:normal;font-size:14px;color:var(--ink-soft);font-weight:500}
   .readout .scorelab{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+  .readout .madeup{font-size:8.5px;letter-spacing:.04em;color:var(--ink-soft);opacity:.7;margin-top:1px}
   @media (max-width:960px){ .readout .score{font-size:24px} }
   .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .site-footer{margin-top:36px;padding-top:22px;border-top:1px solid var(--rule)}
@@ -152,12 +153,13 @@
   .toggles button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
   .actions{display:flex;gap:6px;margin-top:12px}
-  .actions button{
+  .actions button,.actions a{
     flex:1;font-family:"Karla",sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;
     text-transform:uppercase;padding:10px 6px;
     background:var(--ochre);color:#050C16;border:1.5px solid var(--ochre);border-radius:2px;cursor:pointer;
+    text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;
   }
-  .actions button:hover{background:var(--warm);border-color:var(--warm)}
+  .actions button:hover,.actions a:hover{background:var(--warm);border-color:var(--warm)}
   .actions button.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
   .actions button.ghost:hover{background:transparent;border-color:var(--ink)}
   .actions button.violet{background:var(--pen-violet);border-color:var(--pen-violet)}
@@ -271,6 +273,14 @@
           <button id="save" class="ghost">Save PNG</button>
         </div>
       </details>
+
+      <div class="panel">
+        <h2>Feedback</h2>
+        <p class="hint">Tell me where this stops making sense.</p>
+        <div class="actions" style="margin-top:0">
+          <a href="mailto:conditionsforcuriosity@gmail.com?subject=Conditions%20for%20Curiosity%20%E2%80%94%20model%20feedback">Send feedback</a>
+        </div>
+      </div>
 
       <details class="panel" open>
         <summary>Key</summary>
@@ -608,12 +618,13 @@ function paintReadout(score, liveCount, totalCount, pct){
   document.getElementById("readout").innerHTML =
     `<div class="scorelab">curiosity in play</div>` +
     `<div class="score">${score.toFixed(1)}<em> / 10</em></div>` +
+    `<div class="madeup">invented score, not a measurement</div>` +
     `<div style="margin-top:8px">chasing <b>${liveCount}</b> of ${totalCount} questions<br>` +
     `open in <b>${pct}%</b> of directions</div>`;
   clearTimeout(readoutSrTimer);
   readoutSrTimer=setTimeout(()=>{
     document.getElementById("readout-sr").textContent =
-      `Curiosity in play: ${score.toFixed(1)} out of 10. `+
+      `Curiosity in play: ${score.toFixed(1)} out of 10, an invented score, not a measurement. `+
       `Chasing ${liveCount} of ${totalCount} questions. `+
       `Open in ${pct}% of directions.`;
   }, 500);
