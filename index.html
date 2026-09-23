@@ -108,6 +108,24 @@ section + section{border-top:1px solid rgba(246,245,242,.07)}
 .cta:focus-visible{outline:2px solid var(--warm);outline-offset:3px}
 .cta span{font-size:16px;line-height:1}
 
+/* ── the bet: convergence table, pull quote, byline ── */
+.stat-table{width:100%;border-collapse:collapse;margin:8px 0 28px;font-size:14.5px}
+.stat-table th{text-align:left;font-family:"Karla",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);padding:0 16px 10px 0;border-bottom:1px solid var(--rule)}
+.stat-table td{padding:14px 16px 14px 0;border-bottom:1px solid rgba(246,245,242,.08);color:var(--off-mute);vertical-align:top}
+.stat-table td:first-child{color:var(--off);font-weight:600;white-space:nowrap}
+@media (max-width:640px){
+  .stat-table,.stat-table thead,.stat-table tbody,.stat-table tr,.stat-table th,.stat-table td{display:block}
+  .stat-table thead{display:none}
+  .stat-table tr{border-bottom:1px solid rgba(246,245,242,.08);padding:14px 0}
+  .stat-table td{border:none;padding:2px 0}
+  .stat-table td:first-child{margin-bottom:4px}
+}
+.pullquote{font-family:"Playfair Display",serif;font-style:italic;color:var(--gold);
+  font-size:clamp(19px,2.4vw,25px);line-height:1.5;border-left:1px solid rgba(237,193,96,.4);
+  padding:2px 0 2px 22px;margin:8px 0 30px;max-width:56ch}
+.byline{font-family:"Karla",sans-serif;font-size:13.5px;color:var(--off-faint);margin-top:-6px}
+.byline strong{color:var(--off);font-weight:600}
+
 /* ── season list ── */
 .season{list-style:none;margin:0;padding:0;max-width:820px}
 .season li{border-top:1px solid rgba(246,245,242,.08)}
@@ -226,7 +244,7 @@ footer a:hover{color:var(--gold)}
   <!-- HERO -->
   <section class="hero bay">
     <div class="inner">
-      <p class="eyebrow reveal" style="animation-delay:.05s">Conditions for Curiosity &nbsp;·&nbsp; a podcast in progress</p>
+      <p class="eyebrow reveal" style="animation-delay:.05s">Conditions for Curiosity &nbsp;·&nbsp; Season one, all eight episodes out</p>
       <h1>
         <span class="line reveal" style="animation-delay:.18s">Curiosity is not a</span>
         <span class="line reveal" style="animation-delay:.34s">personality trait.</span>
@@ -261,6 +279,30 @@ footer a:hover{color:var(--gold)}
       <p>My question is the one you have at 8:40 on a Tuesday. Not <em>which of these kids is curious.</em> <em>What would make curiosity likely in this room, with these thirty, today.</em> Almost nobody publishes on that. The people who know it are teaching fifth period. The people writing the papers aren't standing there when it falls apart.</p>
       <p>I taught middle and high school math. I coached teachers for ten years. I led curriculum at a national level. I finished a master's in educational research to get closer to the problem.</p>
       <p><strong>I'll talk about what I've seen and what some research points to.</strong> I'll identify where those agree and where I am still working it out. You will be able to tell which is which.</p>
+      <p class="byline">— <strong>Kevin O'Neil</strong>, creator of Conditions for Curiosity</p>
+    </div>
+  </section>
+
+  <!-- THE BET -->
+  <section class="bay">
+    <div class="inner">
+      <p class="tag">The bet</p>
+      <h2>Three studies say the same thing about adults.</h2>
+      <p>Give an adult a goal of teaching their kid, and they get controlling — three independent studies, three setups, three ages of kids, the same result:</p>
+      <div style="overflow-x:auto">
+      <table class="stat-table">
+        <thead><tr><th>Study</th><th>Manipulation</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Maloney/Beilock (2015)</td><td>Math-anxious parents helping frequently</td><td>Lower child achievement, higher child anxiety</td></tr>
+          <tr><td>Lu, Vasilyeva &amp; Laski (2025)</td><td>Informational priming about math</td><td>&uarr; control, &darr; autonomy support, &uarr; disengagement</td></tr>
+          <tr><td>King et al. (2024)</td><td>Explicit "teach your child" instruction</td><td>&uarr; intrusiveness (medium-large)</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="pullquote">"Teach &rarr; intrusive. Learn &rarr; cold. Learn and disclose &rarr; possibly neither."</p>
+      <p>One of those studies also found that "learn from your child" alone cools the interaction down — trades an intrusive adult for a distant one. Nobody has tested what happens when the adult discloses too: answers first, admits what they don't know, alongside the kid instead of above them. That's the actual bet, and it's untested — the way to know is to run this design against the same comparison Lu et al. already used, and see whether math talk goes up without the interaction quality going down.</p>
+      <p>Right now, the app measures one thing: whether the child asks a question back — a sign of engagement with the environment and the adult, not a math score. The shift toward math and science content specifically is the next layer, built on this same mechanism once it's shown to hold.</p>
+      <a class="cta" href="mailto:conditionsforcuriosity@gmail.com?subject=Conditions%20for%20Curiosity%20%E2%80%94%20funder%2Fresearch%20inquiry">For funders, researchers and schools <span>&rarr;</span></a>
     </div>
   </section>
 
