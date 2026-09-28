@@ -45,7 +45,10 @@
         CFC.renderLoadError(screen, "Couldn't load this week's three — check your connection.", load);
         return;
       }
-      const asked = new Set(state.askedQuestionIds || []);
+      // This week's asks only (see weekAskedIds in app.js): a question
+      // re-offered after the pool ran out isn't "done" just because it was
+      // asked in some earlier week.
+      const asked = new Set(CFC.weekAskedIds(state));
 
       // Answered ones sink to the bottom rather than just graying out in
       // place — original rank preserved as a stable sort key within each
@@ -67,11 +70,7 @@
         )
         .join("");
 
-      // Checked against this week's specific three, not asked.size —
-      // askedQuestionIds only ever grows, across every week ever, so a
-      // size check alone would misfire "done" from week 2 onward before
-      // any of that week's three were actually asked.
-      const allDone = questions.every((q) => asked.has(q.id));
+      const allDone = CFC.isWeekDone(state);
       if (allDone) CFC.maybeSubmitWeekSummary(state, questions);
 
       // allDone reuses open.html's own "all caught up" screen for the next-week

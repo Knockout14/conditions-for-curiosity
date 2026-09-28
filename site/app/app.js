@@ -272,29 +272,68 @@
   }
 
   /* ── the nightly loop ──
-     One question, in ranked order, per session (spec §3c). "Which one is
-     next" is always computed the same way — first of the week's three
-     not yet in askedQuestionIds — so the calendar buttons, the open
-     screen, and the summary screen can never disagree with each other. */
+     Two records of "asked," for two jobs:
+     - askedQuestionIds: every question ever asked, across all weeks. Only
+       the sampler uses it, to avoid repeats until an age band's pool runs
+       out (47 Raw/Found questions for ages 3–4, so about 15 weeks).
+     - weeklyPick.askedIds: which of *this* pick's questions were asked, in
+       the order they were asked. Everything about the current week reads
+       this one.
+     Before, the week was read from the all-time list, which went wrong
+     once a pool ran out and the sampler re-offered an old question (it
+     counted as asked the moment it was picked), and a mid-week edit reset a
+     separate counter, so a finished week still looked unfinished. */
+  function weekAskedIds(state) {
+    const pick = state.weeklyPick;
+    if (!pick) return [];
+    if (Array.isArray(pick.askedIds)) return pick.askedIds;
+    // A pick saved before askedIds existed: this week's ids in the all-time
+    // list, in the order they were asked.
+    const all = state.askedQuestionIds || [];
+    return all.filter((id, i) => pick.questionIds.includes(id) && all.lastIndexOf(id) === i);
+  }
+
+  function isWeekDone(state) {
+    const asked = new Set(weekAskedIds(state));
+    return Boolean(state.weeklyPick) && state.weeklyPick.questionIds.every((id) => asked.has(id));
+  }
+
+  /* One question, in ranked order, per session (spec §3c). "Which one is
+     next" is always computed the same way — the first of the week's three
+     not yet asked this week — so the calendar buttons, the open screen and
+     the summary screen can never disagree with each other. */
   function nextQuestion(state, questions) {
-    const asked = new Set(state.askedQuestionIds || []);
+    const asked = new Set(weekAskedIds(state));
     const idx = questions.findIndex((q) => !asked.has(q.id));
     return idx === -1 ? null : { question: questions[idx], index: idx };
   }
 
-  /* The one write circle-back triggers (per this session's design
-     discussion): the question actually got asked, so it's crossed off
-     for good — excluded from future weeks' sampling, not just this
-     one's. usedCount advances one at a time, not by however many are
-     left, so pick.html's "week's still active" check stays accurate
-     after just one question instead of jumping straight to "done." */
+  /* The one write circle-back triggers: the question actually got asked, so
+     it's crossed off this week and excluded from future weeks' sampling. */
   function markQuestionAsked(state, questionId) {
-    const askedQuestionIds = (state.askedQuestionIds || []).concat(questionId);
-    const usedCount = Math.min(3, (state.weeklyPick.usedCount || 0) + 1);
+    const weekAsked = weekAskedIds(state);
     return patch({
-      askedQuestionIds,
-      weeklyPick: Object.assign({}, state.weeklyPick, { usedCount }),
+      askedQuestionIds: (state.askedQuestionIds || []).concat(questionId),
+      weeklyPick: Object.assign({}, state.weeklyPick, {
+        askedIds: weekAsked.includes(questionId) ? weekAsked : weekAsked.concat(questionId),
+      }),
     });
+  }
+
+  /* The weeklyPick record pick.html saves. A fresh pick starts with nothing
+     asked; editing a week in progress (reordering, or swapping a question
+     not yet asked) keeps what's already been asked.
+     swapUsed: the spec's one swap is per week, so it's saved with the pick.
+     Before, it lived only on the pick screen and came back every time the
+     screen was reopened. `swappedNow` is whether this visit used it. */
+  function buildWeeklyPick(state, questionIds, isEdit, swappedNow) {
+    const priorSwap = Boolean(isEdit && state.weeklyPick && state.weeklyPick.swapUsed);
+    return {
+      questionIds,
+      askedIds: isEdit ? weekAskedIds(state).filter((id) => questionIds.includes(id)) : [],
+      swapUsed: priorSwap || Boolean(swappedNow),
+      pickedAt: new Date().toISOString(),
+    };
   }
 
   /* In-progress state for the current question, between the open screen
@@ -387,10 +426,8 @@
     if (!pickedAt || state.weekSummarySentFor === pickedAt) return state;
 
     const byId = new Map(questions.map((q) => [q.id, q]));
-    const askedOrder = (state.askedQuestionIds || [])
-      .map((id) => byId.get(id))
-      .filter(Boolean)
-      .slice(-3); // this week's three, in the order they were actually asked
+    // This week's three, in the order they were actually asked.
+    const askedOrder = weekAskedIds(state).map((id) => byId.get(id)).filter(Boolean);
     const finalOrder = state.weeklyPick.questionIds.map((id) => byId.get(id)).filter(Boolean);
 
     // Only marked sent once the write actually succeeds — this fires from
@@ -515,7 +552,10 @@
     fetchReplacementCandidate,
     submitPick,
     nextQuestion,
+    weekAskedIds,
+    isWeekDone,
     markQuestionAsked,
+    buildWeeklyPick,
     saveCurrentQuestion,
     loadCurrentQuestion,
     submitCircleBack,

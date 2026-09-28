@@ -68,10 +68,9 @@
     noBtn.addEventListener("click", () => select(false, noBtn, yesBtn));
 
     // Only this part is locked at the first click, and only because it has
-    // to be: markQuestionAsked() isn't idempotent (it appends to
-    // askedQuestionIds and increments usedCount every time it runs), so
-    // calling it again on a retry would double-count the question as asked
-    // twice. Everything else below (note text, yes/no) is read fresh on
+    // to be: markQuestionAsked() isn't idempotent (it appends to the
+    // all-time askedQuestionIds every time it runs), so calling it again on
+    // a retry would record the question as asked twice. Everything else below (note text, yes/no) is read fresh on
     // every attempt — if a save fails, editing the note before hitting
     // "Try again" isn't silently thrown away.
     let lockedState = null;

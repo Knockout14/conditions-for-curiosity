@@ -400,6 +400,9 @@ a:hover{color:var(--warm)}
   cursor:pointer;
 }
 .pick-swap:hover{color:var(--warm);border-color:rgba(253,210,132,.5)}
+/* In a week already under way, an asked question can't be swapped out;
+   this label sits where its swap link would be. */
+.pick-asked{align-self:flex-start;margin-top:8px;font-size:11px;font-weight:600;color:var(--green)}
 
 /* Keyboard/screen-reader equivalent to the drag handle — the handle above
    has no keyboard path at all, so these are the only way to reorder
