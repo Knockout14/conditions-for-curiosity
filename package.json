@@ -4,5 +4,11 @@
   "description": "Podcast site + companion app. Static site in site/ (the only published folder); Netlify Functions under netlify/functions/ back the app's question data and (later) circle-back submissions.",
   "dependencies": {
     "@netlify/blobs": "^8.1.0"
+  },
+  "scripts": {
+    "test": "node test/functions.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
   }
 }

@@ -1,5 +1,6 @@
 import { getStore } from "@netlify/blobs";
 import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { isServable } from "./_lib/question-bank.mjs";
 
 // Mirrors the sampling rule agreed for the weekly pick (spec §3b): one
 // guaranteed Math question, one guaranteed General-or-Both, a third from
@@ -13,9 +14,11 @@ function parseRange(s) {
   return [a, b];
 }
 
+// Callers validate bandKey first; an unknown band matches nothing rather
+// than everything, so a bad value can never widen the pool.
 function ageOverlaps(bandKey, questionAges) {
   const band = AGE_BANDS[bandKey];
-  if (!band) return true;
+  if (!band) return false;
   const [qa, qb] = parseRange(questionAges);
   return qa <= band[1] && qb >= band[0];
 }
@@ -41,11 +44,12 @@ export default async (req) => {
     return new Response("Method not allowed", { status: 405 });
   }
 
-  // This endpoint returns real question text with no per-call cap — the
-  // rate limit is what stops it from being scraped into a full copy of the
-  // (proprietary) bank via repeated calls. 20/day/IP is generous for a
-  // real family (a pick plus an occasional swap, a couple of times a
-  // week) and expensive for bulk harvesting.
+  // Two caps bound what one IP can collect: at most 3 candidates per call
+  // (below), and 20 calls/day here, so 60 question texts a day, sampled at
+  // random from one age band. That's generous for a real family (a pick
+  // plus an occasional swap, a couple of times a week). It makes harvesting
+  // slow, not impossible: these questions are shown to families by design,
+  // so a patient scraper with many IPs could still collect them.
   if (!(await checkRateLimit(req, "weekly-candidates", 20))) {
     return new Response("Too many requests", { status: 429 });
   }
@@ -57,21 +61,31 @@ export default async (req) => {
     return new Response("Bad request", { status: 400 });
   }
 
-  const ageBand = typeof body.ageBand === "string" ? body.ageBand : null;
-  const asked = new Set(Array.isArray(body.askedQuestionIds) ? body.askedQuestionIds : []);
+  // Every client sends one of the three bands; anything else is a scripted
+  // call. It used to fall through to "all ages", which let one call see the
+  // whole Raw/Found pool.
+  const ageBand = body.ageBand;
+  if (!Object.hasOwn(AGE_BANDS, ageBand)) {
+    return new Response("Bad request", { status: 400 });
+  }
+  // Integer ids only, most recent 500 at most: askedQuestionIds grows by 3
+  // a week, so 500 is years of history while still bounding the work.
+  const idList = (v) => (Array.isArray(v) ? v.filter(Number.isInteger).slice(-500) : []);
+  const asked = new Set(idList(body.askedQuestionIds));
   // Extra ids to exclude beyond what's been asked — used when fetching a
   // single replacement for the weekly-pick "swap one" allowance, so the
   // replacement can't just be one of the other two already on the table.
-  const exclude = new Set(Array.isArray(body.excludeIds) ? body.excludeIds : []);
-  const count = Number.isInteger(body.count) && body.count > 0 ? body.count : 3;
+  const exclude = new Set(idList(body.excludeIds));
+  // The app asks for exactly two sizes: 3 (a weekly pick) or 1 (a swap).
+  // Anything else gets 3. An uncapped count used to return the whole
+  // eligible pool in a single call.
+  const count = body.count === 1 ? 1 : 3;
 
   const store = getStore("question-bank");
   const all = await store.get("all", { type: "json" });
   if (!all) return new Response("Question bank not populated", { status: 500 });
 
-  const eligible = all.filter(
-    (q) => (q.anchor === "RAW" || q.anchor === "FOUND") && ageOverlaps(ageBand, q.ages)
-  );
+  const eligible = all.filter((q) => isServable(q) && ageOverlaps(ageBand, q.ages));
   let pool = eligible.filter((q) => !asked.has(q.id) && !exclude.has(q.id));
   if (pool.length < count) pool = eligible.filter((q) => !exclude.has(q.id));
 
