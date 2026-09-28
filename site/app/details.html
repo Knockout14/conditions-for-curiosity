@@ -21,7 +21,11 @@
 <main class="screen">
   <h1 class="eyebrow tight">One more thing</h1>
 
-  <form id="details-form" novalidate>
+  <!-- The inline onsubmit guards the gap before app.js loads: without it, a
+       tap on Continue during a slow load did a native GET submit, putting
+       the name and email in the URL (and so in server logs and history).
+       The real handler below still does the work once it's attached. -->
+  <form id="details-form" novalidate onsubmit="event.preventDefault()">
     <div class="field">
       <label class="field-label" for="name">Your first name</label>
       <input class="field-input" type="text" id="name" name="name" maxlength="60" placeholder="Priya" autocomplete="given-name" required>
