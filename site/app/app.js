@@ -53,12 +53,70 @@
     });
   }
 
-  function load() {
-    let state = {};
+  /* ── surviving Safari's storage wipe ──
+     Safari deletes localStorage after 7 days of browser use without a visit
+     to the site — one skipped week of a weekly app can do it — which used
+     to send a family back to the start with a new session id and no
+     question history. Every save also sends the state to
+     /api/remember-state, which hands it back as a cookie set by the server
+     (Safari doesn't cap those; see that file). When localStorage comes back
+     empty, load() restores from the cookie. localStorage stays the source
+     of truth; the cookie is only ever a backup. */
+  const BACKUP_COOKIE = "cfc_state";
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  function readBackup() {
     try {
-      state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      const m = document.cookie.match(/(?:^|;\s*)cfc_state=([^;]+)/);
+      if (!m) return null;
+      const b64 = m[1].replace(/-/g, "+").replace(/_/g, "/");
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const state = JSON.parse(new TextDecoder().decode(bytes));
+      return state && typeof state === "object" && UUID.test(state.sessionId || "") ? state : null;
     } catch (e) {
-      state = {};
+      return null; // missing, cut short, or not ours: start fresh as before
+    }
+  }
+
+  // Fire-and-forget: a failed backup just means the previous one stays.
+  // keepalive lets it finish even though most saves are followed at once
+  // by a page change. Nothing is backed up until there's a name, since
+  // there's nothing worth restoring before then.
+  function backUp(state) {
+    if (!state.name || !UUID.test(state.sessionId || "")) return;
+    // askedQuestionIds only grows; the cookie keeps each id once (its most
+    // recent ask) so years of use still fit in a cookie. Every reader either
+    // checks membership or takes the last 3, which this keeps.
+    const ids = state.askedQuestionIds || [];
+    const recent = ids.filter((id, i) => ids.lastIndexOf(id) === i);
+    try {
+      fetch("/api/remember-state", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.assign({}, state, { askedQuestionIds: recent })),
+        keepalive: true,
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function clearBackup() {
+    document.cookie = `${BACKUP_COOKIE}=; Path=/app; Max-Age=0; SameSite=Lax; Secure`;
+  }
+
+  function load() {
+    let state = null;
+    try {
+      state = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    } catch (e) {
+      state = null;
+    }
+    if (!state || typeof state !== "object") {
+      state = readBackup();
+      if (state) {
+        save(state); // back into localStorage, and refresh the cookie's expiry
+      } else {
+        state = {};
+      }
     }
     if (!state.sessionId) {
       state.sessionId = randomId();
@@ -74,6 +132,7 @@
       /* private browsing / storage disabled — onboarding still works
          within a single page-load, it just won't persist across screens */
     }
+    backUp(state);
     return state;
   }
 
@@ -292,6 +351,7 @@
         localStorage.removeItem(STORAGE_KEY);
         sessionStorage.removeItem(SESSION_KEY);
       } catch (e) {}
+      clearBackup(); // or index.html would just restore everything from it
       location.href = "index.html";
     });
     document.body.appendChild(link);

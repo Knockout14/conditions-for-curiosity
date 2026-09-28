@@ -240,6 +240,58 @@ for (const [name, fn] of [["submit-pick", submitPick], ["submit-circleback", sub
     "writes: a Sheets failure -> 502, logged as readable text");
 }
 
+// ---- remember-state (the Safari-proof backup cookie)
+const rememberState = await load("remember-state");
+const remember = (body, headers = {}) => rememberState(new Request("https://x/api/remember-state", {
+  method: "POST",
+  headers: { "content-type": "application/json", "sec-fetch-site": "same-origin", ...headers },
+  body: typeof body === "string" ? body : JSON.stringify(body),
+}));
+// Decodes the cookie exactly the way site/app/app.js readBackup() does.
+const decodeCookie = (setCookie) => {
+  const value = setCookie.match(/^cfc_state=([^;]+)/)[1];
+  const bytes = Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+};
+
+// A year of weekly use, as app.js sends it (each asked id once).
+const yearOfState = {
+  sessionId: SESSION, episode5: true, name: "Zoë-Ann Nguyễn", email: "zoe.ann.nguyen@example.com", ageBand: "5-6",
+  checkAnswers: {
+    room: { selected: "Something left out that invites a question", correct: true },
+    in: { selected: "Whether you're actually curious too", correct: true },
+    out: "skipped",
+  },
+  onboardingComplete: true, onboardingCompletedAt: "2026-09-01T19:02:11.123Z",
+  weeklyPick: { questionIds: [101, 102, 103], usedCount: 2, pickedAt: "2026-09-27T17:00:00.000Z" },
+  askedQuestionIds: Array.from({ length: 86 }, (_, i) => i + 1), // every servable question, once
+  weekSummarySentFor: "2026-09-20T17:00:00.000Z",
+};
+
+check((await rememberState(get())).status === 405, "remember-state: GET -> 405");
+check((await remember(yearOfState, { "sec-fetch-site": "cross-site" })).status === 403, "remember-state: a cross-site request -> 403");
+check((await remember(yearOfState, { "content-type": "text/plain" })).status === 403, "remember-state: not JSON (what a form on another site sends) -> 403");
+check((await remember("{not json")).status === 400, "remember-state: malformed JSON -> 400");
+for (const bad of [[], "text", { name: "no session" }, { sessionId: "test-session-1" }]) {
+  check((await remember(bad)).status === 400, `remember-state: ${JSON.stringify(bad)} -> 400`);
+}
+check((await remember({ sessionId: SESSION, name: huge })).status === 413, "remember-state: oversized state -> 413");
+{
+  const res = await remember(yearOfState);
+  const setCookie = res.headers.get("set-cookie") || "";
+  check(res.status === 204, "remember-state: a real state -> 204");
+  check(/; Path=\/app; /.test(setCookie) && /Max-Age=34560000/.test(setCookie) && /SameSite=Lax/.test(setCookie) && /Secure/.test(setCookie) && !/HttpOnly/i.test(setCookie),
+    "remember-state: cookie is scoped to /app, lasts 400 days, SameSite=Lax, Secure, readable by app.js");
+  check(JSON.stringify(decodeCookie(setCookie)) === JSON.stringify(yearOfState), "remember-state: the cookie decodes back to the exact state (including non-ASCII names)");
+  check(setCookie.length < 4000, `remember-state: a full year's state fits in one cookie (${setCookie.length} of ~4096 bytes)`);
+}
+{
+  const res = await remember({ sessionId: SESSION, name: "A", note: "</script><img src=x onerror=alert(1)>; Path=/" });
+  const setCookie = res.headers.get("set-cookie") || "";
+  check(res.status === 204 && !/[\s;,]/.test(setCookie.match(/^cfc_state=([^;]+)/)[1]),
+    "remember-state: hostile text can't break out of the cookie value (base64url only)");
+}
+
 fs.rmSync(out, { recursive: true, force: true });
 console.log(failures ? `\n${failures} failed` : "\nAll passed");
 process.exit(failures ? 1 : 0);
