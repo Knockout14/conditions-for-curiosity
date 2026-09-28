@@ -1,5 +1,5 @@
 /* Conditions for Curiosity — app
-   Shared client-side state. No backend yet (per app-v1-spec-2026-09-01.md
+   Shared client-side state. No backend yet (per docs/app-v1-spec-2026-09-01.md
    §2): continuity rests on this device, via a random session id and a
    localStorage record of onboarding progress. Nothing here is sent
    anywhere — it's a placeholder for the lightweight backend described

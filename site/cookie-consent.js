@@ -1,6 +1,6 @@
 /* Conditions for Curiosity — cookie consent + gated GA4 loading.
    Shared across the marketing site only (index/model/privacy/terms/404) —
-   the app deliberately isn't tracked, see app/status-2026-09-01.md.
+   the app deliberately isn't tracked, see docs/status-2026-09-01.md.
 
    The one rule this file exists to enforce: the GA4 script tag never
    touches the page until someone clicks Accept. Not loaded-quietly-then-

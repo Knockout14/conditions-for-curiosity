@@ -1,5 +1,8 @@
 [build]
-  publish = "."
+  # Only site/ is public. Everything else in the repo (docs/, netlify/,
+  # package files) stays off the web. Never point this back at "." — that
+  # served internal docs and function source until 2026-09-28.
+  publish = "site"
   functions = "netlify/functions"
 
 [functions]
