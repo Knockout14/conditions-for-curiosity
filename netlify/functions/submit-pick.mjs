@@ -1,8 +1,6 @@
 import { appendRow } from "./_lib/google-sheets.mjs";
-
-function tagFor(q) {
-  return q ? `${q.domain} · ${q.bigIdea || q.category}` : "";
-}
+import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { isSessionId, ageBand, text, tagFor, errorMessage, QUESTION_TEXT } from "./_lib/input.mjs";
 
 // check.html now always fills all three keys — either an {selected,
 // correct} object or the literal string "skipped" — but this stays
@@ -18,38 +16,48 @@ export default async (req) => {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  // A family confirms a pick about once a week, plus the odd edit or retry.
+  // 30/day/IP leaves room for several families on one network while keeping
+  // a script from flooding the Sheet both apps share.
+  if (!(await checkRateLimit(req, "submit-pick", 30))) {
+    return new Response("Too many requests", { status: 429 });
+  }
+
   let body;
   try {
     body = await req.json();
   } catch {
     return new Response("Bad request", { status: 400 });
   }
+  if (!isSessionId(body?.sessionId)) {
+    return new Response("Bad request", { status: 400 });
+  }
 
-  const { sessionId, name, email, ageBand, checkAnswers, questions, isEdit } = body;
-  const q = Array.isArray(questions) ? questions : [];
+  const { sessionId, name, email, checkAnswers, questions, isEdit } = body;
+  const q = Array.isArray(questions) ? questions.slice(0, 3) : [];
 
   const row = [
     new Date().toISOString(),
-    sessionId || "",
-    name || "",
-    email || "",
-    ageBand || "",
-    isEdit ? "yes" : "no",
+    sessionId,
+    text(name, 60),
+    text(email, 120),
+    ageBand(body.ageBand),
+    isEdit === true ? "yes" : "no",
     checkCol(checkAnswers?.room),
     checkCol(checkAnswers?.in),
     checkCol(checkAnswers?.out),
-    q[0]?.text || "",
+    text(q[0]?.text, QUESTION_TEXT),
     tagFor(q[0]),
-    q[1]?.text || "",
+    text(q[1]?.text, QUESTION_TEXT),
     tagFor(q[1]),
-    q[2]?.text || "",
+    text(q[2]?.text, QUESTION_TEXT),
     tagFor(q[2]),
   ];
 
   try {
     await appendRow("Sheet1", row);
   } catch (e) {
-    console.error(e);
+    console.error(`submit-pick: ${errorMessage(e)}`);
     return new Response("Failed to record submission", { status: 502 });
   }
 

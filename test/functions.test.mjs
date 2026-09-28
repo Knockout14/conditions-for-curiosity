@@ -1,6 +1,7 @@
-// Offline tests for the two question-bank Functions: no network, no
-// Netlify account. The Blobs store is swapped for a fake 40-question bank
-// and the rate limiter for a stub, both at bundle time.
+// Offline tests for all five Functions: no network, no Netlify account, no
+// Google credentials. At bundle time the Blobs store is swapped for a fake
+// 40-question bank, the rate limiter for a stub, and the Google Sheets
+// client for one that records the rows it would have appended.
 // Run: npm test
 import * as esbuild from "esbuild";
 import fs from "node:fs";
@@ -27,17 +28,26 @@ const BANK = Array.from({ length: 40 }, (_, i) => ({
   prep: `prep${i + 1}`,
 }));
 globalThis.__TEST_BANK = BANK;
+globalThis.__TEST_ROWS = [];
+globalThis.__TEST_SHEETS_FAIL = false;
 
 const stubs = {
   name: "stubs",
   setup(build) {
     build.onResolve({ filter: /rate-limit\.mjs$/ }, () => ({ path: "rate-limit", namespace: "stub" }));
     build.onResolve({ filter: /^@netlify\/blobs$/ }, () => ({ path: "blobs", namespace: "stub" }));
+    build.onResolve({ filter: /google-sheets\.mjs$/ }, () => ({ path: "sheets", namespace: "stub" }));
     build.onLoad({ filter: /^rate-limit$/, namespace: "stub" }, () => ({
       contents: "export async function checkRateLimit(){ return true; }",
     }));
     build.onLoad({ filter: /^blobs$/, namespace: "stub" }, () => ({
       contents: "export const getStore = () => ({ get: async () => globalThis.__TEST_BANK });",
+    }));
+    build.onLoad({ filter: /^sheets$/, namespace: "stub" }, () => ({
+      contents: `export async function appendRow(tab, row) {
+        if (globalThis.__TEST_SHEETS_FAIL) throw new Error("sheets append failed: 500 quota");
+        globalThis.__TEST_ROWS.push({ tab, row });
+      }`,
     }));
   },
 };
@@ -128,6 +138,106 @@ check((await questionsByIds(get())).status === 405, "questions-by-ids: GET -> 40
 {
   const r = await (await questionsByIds(post({ ids: ["1", 1.5, null, 1] }))).json();
   check(r.length === 1 && r[0].id === 1, "questions-by-ids: non-integer ids ignored");
+}
+
+// ---- the three write endpoints
+const submitPick = await load("submit-pick");
+const submitCircleBack = await load("submit-circleback");
+const submitWeekSummary = await load("submit-weeksummary");
+
+const SESSION = "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90";
+const Q = (id) => ({ id, text: `q${id}`, domain: "Math", bigIdea: "Counting", category: "Notice" });
+const lastRow = () => globalThis.__TEST_ROWS.at(-1);
+const huge = "x".repeat(20000);
+
+// Sends `body` and reports the status plus the row appended, if any.
+async function send(fn, body) {
+  const before = globalThis.__TEST_ROWS.length;
+  const res = await fn(post(body));
+  return { status: res.status, row: globalThis.__TEST_ROWS.length > before ? lastRow() : null };
+}
+
+for (const [name, fn] of [["submit-pick", submitPick], ["submit-circleback", submitCircleBack], ["submit-weeksummary", submitWeekSummary]]) {
+  check((await fn(get())).status === 405, `${name}: GET -> 405`);
+  check((await fn(new Request("https://x/api", { method: "POST", body: "{not json" }))).status === 400, `${name}: malformed JSON -> 400`);
+  for (const bad of [undefined, "", "test-session-1", 12345, { id: SESSION }, `${SESSION}x`]) {
+    const r = await send(fn, { sessionId: bad, name: "A" });
+    check(r.status === 400 && !r.row, `${name}: sessionId ${JSON.stringify(bad)} -> 400, nothing written`);
+  }
+}
+
+{
+  // What the app actually sends (app.js submitPick), and the row it has always produced.
+  const r = await send(submitPick, {
+    sessionId: SESSION, name: "Priya", email: "p@example.com", ageBand: "5-6",
+    checkAnswers: { room: { selected: "a", correct: true }, in: "skipped", out: { selected: "b", correct: false } },
+    questions: [Q(1), Q(2), Q(6)], isEdit: false,
+  });
+  const expected = [SESSION, "Priya", "p@example.com", "5-6", "no", "yes", "skipped", "no",
+    "q1", "Math · Counting", "q2", "Math · Counting", "q6", "Math · Counting"];
+  check(r.status === 200 && r.row.tab === "Sheet1" && JSON.stringify(r.row.row.slice(1)) === JSON.stringify(expected),
+    "submit-pick: a real pick -> the same 15-column row as before");
+}
+{
+  const r = await send(submitPick, {
+    sessionId: SESSION, name: huge, email: huge, ageBand: "3-99", isEdit: "yes",
+    questions: Array.from({ length: 50 }, (_, i) => ({ id: i, text: huge, domain: huge, bigIdea: { x: 1 } })),
+  });
+  const row = r.row.row;
+  check(r.status === 200 && row.length === 15, "submit-pick: oversized input -> still exactly 15 columns");
+  check(row[2].length === 60 && row[3].length === 120 && row[4] === "" && row[5] === "no",
+    "submit-pick: name capped at 60, email at 120, bad ageBand blank, non-boolean isEdit -> no");
+  check(row.slice(9).every((c) => typeof c === "string" && c.length <= 300), "submit-pick: question cells are bounded strings");
+}
+
+{
+  // What circleback.html sends via app.js submitCircleBack.
+  const r = await send(submitCircleBack, {
+    sessionId: SESSION, name: "Priya", email: "", ageBand: "7-8",
+    question: Q(11), rank: 2, adultAnswer: "Mine was the stairs.", childAskedQuestion: true, note: "Asked why.",
+  });
+  const expected = [SESSION, "Priya", "", "7-8", 11, "q11", "Math · Counting", 2, "Mine was the stairs.", "yes", "Asked why."];
+  check(r.status === 200 && r.row.tab === "Circle-back" && JSON.stringify(r.row.row.slice(1)) === JSON.stringify(expected),
+    "submit-circleback: a real circle-back -> the same 12-column row as before");
+}
+{
+  const r = await send(submitCircleBack, {
+    sessionId: SESSION, question: "not an object", rank: 99, adultAnswer: huge, childAskedQuestion: "yes", note: { a: huge },
+  });
+  const row = r.row.row;
+  check(r.status === 200 && row.length === 12, "submit-circleback: oversized input -> still exactly 12 columns");
+  check(row[5] === "" && row[6] === "" && row[7] === "" && row[8] === "", "submit-circleback: a non-object question and a bad rank -> blank cells");
+  check(row[9].length === 4000 && row[10] === "no" && row[11].length <= 4000, "submit-circleback: answer and note capped at 4000; only true counts as yes");
+}
+
+{
+  // What app.js maybeSubmitWeekSummary sends.
+  const r = await send(submitWeekSummary, {
+    sessionId: SESSION, name: "Priya", email: "", ageBand: "5-6",
+    finalOrder: [Q(1), Q(2), Q(6)], askedOrder: [Q(2), Q(1), Q(6)],
+  });
+  const expected = [SESSION, "Priya", "", "5-6", "q1", "q2", "q6", "q2", "q1", "q6", "no"];
+  check(r.status === 200 && r.row.tab === "Week Summary" && JSON.stringify(r.row.row.slice(1)) === JSON.stringify(expected),
+    "submit-weeksummary: a real week -> the same 12-column row as before");
+}
+{
+  const many = Array.from({ length: 50 }, (_, i) => ({ id: i, text: huge }));
+  const r = await send(submitWeekSummary, { sessionId: SESSION, finalOrder: many, askedOrder: many });
+  check(r.status === 200 && r.row.row.length === 12 && r.row.row[11] === "yes" && r.row.row.slice(5, 11).every((c) => c.length === 300),
+    "submit-weeksummary: 50-item orders -> first 3 only, texts capped, still 12 columns");
+}
+
+{
+  // A Sheets failure: 502 to the app, and a log line that isn't blank.
+  const logged = [];
+  const realError = console.error;
+  console.error = (...a) => logged.push(a.join(" "));
+  globalThis.__TEST_SHEETS_FAIL = true;
+  const res = await submitCircleBack(post({ sessionId: SESSION }));
+  globalThis.__TEST_SHEETS_FAIL = false;
+  console.error = realError;
+  check(res.status === 502 && logged.length === 1 && logged[0].includes("sheets append failed: 500 quota"),
+    "writes: a Sheets failure -> 502, logged as readable text");
 }
 
 fs.rmSync(out, { recursive: true, force: true });

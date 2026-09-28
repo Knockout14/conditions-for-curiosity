@@ -24,7 +24,7 @@
   <form id="details-form" novalidate>
     <div class="field">
       <label class="field-label" for="name">Your first name</label>
-      <input class="field-input" type="text" id="name" name="name" placeholder="Priya" autocomplete="given-name" required>
+      <input class="field-input" type="text" id="name" name="name" maxlength="60" placeholder="Priya" autocomplete="given-name" required>
       <p class="field-hint">So we don't mix you up with another family.</p>
     </div>
 
@@ -33,7 +33,7 @@
         <label class="field-label" for="email">Email</label>
         <span class="field-optional">Optional</span>
       </div>
-      <input class="field-input optional" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+      <input class="field-input optional" type="email" id="email" name="email" maxlength="120" placeholder="you@example.com" autocomplete="email">
       <p class="field-hint">So we can follow up if something in your feedback is worth asking about.</p>
     </div>
 
