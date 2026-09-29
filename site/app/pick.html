@@ -54,11 +54,21 @@
     // In a week under way, what's already been asked stays put: it can
     // still be reordered, but not swapped out.
     const askedThisWeek = new Set(active ? CFC.weekAskedIds(state).map(String) : []);
+    // Not confirmed yet: re-show the candidates already drawn (see
+    // pendingPick in app.js) rather than drawing new ones on every visit.
+    const pending = active ? null : CFC.pendingPick(CFC.load());
     let candidates;
+    let fromPending = false;
     try {
-      candidates = active
-        ? await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds)
-        : await CFC.fetchWeeklyCandidates(state);
+      if (active) {
+        candidates = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
+      } else if (pending) {
+        candidates = await CFC.fetchQuestionsByIds(pending.questionIds);
+        // All three should come back. If one has left the bank since, draw
+        // a fresh set rather than show two.
+        fromPending = candidates.length === 3;
+      }
+      if (!active && !fromPending) candidates = await CFC.fetchWeeklyCandidates(state);
     } catch (e) {
       console.error("fetching pick candidates failed:", e);
       CFC.renderLoadError(list, "Couldn't load this week's candidates — check your connection.", load);
@@ -69,9 +79,10 @@
     let order = candidates.map((q) => String(q.id));
     // Spec allows one swap a week across the three — not a reroll of the
     // whole set. Once used, every remaining "swap" affordance disappears on
-    // the next render. It's saved with the pick, so reopening this screen
-    // to edit the week doesn't bring it back.
-    let swapUsed = active && Boolean(state.weeklyPick.swapUsed);
+    // the next render. It's saved with the pick (or with the pending
+    // candidates, before confirming), so reopening this screen doesn't
+    // bring it back.
+    let swapUsed = active ? Boolean(state.weeklyPick.swapUsed) : fromPending && Boolean(pending.swapUsed);
     continueBtn.disabled = false;
 
     function buildCard(id, index, total) {
@@ -155,6 +166,9 @@
     function render() {
       list.innerHTML = "";
       order.forEach((id, i) => list.appendChild(buildCard(id, i, order.length)));
+      // Every render follows a draw, a reorder or a swap: keep the
+      // unconfirmed candidates saved exactly as shown.
+      if (!active) CFC.savePendingPick(order.map(Number), swapUsed);
     }
 
     render();
@@ -184,6 +198,7 @@
       // unfinished and "Pick again" re-showed the same three.
       const newState = CFC.patch({
         weeklyPick: CFC.buildWeeklyPick(CFC.load(), order.map(Number), active, swapUsed),
+        pendingPick: null, // confirmed: nothing pending any more
       });
       try {
         await CFC.submitPick(newState, rankedQuestions, active);

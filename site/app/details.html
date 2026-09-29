@@ -89,7 +89,9 @@
       return;
     }
     const ageBand = form.querySelector('input[name="ageBand"]:checked').value;
-    const newState = CFC.patch({
+    // saveDetails also drops unconfirmed pick candidates if the age band
+    // changed, since they were drawn for the old one.
+    const newState = CFC.saveDetails({
       name: nameInput.value.trim(),
       email: emailInput.value.trim(),
       ageBand,

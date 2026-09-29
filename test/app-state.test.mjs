@@ -82,6 +82,32 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(CFC.load().weeklyPick.swapUsed === true, "swap: an older saved pick (no swapUsed yet) can still use its one swap");
 }
 
+// ---- unconfirmed candidates survive a reload (it used to be a full reroll)
+{
+  const { CFC } = boot({ stored: { ...base, askedQuestionIds: [] } });
+  check(CFC.pendingPick(CFC.load()) === null, "pending: nothing pending to start with");
+  CFC.savePendingPick([4, 5, 6], false);
+  check(same(CFC.pendingPick(CFC.load()), { questionIds: [4, 5, 6], swapUsed: false }), "pending: the drawn three are saved, in order");
+  CFC.savePendingPick([6, 9, 4], true); // reordered, then swapped 5 for 9
+  check(same(CFC.pendingPick(CFC.load()), { questionIds: [6, 9, 4], swapUsed: true }), "pending: a reorder and the swap are saved too");
+  CFC.patch({ weeklyPick: CFC.buildWeeklyPick(CFC.load(), [6, 9, 4], false, true), pendingPick: null });
+  check(CFC.pendingPick(CFC.load()) === null && CFC.load().weeklyPick.swapUsed === true, "pending: confirming clears it, and the swap carries into the week");
+}
+{
+  const { CFC } = boot({ stored: { ...base, askedQuestionIds: [], pendingPick: { questionIds: [4, 5, 6], swapUsed: false } } });
+  CFC.saveDetails({ name: "Priya R", email: "", ageBand: "3-4" });
+  check(CFC.pendingPick(CFC.load()) !== null, "pending: editing a name keeps the candidates");
+  CFC.saveDetails({ name: "Priya R", email: "", ageBand: "5-6" });
+  check(CFC.pendingPick(CFC.load()) === null && CFC.load().ageBand === "5-6", "pending: changing the age band drops them (drawn for the old band)");
+}
+{
+  for (const bad of [{ questionIds: [1, 2] }, { questionIds: ["1", "2", "3"] }, { questionIds: null }, "x"]) {
+    const { CFC } = boot({ stored: { ...base, pendingPick: bad } });
+    if (CFC.pendingPick(CFC.load()) !== null) { check(false, `pending: a malformed value is ignored (${JSON.stringify(bad)})`); }
+  }
+  check(true, "pending: malformed saved values are ignored, so the screen just draws fresh");
+}
+
 // ---- a fresh pick starts empty, even after the pool runs out
 {
   // Ages 3–4 have 47 questions, so after ~15 weeks the sampler re-offers

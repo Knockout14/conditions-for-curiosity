@@ -320,6 +320,32 @@
     });
   }
 
+  /* ── candidates not yet confirmed ──
+     A fresh sample used to live only on the pick screen, so reloading it,
+     or leaving and coming back, drew three new candidates: a full reroll,
+     when the spec allows one swap. Until the pick is confirmed, the three
+     candidates (in their current order) and whether the swap was used are
+     saved here, and the pick screen re-shows them. Confirming clears it;
+     so does changing the age band, since they were drawn for the old one. */
+  function pendingPick(state) {
+    const p = state.pendingPick;
+    const ok = p && Array.isArray(p.questionIds) && p.questionIds.length === 3 && p.questionIds.every(Number.isInteger);
+    return ok ? p : null;
+  }
+
+  function savePendingPick(questionIds, swapUsed) {
+    return patch({ pendingPick: { questionIds, swapUsed: Boolean(swapUsed) } });
+  }
+
+  // details.html's save. Only a changed age band drops the pending
+  // candidates; editing a name or email keeps them.
+  function saveDetails({ name, email, ageBand }) {
+    const before = load();
+    const changes = { name, email, ageBand };
+    if (before.ageBand && before.ageBand !== ageBand) changes.pendingPick = null;
+    return patch(changes);
+  }
+
   /* The weeklyPick record pick.html saves. A fresh pick starts with nothing
      asked; editing a week in progress (reordering, or swapping a question
      not yet asked) keeps what's already been asked.
@@ -556,6 +582,9 @@
     isWeekDone,
     markQuestionAsked,
     buildWeeklyPick,
+    pendingPick,
+    savePendingPick,
+    saveDetails,
     saveCurrentQuestion,
     loadCurrentQuestion,
     submitCircleBack,
