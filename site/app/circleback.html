@@ -101,6 +101,7 @@
         console.error("submitCircleBack failed:", e);
         doneBtn.disabled = false;
         doneBtn.textContent = "Try again";
+        errorEl.textContent = `Couldn't save that. ${CFC.failureReason(e)} Your answer isn't lost, it just hasn't reached us yet.`;
         errorEl.hidden = false;
       }
     }

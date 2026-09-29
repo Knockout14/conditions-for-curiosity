@@ -37,8 +37,11 @@ const stubs = {
     build.onResolve({ filter: /rate-limit\.mjs$/ }, () => ({ path: "rate-limit", namespace: "stub" }));
     build.onResolve({ filter: /^@netlify\/blobs$/ }, () => ({ path: "blobs", namespace: "stub" }));
     build.onResolve({ filter: /google-sheets\.mjs$/ }, () => ({ path: "sheets", namespace: "stub" }));
+    // __TEST_LIMITED switches every endpoint into "rate limit reached". The
+    // real module is tested on its own at the end of this file.
     build.onLoad({ filter: /^rate-limit$/, namespace: "stub" }, () => ({
-      contents: "export async function checkRateLimit(){ return true; }",
+      contents: `export async function checkRateLimit(){ return !globalThis.__TEST_LIMITED; }
+        export function tooManyRequests(){ return new Response("Too many requests", { status: 429 }); }`,
     }));
     build.onLoad({ filter: /^blobs$/, namespace: "stub" }, () => ({
       contents: "export const getStore = () => ({ get: async () => globalThis.__TEST_BANK });",
@@ -65,6 +68,7 @@ let failures = 0;
 const check = (ok, msg) => { console.log(`${ok ? "PASS" : "FAIL"}  ${msg}`); if (!ok) failures++; };
 const post = (body) => new Request("https://x/api", { method: "POST", body: JSON.stringify(body) });
 const get = () => new Request("https://x/api", { method: "GET" });
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const servable = (q) => q.anchor === "RAW" || q.anchor === "FOUND";
 const byId = new Map(BANK.map((q) => [q.id, q]));
 const range = (ages) => ages.split("-").map(Number);
@@ -290,6 +294,64 @@ check((await remember({ sessionId: SESSION, name: huge })).status === 413, "reme
   const setCookie = res.headers.get("set-cookie") || "";
   check(res.status === 204 && !/[\s;,]/.test(setCookie.match(/^cfc_state=([^;]+)/)[1]),
     "remember-state: hostile text can't break out of the cookie value (base64url only)");
+}
+
+// ---- rate limits: every limited endpoint answers 429, before touching anything
+{
+  globalThis.__TEST_LIMITED = true;
+  const rowsBefore = globalThis.__TEST_ROWS.length;
+  const results = [
+    ["weekly-candidates", await weeklyCandidates(post({ ageBand: "5-6" }))],
+    ["questions-by-ids", await questionsByIds(post({ ids: [1] }))],
+    ["submit-pick", await submitPick(post({ sessionId: SESSION }))],
+    ["submit-circleback", await submitCircleBack(post({ sessionId: SESSION }))],
+    ["submit-weeksummary", await submitWeekSummary(post({ sessionId: SESSION }))],
+  ];
+  globalThis.__TEST_LIMITED = false;
+  check(results.every(([, r]) => r.status === 429) && globalThis.__TEST_ROWS.length === rowsBefore,
+    "rate limit: all five limited endpoints answer 429, and nothing is written");
+}
+
+// ---- the real rate limiter, against an in-memory Blobs store
+{
+  globalThis.__TEST_COUNTERS = new Map();
+  const file = path.join(out, "rate-limit-real.mjs");
+  await esbuild.build({
+    entryPoints: [path.join(root, "netlify/functions/_lib/rate-limit.mjs")],
+    outfile: file, bundle: true, format: "esm", platform: "node", logLevel: "silent",
+    plugins: [{
+      name: "blobs-in-memory",
+      setup(build) {
+        build.onResolve({ filter: /^@netlify\/blobs$/ }, () => ({ path: "blobs", namespace: "mem" }));
+        build.onLoad({ filter: /^blobs$/, namespace: "mem" }, () => ({
+          contents: `export const getStore = () => ({
+            get: async (k) => globalThis.__TEST_COUNTERS.get(k) ?? null,
+            set: async (k, v) => { globalThis.__TEST_COUNTERS.set(k, v); },
+          });`,
+        }));
+      },
+    }],
+  });
+  const { checkRateLimit, tooManyRequests } = await import(pathToFileURL(file).href);
+  const from = (ip) => new Request("https://x/api", { method: "POST", headers: { "x-nf-client-connection-ip": ip } });
+
+  const warned = [];
+  const realWarn = console.warn;
+  console.warn = (...a) => warned.push(a.join(" "));
+  const allowed = [];
+  for (let i = 0; i < 5; i++) allowed.push(await checkRateLimit(from("203.0.113.7"), "submit-pick", 3));
+  const otherNetwork = await checkRateLimit(from("198.51.100.2"), "submit-pick", 3);
+  console.warn = realWarn;
+
+  check(same(allowed, [true, true, true, false, false]) && otherNetwork, "rate limiter: allows the limit, refuses after it, per network");
+  check(warned.length === 1 && warned[0].includes("submit-pick") && !warned.join().includes("203.0.113.7"),
+    "rate limiter: logs the first refusal only, with no IP address in the log");
+
+  const res = tooManyRequests();
+  const retryAfter = Number(res.headers.get("retry-after"));
+  const resetsAt = new Date(Date.now() + retryAfter * 1000);
+  check(res.status === 429 && retryAfter > 0 && retryAfter <= 86400 && resetsAt.getUTCHours() === 0 && resetsAt.getUTCMinutes() <= 1,
+    `rate limiter: 429 carries Retry-After (${retryAfter}s), which lands on the next UTC midnight`);
 }
 
 fs.rmSync(out, { recursive: true, force: true });

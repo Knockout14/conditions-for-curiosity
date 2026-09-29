@@ -205,7 +205,14 @@
         body: JSON.stringify(body),
         signal: controller.signal,
       });
-      if (!res.ok) throw new Error(`${path} → ${res.status}`);
+      if (!res.ok) {
+        // The status and Retry-After ride along so failureReason() can say
+        // what actually went wrong.
+        const err = new Error(`${path} → ${res.status}`);
+        err.status = res.status;
+        err.retryAfter = Number(res.headers.get("retry-after")) || 0;
+        throw err;
+      }
       return await res.json();
     } catch (e) {
       if (e.name === "AbortError") throw new Error(`${path} → timed out after ${POST_TIMEOUT_MS}ms`);
@@ -213,6 +220,29 @@
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  /* One sentence on why a request failed, for every error message in the
+     app. Every failure used to say "check your connection," including a
+     rate limit (429), where retrying only uses up more of the network's
+     shared budget. That's exactly what a group on one Wi-Fi would hit, a
+     school PD session for instance, and the message sent them the wrong
+     way. `now` is only there for tests. */
+  function failureReason(e, now = new Date()) {
+    const status = e && e.status;
+    if (status === 429) {
+      const seconds = e.retryAfter > 0 ? e.retryAfter : 0;
+      let when = "later today or tomorrow";
+      if (seconds) {
+        const resets = new Date(now.getTime() + seconds * 1000);
+        const day = resets.toDateString() === now.toDateString() ? "today" : "tomorrow";
+        when = `${day} at ${resets.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+      }
+      return `This network has reached the app's daily limit, which everyone on it shares. It resets ${when}, or switching networks (Wi-Fi to mobile data, say) should work now.`;
+    }
+    if (status >= 500) return "Something went wrong on the server. Try again in a minute.";
+    if (status >= 400) return "Something about that request didn't work. Reloading the page usually fixes it.";
+    return "Check your connection and try again."; // offline, or timed out
   }
 
   /* Three candidates for the weekly pick (spec §3b), sampled server-side:
@@ -567,6 +597,7 @@
   global.CFC = {
     escapeHtml,
     renderLoadError,
+    failureReason,
     load,
     save,
     patch,

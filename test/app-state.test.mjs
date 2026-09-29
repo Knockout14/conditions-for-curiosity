@@ -149,6 +149,20 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
     "week summary: final order 1,2,3 next to asked order 3,1,2");
 }
 
+// ---- error messages say what actually went wrong
+{
+  const { CFC } = boot();
+  const now = new Date(2026, 8, 28, 14, 0, 0); // 2:00 PM local
+  const limited = CFC.failureReason({ status: 429, retryAfter: 3 * 3600 }, now);
+  check(/daily limit/.test(limited) && /resets today at/.test(limited) && /switching networks/.test(limited) && !/connection/.test(limited),
+    "message: a rate limit says so, when it resets (today), and to switch networks, not 'check your connection'");
+  check(/resets tomorrow at/.test(CFC.failureReason({ status: 429, retryAfter: 12 * 3600 }, now)), "message: a reset after midnight says tomorrow");
+  check(/later today or tomorrow/.test(CFC.failureReason({ status: 429 }, now)), "message: a rate limit with no Retry-After still reads sensibly");
+  check(/server/.test(CFC.failureReason({ status: 502 })), "message: a server failure says so");
+  check(/Reloading/.test(CFC.failureReason({ status: 400 })), "message: a rejected request suggests reloading");
+  check(/Check your connection/.test(CFC.failureReason(new Error("timed out"))), "message: a timeout or offline still says check your connection");
+}
+
 // ---- the storage backup (Safari's 7-day wipe)
 {
   const { CFC, calls } = boot({ stored: { ...base, askedQuestionIds: [4, 5, 4, 6, 4] } });

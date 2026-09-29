@@ -1,5 +1,5 @@
 import { appendRow } from "./_lib/google-sheets.mjs";
-import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { checkRateLimit, tooManyRequests } from "./_lib/rate-limit.mjs";
 import { isSessionId, ageBand, text, errorMessage, QUESTION_TEXT } from "./_lib/input.mjs";
 
 export default async (req) => {
@@ -10,7 +10,7 @@ export default async (req) => {
   // One row per finished week, retried on the next page load if it failed.
   // Same 30/day/IP budget as the other two writes.
   if (!(await checkRateLimit(req, "submit-weeksummary", 30))) {
-    return new Response("Too many requests", { status: 429 });
+    return tooManyRequests();
   }
 
   let body;

@@ -42,7 +42,7 @@
         questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
       } catch (e) {
         console.error("fetchQuestionsByIds failed:", e);
-        CFC.renderLoadError(screen, "Couldn't load this week's three — check your connection.", load);
+        CFC.renderLoadError(screen, `Couldn't load this week's three. ${CFC.failureReason(e)}`, load);
         return;
       }
       // This week's asks only (see weekAskedIds in app.js): a question

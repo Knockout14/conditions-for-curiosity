@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { checkRateLimit, tooManyRequests } from "./_lib/rate-limit.mjs";
 import { isServable } from "./_lib/question-bank.mjs";
 
 // Mirrors the sampling rule agreed for the weekly pick (spec §3b): one
@@ -51,7 +51,7 @@ export default async (req) => {
   // slow, not impossible: these questions are shown to families by design,
   // so a patient scraper with many IPs could still collect them.
   if (!(await checkRateLimit(req, "weekly-candidates", 20))) {
-    return new Response("Too many requests", { status: 429 });
+    return tooManyRequests();
   }
 
   let body;

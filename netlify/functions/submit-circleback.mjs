@@ -1,5 +1,5 @@
 import { appendRow } from "./_lib/google-sheets.mjs";
-import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { checkRateLimit, tooManyRequests } from "./_lib/rate-limit.mjs";
 import { isSessionId, ageBand, text, tagFor, errorMessage, LONG_TEXT, QUESTION_TEXT } from "./_lib/input.mjs";
 
 export default async (req) => {
@@ -10,7 +10,7 @@ export default async (req) => {
   // At most one circle-back a night per family, plus retries. Same
   // 30/day/IP budget as submit-pick, for the same reason.
   if (!(await checkRateLimit(req, "submit-circleback", 30))) {
-    return new Response("Too many requests", { status: 429 });
+    return tooManyRequests();
   }
 
   let body;

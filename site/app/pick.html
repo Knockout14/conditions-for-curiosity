@@ -71,7 +71,7 @@
       if (!active && !fromPending) candidates = await CFC.fetchWeeklyCandidates(state);
     } catch (e) {
       console.error("fetching pick candidates failed:", e);
-      CFC.renderLoadError(list, "Couldn't load this week's candidates — check your connection.", load);
+      CFC.renderLoadError(list, `Couldn't load this week's candidates. ${CFC.failureReason(e)}`, load);
       return;
     }
     const byId = new Map(candidates.map((q) => [String(q.id), q]));
@@ -146,7 +146,8 @@
         // "Swapping…" with no way forward. The swap isn't spent; try again.
         console.error("swap failed:", e);
         btn.disabled = false;
-        btn.textContent = "Couldn't swap. Try again";
+        // A rate limit won't clear on a retry, so say that instead.
+        btn.textContent = e.status === 429 ? "Swaps are paused on this network today" : "Couldn't swap. Try again";
         return;
       }
       if (!replacement) {
@@ -207,6 +208,7 @@
         console.error("submitPick failed:", e);
         continueBtn.disabled = false;
         continueBtn.textContent = "Try again";
+        errorEl.textContent = `Couldn't save that. ${CFC.failureReason(e)} Your ranking is kept, it just hasn't reached us yet.`;
         errorEl.hidden = false;
       }
     }

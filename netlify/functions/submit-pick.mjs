@@ -1,5 +1,5 @@
 import { appendRow } from "./_lib/google-sheets.mjs";
-import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { checkRateLimit, tooManyRequests } from "./_lib/rate-limit.mjs";
 import { isSessionId, ageBand, text, tagFor, errorMessage, QUESTION_TEXT } from "./_lib/input.mjs";
 
 // check.html now always fills all three keys — either an {selected,
@@ -20,7 +20,7 @@ export default async (req) => {
   // 30/day/IP leaves room for several families on one network while keeping
   // a script from flooding the Sheet both apps share.
   if (!(await checkRateLimit(req, "submit-pick", 30))) {
-    return new Response("Too many requests", { status: 429 });
+    return tooManyRequests();
   }
 
   let body;

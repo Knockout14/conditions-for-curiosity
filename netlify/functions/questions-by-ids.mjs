@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import { checkRateLimit } from "./_lib/rate-limit.mjs";
+import { checkRateLimit, tooManyRequests } from "./_lib/rate-limit.mjs";
 import { isServable } from "./_lib/question-bank.mjs";
 
 // Full question fields — used once a question is part of a family's
@@ -24,7 +24,7 @@ export default async (req) => {
   // bank come back empty however they're requested. Like weekly-candidates,
   // this makes harvesting the v1 questions slow, not impossible.
   if (!(await checkRateLimit(req, "questions-by-ids", 20))) {
-    return new Response("Too many requests", { status: 429 });
+    return tooManyRequests();
   }
 
   let body;
