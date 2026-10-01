@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { getStore } from "@netlify/blobs";
 
 // Coarse per-identity-per-day request cap, backed by a Netlify Blobs
@@ -42,8 +43,24 @@ export async function checkRateLimit(req, bucket, limit) {
   // Once per network per bucket per day, and never the IP itself.
   if (count === limit + 1) {
     console.warn(`rate limit reached: ${bucket} (${limit}/day) by one network`);
+    await recordRefusal(day, bucket);
   }
   return count <= limit;
+}
+
+// A lasting record next to the log line, since Netlify keeps Function logs
+// only briefly. One entry per network refused, per bucket per day, read by
+// `npm run limits` (scripts/rate-limit-report.mjs). Each entry gets its own
+// random key rather than bumping a shared counter, so two refusals at once
+// can't overwrite each other, and nothing about the network is stored.
+// A failure here never blocks the request.
+export const STATS_STORE = "rate-limit-stats";
+async function recordRefusal(day, bucket) {
+  try {
+    await getStore(STATS_STORE).set(`${day}/${bucket}/${randomUUID()}`, "1");
+  } catch (e) {
+    console.error(`rate-limit-stats: ${e && e.message ? e.message : String(e)}`);
+  }
 }
 
 // The 429 every endpoint returns. Retry-After is the seconds until the

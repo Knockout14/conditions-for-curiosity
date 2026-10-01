@@ -6,7 +6,8 @@
     "@netlify/blobs": "^8.1.0"
   },
   "scripts": {
-    "test": "node test/functions.test.mjs && node test/app-state.test.mjs"
+    "test": "node test/functions.test.mjs && node test/app-state.test.mjs",
+    "limits": "node scripts/rate-limit-report.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

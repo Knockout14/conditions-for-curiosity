@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy — Conditions for Curiosity</title>
-<meta name="description" content="What Conditions for Curiosity collects, why, and who sees it — for the podcast site and the companion app.">
+<title>Privacy: Conditions for Curiosity</title>
+<meta name="description" content="What Conditions for Curiosity collects, why, and who sees it, for the podcast site and the companion app.">
 <link rel="canonical" href="https://conditionsforcuriosity.netlify.app/privacy.html">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -91,16 +91,16 @@ footer a:hover{color:var(--gold)}
   <section class="bay">
     <div class="inner">
       <h2>Who this is</h2>
-      <p>Conditions for Curiosity is a one-person project — I'm Kevin, I host the podcast, and I built the companion app myself. There's no company, no team with access to this data, and no third party I sell it to. If you have a question about any of this, email me directly: <a href="mailto:conditionsforcuriosity@gmail.com">conditionsforcuriosity@gmail.com</a>.</p>
+      <p>Conditions for Curiosity is a one-person project: I'm Kevin, I host the podcast, and I built the companion app myself. There's no company, no team with access to this data, and no third party I sell it to. If you have a question about any of this, email me directly: <a href="mailto:conditionsforcuriosity@gmail.com">conditionsforcuriosity@gmail.com</a>.</p>
     </div>
   </section>
 
   <section class="bay">
     <div class="inner">
       <h2>The podcast site</h2>
-      <p>If you sign up for the newsletter, I collect your <strong>email address</strong> — nothing else. That signup is handled by <a href="https://buttondown.email" target="_blank" rel="noopener">Buttondown</a>, a third-party email service; your address is stored on their servers, not mine, and their own <a href="https://buttondown.email/legal/privacy" target="_blank" rel="noopener">privacy policy</a> governs how they handle it. Right now that's a weekly note — something I'm reading about curiosity in kids, one thing to try that night, and a standing ask for how the app's working for you. It'll change shape again once season two is scripted. Every email has a one-click unsubscribe.</p>
-      <p>The Curiosity Sphere model (<a href="/model.html">/model.html</a>) collects nothing at all — it runs entirely in your browser and doesn't talk to any server.</p>
-      <p>This site can use <strong>Google Analytics</strong> to see which pages and episodes people are actually finding — standard, aggregate stuff: page views, roughly where visitors come from, what kind of device they're on. Nothing about you individually. It only runs if you click Accept on the banner the first time you visit; click Decline (or just ignore it) and the Analytics script never loads at all — not quietly in the background, not at all. You can change your answer any time from the "Cookie preferences" link in this footer. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's own privacy policy</a> governs how they handle what Analytics collects. This only runs on the podcast site — the app (everything under <code>/app</code>) has no analytics of any kind, on top of everything above.</p>
+      <p>If you sign up for the newsletter, I collect your <strong>email address</strong>. Nothing else. That signup is handled by <a href="https://buttondown.email" target="_blank" rel="noopener">Buttondown</a>, a third-party email service; your address is stored on their servers, not mine, and their own <a href="https://buttondown.email/legal/privacy" target="_blank" rel="noopener">privacy policy</a> governs how they handle it. Right now that's a weekly note: something I'm reading about curiosity in kids, one thing to try that night, and a standing ask for how the app's working for you. It'll change shape again once season two is scripted. Every email has a one-click unsubscribe.</p>
+      <p>The Curiosity Sphere model (<a href="/model.html">/model.html</a>) collects nothing at all: it runs entirely in your browser and doesn't talk to any server.</p>
+      <p>This site can use <strong>Google Analytics</strong> to see which pages and episodes people are actually finding: standard, aggregate stuff such as page views, roughly where visitors come from, and what kind of device they're on. Nothing about you individually. It only runs if you click Accept on the banner the first time you visit; click Decline (or just ignore it) and the Analytics script never loads at all, not quietly in the background, not at all. You can change your answer any time from the "Cookie preferences" link in this footer. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's own privacy policy</a> governs how they handle what Analytics collects. This only runs on the podcast site. The app (everything under <code>/app</code>) has no analytics of any kind, on top of everything above.</p>
     </div>
   </section>
 
@@ -109,15 +109,15 @@ footer a:hover{color:var(--gold)}
       <h2>The app</h2>
       <p>The companion app is where most of the actual data collection happens, because it's built around real feedback from real families using it. Here's exactly what it collects and why:</p>
       <ul>
-        <li><strong>Your first name</strong> — so I don't mix your feedback up with another family's.</li>
-        <li><strong>Your email, optional</strong> — only so I can follow up if something you share is worth asking about. Leave it blank and I have no way to reach you.</li>
-        <li><strong>Your child's age band</strong> (3–4, 5–6, or 7–8+) — never an exact age or birthdate. This only shapes which questions the app offers.</li>
+        <li><strong>Your first name</strong>: so I don't mix your feedback up with another family's.</li>
+        <li><strong>Your email, optional</strong>: only so I can follow up if something you share is worth asking about. Leave it blank and I have no way to reach you.</li>
+        <li><strong>Your child's age band</strong> (3–4, 5–6, or 7–8+): never an exact age or birthdate. This only shapes which questions the app offers.</li>
         <li><strong>Your answers to a short comprehension check</strong> during onboarding, and <strong>which three questions you pick</strong> each week.</li>
-        <li><strong>Circle-back responses</strong> — whether your child asked a question back, and an optional note, written by you, on what they said.</li>
-        <li><strong>A random session ID</strong>, generated by your device, used to tell your submissions apart from another family's — it isn't tied to any account or login, because there isn't one.</li>
+        <li><strong>Circle-back responses</strong>: whether your child asked a question back, and an optional note, written by you, on what they said.</li>
+        <li><strong>A random session ID</strong>, generated by your device, used to tell your submissions apart from another family's. It isn't tied to any account or login, because there isn't one.</li>
       </ul>
       <p>This is sent through a small backend function to a private Google Sheet that only I can read. The only companies involved are the two services that run it: Netlify, which hosts the site and that function, and Google, which stores the spreadsheet. I don't share it with anyone else. Your day-to-day progress in the app (which screen you're on, which questions you've already been asked) is saved on your own device, in your browser's local storage. A backup copy is also kept in a cookie on your device, because some browsers, Safari especially, clear local storage after about a week without a visit, and that used to reset people back to the start. To create that cookie, the app sends your progress to its server, which hands it straight back to your browser without storing or logging it. The cookie is only used by the app's own pages. Beyond that, I never see your progress, only the specific data listed above, submitted when you actually complete a step.</p>
-      <p>I read this weekly, by hand, to see how the app is actually landing with real families. I don't run ads against it and I don't have a use for your data beyond that — there's nothing else here to monetize it with.</p>
+      <p>I read this weekly, by hand, to see how the app is actually landing with real families. I don't run ads against it and I don't have a use for your data beyond that. There's nothing else here to monetize it with.</p>
     </div>
   </section>
 
@@ -126,10 +126,10 @@ footer a:hover{color:var(--gold)}
       <h2>Counting games (pilot)</h2>
       <p>The counting games are a separate pilot, at their own web address, for a small group of families I've invited. They collect:</p>
       <ul>
-        <li><strong>Your first name and, optionally, your email</strong> — same as the main app, and for the same reasons.</li>
-        <li><strong>Your child's age band</strong> — never an exact age or birthdate.</li>
-        <li><strong>A label for each child that you choose</strong> — initials, "older" or "younger," anything but their name. It only keeps two kids' nights from getting mixed up.</li>
-        <li><strong>What happened in the game</strong>: your answers to a few short multiple-choice questions, and what you choose to share in your own words (typed, or dictated with your phone's keyboard mic — only the text is saved, never a recording).</li>
+        <li><strong>Your first name and, optionally, your email</strong>: same as the main app, and for the same reasons.</li>
+        <li><strong>Your child's age band</strong>: never an exact age or birthdate.</li>
+        <li><strong>A label for each child that you choose</strong>: initials, "older" or "younger," anything but their name. It only keeps two kids' nights from getting mixed up.</li>
+        <li><strong>What happened in the game</strong>: your answers to a few short multiple-choice questions, and what you choose to share in your own words (typed, or dictated with your phone's keyboard mic; only the text is saved, never a recording).</li>
         <li><strong>How long the short questions took you</strong>, so I can spot entries that were rushed or accidental.</li>
       </ul>
       <p>This goes to the same private spreadsheet as the main app. When you share at least a couple of sentences, I write a short note back to you myself, and it appears in the app the next time you open it.</p>
@@ -142,8 +142,8 @@ footer a:hover{color:var(--gold)}
     <div class="inner">
       <h2>About your child's information</h2>
       <div class="box">
-        <p>The app is built and used by you, the parent or caregiver — your child never opens it, creates anything in it, or submits anything to it directly. It is not directed at children, and I don't knowingly collect information directly from a child.</p>
-        <p>What I do collect, about your child, from you: an age band (never an exact age, birthdate, or name), whatever you choose to write in an optional circle-back note, and, in the counting games, a label you choose for each child and what you share about how the game went. That's a deliberate design choice, made before any of this was built — the app can do everything it needs to (match question difficulty, show you patterns over time) without ever turning your child into an identifiable record on my end.</p>
+        <p>The app is built and used by you, the parent or caregiver. Your child never opens it, creates anything in it, or submits anything to it directly. It is not directed at children, and I don't knowingly collect information directly from a child.</p>
+        <p>What I do collect, about your child, from you: an age band (never an exact age, birthdate, or name), whatever you choose to write in an optional circle-back note, and, in the counting games, a label you choose for each child and what you share about how the game went. That's a deliberate design choice, made before any of this was built. The app can do everything it needs to (match question difficulty, show you patterns over time) without ever turning your child into an identifiable record on my end.</p>
       </div>
     </div>
   </section>
@@ -170,13 +170,13 @@ footer a:hover{color:var(--gold)}
   <section class="bay">
     <div class="inner">
       <h2>Changes to this policy</h2>
-      <p>If what I collect or how I use it changes, I'll update this page and the date at the top. For anything material — a new kind of data, a new place it goes — I'll say so plainly here rather than quietly editing the wording.</p>
+      <p>If what I collect or how I use it changes, I'll update this page and the date at the top. For anything material, a new kind of data, a new place it goes, I'll say so plainly here rather than quietly editing the wording.</p>
     </div>
   </section>
 
   <footer class="bay">
     <div class="inner">
-      <p>Conditions for Curiosity — a show being built in public. <a href="/">Home</a> · <a href="terms.html">Terms</a> · <a href="https://www.instagram.com/curiosityconditions/" target="_blank" rel="noopener">Instagram</a> · <a href="mailto:conditionsforcuriosity@gmail.com">conditionsforcuriosity@gmail.com</a></p>
+      <p>Conditions for Curiosity: a show being built in public. <a href="/">Home</a> · <a href="terms.html">Terms</a> · <a href="https://www.instagram.com/curiosityconditions/" target="_blank" rel="noopener">Instagram</a> · <a href="mailto:conditionsforcuriosity@gmail.com">conditionsforcuriosity@gmail.com</a></p>
     </div>
   </footer>
 

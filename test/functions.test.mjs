@@ -324,9 +324,9 @@ check((await remember({ sessionId: SESSION, name: huge })).status === 413, "reme
       setup(build) {
         build.onResolve({ filter: /^@netlify\/blobs$/ }, () => ({ path: "blobs", namespace: "mem" }));
         build.onLoad({ filter: /^blobs$/, namespace: "mem" }, () => ({
-          contents: `export const getStore = () => ({
-            get: async (k) => globalThis.__TEST_COUNTERS.get(k) ?? null,
-            set: async (k, v) => { globalThis.__TEST_COUNTERS.set(k, v); },
+          contents: `export const getStore = (name) => ({
+            get: async (k) => globalThis.__TEST_COUNTERS.get(name + "::" + k) ?? null,
+            set: async (k, v) => { globalThis.__TEST_COUNTERS.set(name + "::" + k, v); },
           });`,
         }));
       },
@@ -347,11 +347,43 @@ check((await remember({ sessionId: SESSION, name: huge })).status === 413, "reme
   check(warned.length === 1 && warned[0].includes("submit-pick") && !warned.join().includes("203.0.113.7"),
     "rate limiter: logs the first refusal only, with no IP address in the log");
 
+  const today = new Date().toISOString().slice(0, 10);
+  const statKeys = [...globalThis.__TEST_COUNTERS.keys()].filter((k) => k.startsWith("rate-limit-stats::"));
+  check(statKeys.length === 1 && statKeys[0].startsWith(`rate-limit-stats::${today}/submit-pick/`) && !statKeys[0].includes("203.0.113.7"),
+    "rate limiter: records one lasting stats entry per refused network (day/endpoint only, no IP)");
+
   const res = tooManyRequests();
   const retryAfter = Number(res.headers.get("retry-after"));
   const resetsAt = new Date(Date.now() + retryAfter * 1000);
   check(res.status === 429 && retryAfter > 0 && retryAfter <= 86400 && resetsAt.getUTCHours() === 0 && resetsAt.getUTCMinutes() <= 1,
     `rate limiter: 429 carries Retry-After (${retryAfter}s), which lands on the next UTC midnight`);
+
+  // A second network refused the same day adds its own entry: no shared
+  // counter to overwrite.
+  for (let i = 0; i < 4; i++) await checkRateLimit(from("198.51.100.2"), "submit-pick", 3);
+  const { summarize, formatReport } = await import(pathToFileURL(path.join(root, "scripts/rate-limit-report.mjs")).href);
+  const rows = summarize([...globalThis.__TEST_COUNTERS.keys()].filter((k) => k.startsWith("rate-limit-stats::")).map((k) => k.split("::")[1]));
+  check(same(rows, [{ day: today, bucket: "submit-pick", networks: 2 }]), "report: two networks refused on one endpoint read as 2");
+}
+
+// ---- the report's grouping and wording (scripts/rate-limit-report.mjs)
+{
+  const { summarize, formatReport } = await import(pathToFileURL(path.join(root, "scripts/rate-limit-report.mjs")).href);
+  const u = () => crypto.randomUUID();
+  const keys = [
+    `2026-09-27/submit-pick/${u()}`, `2026-09-28/weekly-candidates/${u()}`, `2026-09-28/submit-pick/${u()}`,
+    `2026-09-28/submit-pick/${u()}`, `2026-08-01/submit-pick/${u()}`, "garbage", `2026-09-28/submit-pick/not-a-uuid`,
+  ];
+  const rows = summarize(keys, "2026-09-01");
+  check(same(rows, [
+    { day: "2026-09-28", bucket: "submit-pick", networks: 2 },
+    { day: "2026-09-28", bucket: "weekly-candidates", networks: 1 },
+    { day: "2026-09-27", bucket: "submit-pick", networks: 1 },
+  ]), "report: groups by day and endpoint, newest first, skips old and malformed keys");
+  const text = formatReport("Question app", rows, 30);
+  check(text.startsWith("Question app: 4 refused networks in the last 30 days") && /submit-pick\s+2 networks$/m.test(text) && /weekly-candidates\s+1 network$/m.test(text),
+    "report: totals and singular/plural read right");
+  check(formatReport("Counting games", [], 30) === "Counting games: no networks hit a limit in the last 30 days.", "report: an empty store says so plainly");
 }
 
 fs.rmSync(out, { recursive: true, force: true });
