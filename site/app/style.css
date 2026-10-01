@@ -75,7 +75,7 @@ a:hover{color:var(--warm)}
 .eyebrow-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .edit-link{
   font-family:inherit;
-  font-size:10.5px;
+  font-size:11px;
   font-weight:600;
   letter-spacing:.06em;
   text-transform:uppercase;
@@ -214,7 +214,7 @@ a:hover{color:var(--warm)}
   text-transform:uppercase;
   color:var(--off-mute);
 }
-.field-optional{font-size:10.5px;color:var(--off-instruct)}
+.field-optional{font-size:11px;color:var(--off-instruct)}
 
 .field-input{
   width:100%;
@@ -267,8 +267,8 @@ a:hover{color:var(--warm)}
 }
 .check-block:first-of-type{margin-top:20px}
 .check-tag{
-  font-size:10px;
-  font-weight:700;
+  font-size:11px;
+  font-weight:600;
   letter-spacing:.1em;
   text-transform:uppercase;
   color:rgba(237,193,96,.7);
@@ -369,7 +369,7 @@ a:hover{color:var(--warm)}
   align-items:center;
   justify-content:center;
   font-size:12px;
-  font-weight:700;
+  font-weight:600;
   background:var(--gold);
   color:var(--navy);
 }
@@ -381,7 +381,7 @@ a:hover{color:var(--warm)}
 }
 .pick-tag{
   margin-top:6px;
-  font-size:10.5px;
+  font-size:11px;
   letter-spacing:.06em;
   text-transform:uppercase;
   color:var(--off-faint);
@@ -451,7 +451,7 @@ a:hover{color:var(--warm)}
   background:var(--gold);
   color:var(--navy);
   font-size:11px;
-  font-weight:700;
+  font-weight:600;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -459,7 +459,7 @@ a:hover{color:var(--warm)}
 .summary-text{font-size:13.5px;line-height:1.45;color:var(--off)}
 .summary-tag{
   margin-top:4px;
-  font-size:10px;
+  font-size:11px;
   letter-spacing:.06em;
   text-transform:uppercase;
   color:var(--off-faint);
@@ -536,7 +536,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 }
 .quote-block + .quote-block{margin-top:10px;border-left-color:rgba(246,245,242,.16);color:var(--off-faint);font-style:italic}
 .quote-label{
-  font-size:10.5px;
+  font-size:11px;
   letter-spacing:.08em;
   text-transform:uppercase;
   color:var(--off-faint);
@@ -576,7 +576,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 }
 .why-box .citation{
   margin-top:11px;
-  font-size:10.5px;
+  font-size:11px;
   letter-spacing:.05em;
   text-transform:uppercase;
   color:rgba(246,245,242,.38);
@@ -612,7 +612,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
   right:10px;
   z-index:20;
   font-family:"Karla",sans-serif;
-  font-size:10px;
+  font-size:11px;
   font-weight:600;
   letter-spacing:.08em;
   text-transform:uppercase;
