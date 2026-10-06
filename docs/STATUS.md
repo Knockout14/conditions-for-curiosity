@@ -76,6 +76,20 @@ From the system review's evaluation plan:
 - **Phase 3, counting signal:** agreement between Kevin's codes and the form, later the local
   model; each child's movement across P1–P5.
 
+## Security posture (as of Oct 6)
+
+- **Script injection (XSS):** counting games renders everything through React, which treats data
+  as text; it uses no raw-HTML insertion (checked). Invite codes are checked against a strict
+  pattern in the app and again on the server, and a rejected code is never displayed. The question
+  app builds HTML by hand with an escaping helper: correct everywhere reviewed, but it relies on
+  remembering to use it.
+- **The Sheet:** every write is RAW, so a value starting with `=` stays text.
+- **Still to add:** a Content Security Policy (only run scripts from our own site), now possible
+  since counting games loads no outside scripts. Client-side tests for counting games (today only
+  its server functions are tested; the app is checked in a browser).
+- **By design:** an invite link works for whoever holds it; the protection is revoking that one
+  invite.
+
 ## Smaller open items
 
 - Guest invites limited to logging nights only (no notes or history): a column on Invites, later.
