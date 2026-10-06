@@ -22,7 +22,9 @@ grandfathered and never need a code. The question app is not gated.
 **Still to do, in order:**
 1. **App side** (`counting-games/src/app.jsx`): read `?invite=` from the link and redeem it; a
    "have a code?" box; "You're in as Grandma"; an invite-only screen with plain messages for
-   expired or revoked invites; "logged by" on shared nights; keep the code in the backup cookie.
+   expired or revoked invites; "logged by" on shared nights. Take the code out of the address bar
+   once read. (The code doesn't need to be stored on the phone: the link is recorded server-side
+   against the session id, which the backup cookie already restores after a Safari wipe.)
 2. **`SHEET-SETUP.md`**: steps for the **Invites** tab (Code, Family, Adult, Last day, Revoked,
    Created, Notes) and the **Devices** tab (Redeemed at, Session ID, Family, Adult, Code), a lookup
    formula to show family / logged-by beside each night, and a small local command that generates
