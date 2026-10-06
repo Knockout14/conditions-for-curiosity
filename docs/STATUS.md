@@ -17,14 +17,16 @@ From **Oct 16, midnight US Eastern**, the counting games need an invite. Until t
 so new families can join through the plain URL. Families who log a night before the 16th are
 grandfathered and never need a code. The question app is not gated.
 
-**Server side: built and tested, not deployed** (`counting-games` commit `9d16b79`, local only).
+**Built and tested, not deployed** (`counting-games`, local commits, shipping together):
+- Server side: `redeem-invite`, and the gate in `submit-night` and `get-notes` (`9d16b79`).
+- App: the invite link is read, redeemed and cleared from the address bar; "You're in as Mom" or a plain reason it didn't work; a network failure retries on the next visit (`7e1203c`).
 
 **Still to do, in order:**
-1. **App side** (`counting-games/src/app.jsx`): read `?invite=` from the link and redeem it; a
-   "have a code?" box; "You're in as Grandma"; an invite-only screen with plain messages for
-   expired or revoked invites; "logged by" on shared nights. Take the code out of the address bar
-   once read. (The code doesn't need to be stored on the phone: the link is recorded server-side
-   against the session id, which the backup cookie already restores after a Safari wipe.)
+1. **App side, the rest** (`counting-games/src/app.jsx`): a "have a code?" box for anyone who
+   opens the plain URL; an invite-only screen after Oct 16 (what a phone sees when the server says
+   `invite_required`, `invite_expired` or `invite_revoked`); "logged by" on shared nights.
+   (The code isn't stored on the phone once redeemed: the link lives server-side against the
+   session id, which the backup cookie restores after a Safari wipe.)
 2. **`SHEET-SETUP.md`**: steps for the **Invites** tab (Code, Family, Adult, Last day, Revoked,
    Created, Notes) and the **Devices** tab (Redeemed at, Session ID, Family, Adult, Code), a lookup
    formula to show family / logged-by beside each night, and a small local command that generates
@@ -86,5 +88,5 @@ From the system review's evaluation plan:
 - **Deploys:** about 50 a month, shared by both sites. Commit and push only finished, reviewed
   work. Changes outside `site/` use `[skip netlify]` in the commit message so they cost no deploy.
 - **Tests:** `npm test` in each repo (110 checks here, 91 in counting games). All pass.
-- **Resume:** `git status` in both repos. `counting-games` is 1 commit ahead of GitHub
-  (the invite server side), deliberately unpushed until the app side is ready.
+- **Resume:** `git status` in both repos. `counting-games` is 2 commits ahead of GitHub
+  (the invite gate so far), deliberately unpushed until the app side is ready.
