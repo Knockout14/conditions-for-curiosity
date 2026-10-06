@@ -82,6 +82,7 @@ against the old code before the fix shipped.
 ## More
 
 - `DESIGN.md`: colors, type, components, and the rules behind them.
+- `docs/STATUS.md`: where things stand now, decisions and their impact, and what's next.
 - `docs/status-2026-09-01.md`: the engineering log, decision by decision.
 - `docs/app-v1-spec-2026-09-01.md`: the original app spec.
 - Privacy policy: https://conditionsforcuriosity.netlify.app/privacy.html
