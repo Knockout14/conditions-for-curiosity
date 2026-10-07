@@ -22,7 +22,7 @@ grandfathered and never need a code. The question app is not gated.
 - App: the invite link is read, redeemed and cleared from the address bar; "You're in as Mom" or a plain reason it didn't work; a network failure retries on the next visit (`7e1203c`).
 
 **Still to do, in order:**
-1. **App side, the rest** (`counting-games/src/app.jsx`): ~~"have a code?" box~~ done (`ef546fa`); ~~invite-only screen~~ done (`80363bf`: a refused phone finds out on arrival, not at Save); "logged by" on shared nights.
+1. **App side, the rest** (`counting-games/src/app.jsx`): ~~"have a code?" box~~ done (`ef546fa`); ~~invite-only screen~~ done (`80363bf`: a refused phone finds out on arrival, not at Save); ~~"logged by" on shared nights~~ done (`c471363`). **The app side is complete.**
    (The code isn't stored on the phone once redeemed: the link lives server-side against the
    session id, which the backup cookie restores after a Safari wipe.)
 2. **`SHEET-SETUP.md`**: steps for the **Invites** tab (Code, Family, Adult, Last day, Revoked,
@@ -100,5 +100,5 @@ From the system review's evaluation plan:
 - **Deploys:** about 50 a month, shared by both sites. Commit and push only finished, reviewed
   work. Changes outside `site/` use `[skip netlify]` in the commit message so they cost no deploy.
 - **Tests:** `npm test` in each repo (110 checks here, 91 in counting games). All pass.
-- **Resume:** `git status` in both repos. `counting-games` is 4 commits ahead of GitHub
+- **Resume:** `git status` in both repos. `counting-games` is 5 commits ahead of GitHub
   (the invite gate so far), deliberately unpushed until the app side is ready.
