@@ -1,6 +1,6 @@
-// How many networks hit a daily rate limit, per day and endpoint, on both
-// sites. Run: npm run limits            (last 30 days)
-//             npm run limits -- --days 90
+// How many networks hit a daily rate limit, per day and endpoint, per site.
+// Run: npm run limits            (last 30 days)
+//      npm run limits -- --days 90
 //
 // Reads the "rate-limit-stats" Blobs store that _lib/rate-limit.mjs writes
 // to (one entry per network refused, per endpoint per day; no IPs), through
@@ -10,13 +10,19 @@
 // real families, not scrapers, are being turned away. That's the signal to
 // raise a limit, or to prioritize login, after which the IP limits come out.
 import { execSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+import fs from "node:fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-// Site ids aren't secrets: they only work alongside a Netlify login.
-export const SITES = [
-  { name: "Question app", siteId: "572736e1-b8ce-464c-9adc-88f6f34d755a" },
-  { name: "Counting games", siteId: "93d6124d-9985-46a5-992b-a29c745adc26" },
-];
+// This repo's own site. Other sites (a private pilot) are listed in
+// scripts/limits.local.json, which is gitignored so their ids stay out of
+// this public repo: { "Counting games": "<netlify site id>" }.
+const LOCAL_SITES = fileURLToPath(new URL("./limits.local.json", import.meta.url));
+export const SITES = [{ name: "Question app", siteId: "572736e1-b8ce-464c-9adc-88f6f34d755a" }];
+try {
+  for (const [name, siteId] of Object.entries(JSON.parse(fs.readFileSync(LOCAL_SITES, "utf8")))) SITES.push({ name, siteId });
+} catch (e) {
+  // No local file: just this site.
+}
 const STORE = "rate-limit-stats";
 const KEY = /^(\d{4}-\d{2}-\d{2})\/([a-z0-9-]+)\/[0-9a-f-]{36}$/;
 

@@ -7,3 +7,6 @@ deno.lock
 
 # Claude Code: personal settings stay local; shared config (.claude/launch.json) is committed
 .claude/settings.local.json
+
+# Site ids for `npm run limits` beyond this repo's own (kept out of the public repo)
+scripts/limits.local.json
