@@ -32,9 +32,10 @@ are refused, the address bar is cleared, existing families are unaffected.
 3. **Invite current families:** one invite per adult, the same Family id per household, opened on
    the phone they already use; `--access log` for babysitters and relatives.
 
-**Next build: highlights** (approved Oct 7): the home screen leads with the newest note from Kevin
-and one line of rhythm ("2 nights this week"), with the full list one tap away ("See all nights").
-No charts, per-principle counts or progress views.
+**Highlights: built, not deployed** (`counting-games` 6179ee9, local). The home screen leads with the
+most recently sent note from Kevin (three lines, "Read more"), a "note on its way" line, and one line
+of rhythm ("2 nights this week"); the full list sits behind "See all nights (N)". No charts,
+per-principle counts or progress views. Awaiting KO's go-ahead to deploy.
 
 ## Decisions and their impact
 
@@ -100,4 +101,4 @@ From the system review's evaluation plan:
 - **Deploys:** about 50 a month, shared by both sites. Commit and push only finished, reviewed
   work. Changes outside `site/` use `[skip netlify]` in the commit message so they cost no deploy.
 - **Tests:** `npm test` in each repo (110 checks here, 91 in counting games). All pass.
-- **Resume:** `git status` in both repos. Both repos are in sync with GitHub.
+- **Resume:** `git status` in both repos. `counting-games` is 1 commit ahead of GitHub (highlights), awaiting the go-ahead to deploy.
