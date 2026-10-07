@@ -29,7 +29,7 @@ grandfathered and never need a code. The question app is not gated.
    Created, Notes) and the **Devices** tab (Redeemed at, Session ID, Family, Adult, Code), a lookup
    formula to show family / logged-by beside each night, and a small local command that generates
    a code and its link.
-3. **Privacy page wording** for invites, linked phones and the adult label. Needs KO's approval.
+3. **Privacy page wording** for invites, linked phones, the adult label and log-only access. Needs KO's approval (draft in progress).
 4. **Deploy and a live check** with a TEST invite row (KO deletes the test rows afterward).
 5. **KO, by Oct 15:** create the two tabs and add an invite row per adult already in the pilot
    who should be linked to a family.
@@ -41,6 +41,7 @@ nights, as today, and every code reads as unknown.
 
 | Date | Decision | Why | Impact |
 |---|---|---|---|
+| Oct 7 | **Log-only invites** for adults who see a child once or twice (babysitter, relative): they log nights, see only their own plus the family's child labels, never the family's history. Built (`651fd97`). | They can add real observations but don't need the history, and it could sway what they notice. | Wider set of observers without biasing them; parents still see everything logged. Raised a broader question: highlights first, full history on request (proposal pending). |
 | Oct 6 | **An invite code points to a family; it isn't the family.** One invite per adult (label, optional last day, revocable); phones map to the invite they redeemed; the Invites tab is the one source of truth. | A shared family code can't expire for one person, can't tell adults apart, and has no path to real login. | Babysitter or grandparent access for a day or a week; revoke one person without touching others; every night records which adult logged it (the research needs this: the adult is the variable); a later login slots in without reworking identity. |
 | Oct 6 | Gate from **Oct 16, US Eastern**; grandfather families with a night before then; Sheet holds the code list. | Keep the pilot open for the next week and a half of invitations. | No one currently playing is disrupted; adding or revoking a family is a Sheet edit, no deploy. |
 | Oct 6 | Counting games load **no scripts from other sites** (React bundled, Tailwind compiled at build). | Outside scripts could run on the page where parents enter names and child details. | Same look (verified property by property); less to download on phones; a strict security policy is now possible. |
@@ -100,5 +101,5 @@ From the system review's evaluation plan:
 - **Deploys:** about 50 a month, shared by both sites. Commit and push only finished, reviewed
   work. Changes outside `site/` use `[skip netlify]` in the commit message so they cost no deploy.
 - **Tests:** `npm test` in each repo (110 checks here, 91 in counting games). All pass.
-- **Resume:** `git status` in both repos. `counting-games` is 5 commits ahead of GitHub
+- **Resume:** `git status` in both repos. `counting-games` is 7 commits ahead of GitHub
   (the invite gate so far), deliberately unpushed until the app side is ready.
