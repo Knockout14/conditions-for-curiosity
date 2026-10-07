@@ -17,25 +17,24 @@ From **Oct 16, midnight US Eastern**, the counting games need an invite. Until t
 so new families can join through the plain URL. Families who log a night before the 16th are
 grandfathered and never need a code. The question app is not gated.
 
-**Built and tested, not deployed** (`counting-games`, local commits, shipping together):
-- Server side: `redeem-invite`, and the gate in `submit-night` and `get-notes` (`9d16b79`).
-- App: the invite link is read, redeemed and cleared from the address bar; "You're in as Mom" or a plain reason it didn't work; a network failure retries on the next visit (`7e1203c`).
+**Deployed Oct 7** (`counting-games` 651fd97; privacy page 3b89f7d). Built and tested: the
+invite rules, `redeem-invite`, the gate in `submit-night` and `get-notes`, the invite link and the
+"Have an invite code?" box, the invite-only screen, "logged by" on shared nights, **log-only invites**
+for occasional adults, `npm run invite`, and `SHEET-SETUP.md` section 5. Checked live: unknown codes
+are refused, the address bar is cleared, existing families are unaffected.
 
-**Still to do, in order:**
-1. **App side, the rest** (`counting-games/src/app.jsx`): ~~"have a code?" box~~ done (`ef546fa`); ~~invite-only screen~~ done (`80363bf`: a refused phone finds out on arrival, not at Save); ~~"logged by" on shared nights~~ done (`c471363`). **The app side is complete.**
-   (The code isn't stored on the phone once redeemed: the link lives server-side against the
-   session id, which the backup cookie restores after a Safari wipe.)
-2. **`SHEET-SETUP.md`**: steps for the **Invites** tab (Code, Family, Adult, Last day, Revoked,
-   Created, Notes) and the **Devices** tab (Redeemed at, Session ID, Family, Adult, Code), a lookup
-   formula to show family / logged-by beside each night, and a small local command that generates
-   a code and its link.
-3. **Privacy page wording** for invites, linked phones, the adult label and log-only access. Needs KO's approval (draft in progress).
-4. **Deploy and a live check** with a TEST invite row (KO deletes the test rows afterward).
-5. **KO, by Oct 15:** create the two tabs and add an invite row per adult already in the pilot
-   who should be linked to a family.
+**What's left, and it's KO's:**
+1. **By Oct 15:** create the **Invites** tab (A–H: Code, Family, Adult, Access, Last day, Revoked,
+   Created, Notes) and the **Devices** tab (A–E), as in `counting-games/SHEET-SETUP.md` section 5.
+   Until they exist, every code reads as unknown, and after the 16th no new phone could get in.
+2. **Then a live check:** `npm run invite -- --family TEST --adult Tester`, open the link on a
+   phone, log one night with a "test" child label, and delete the test rows from all three tabs.
+3. **Invite current families:** one invite per adult, the same Family id per household, opened on
+   the phone they already use; `--access log` for babysitters and relatives.
 
-Deploying the server side early is safe: until the tabs exist, every phone sees just its own
-nights, as today, and every code reads as unknown.
+**Next build: highlights** (approved Oct 7): the home screen leads with the newest note from Kevin
+and one line of rhythm ("2 nights this week"), with the full list one tap away ("See all nights").
+No charts, per-principle counts or progress views.
 
 ## Decisions and their impact
 
@@ -54,7 +53,7 @@ nights, as today, and every code reads as unknown.
 | Sep 28 | One swap per week; unconfirmed picks keep the same three. | Reloading was a full reroll. | Matches the spec's "one swap." |
 | Sep 28 | Survive Safari's 7-day storage wipe with a server-set backup cookie (both apps). | One skipped week could reset a family. | Families keep their place and their notes. |
 
-## Phase 0 (hardening): done except the invite gate
+## Phase 0 (hardening): done
 
 - [x] Only `site/` published; status doc scrubbed of private details
 - [x] Question-bank endpoints capped (3 per call, Raw/Found only)
@@ -63,7 +62,7 @@ nights, as today, and every code reads as unknown.
 - [x] Pick bugs (per-week tracking, swap per week, same three until confirmed)
 - [x] Error messages say what went wrong; refusals logged and counted
 - [x] Counting games: no outside scripts; gold links
-- [ ] **Counting games invite gate** (server done; app, setup, privacy, deploy remain)
+- [x] Counting games invite gate (deployed Oct 7; KO creates the Sheet tabs by Oct 15)
 
 ## After Phase 0
 
@@ -101,5 +100,4 @@ From the system review's evaluation plan:
 - **Deploys:** about 50 a month, shared by both sites. Commit and push only finished, reviewed
   work. Changes outside `site/` use `[skip netlify]` in the commit message so they cost no deploy.
 - **Tests:** `npm test` in each repo (110 checks here, 91 in counting games). All pass.
-- **Resume:** `git status` in both repos. `counting-games` is 7 commits ahead of GitHub
-  (the invite gate so far), deliberately unpushed until the app side is ready.
+- **Resume:** `git status` in both repos. Both repos are in sync with GitHub.
