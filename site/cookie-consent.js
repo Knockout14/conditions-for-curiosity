@@ -89,8 +89,8 @@
     el.setAttribute("role", "region");
     el.setAttribute("aria-label", "Cookie consent");
     el.innerHTML =
-      "<p>I use Google Analytics to see which pages and episodes people are finding — " +
-      'nothing loads until you click Accept. <a href="privacy.html">Privacy policy</a></p>' +
+      "<p>I use Google Analytics to see which pages and episodes people are finding. " +
+      'Nothing loads until you click Accept. <a href="privacy.html">Privacy policy</a></p>' +
       '<div class="cfc-cc-actions">' +
       '<button type="button" class="cfc-cc-decline">Decline</button>' +
       '<button type="button" class="cfc-cc-accept">Accept</button>' +

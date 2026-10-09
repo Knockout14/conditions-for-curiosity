@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#050C16">
-<title>Pick this week's three — Conditions for Curiosity</title>
+<title>Pick this week's three: Conditions for Curiosity</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="../favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
@@ -23,15 +23,15 @@
     <h1 class="eyebrow tight">Pick this week's three</h1>
     <button type="button" class="edit-link" onclick="location.href='details.html'">Edit your details</button>
   </div>
-  <p class="lede">Use the arrows to set the order — first, second, third. One a week, whenever a night fits. Not feeling one of them? You get one swap a week, on any of the three.</p>
+  <p class="lede">Use the arrows to set the order: first, second, third. One a week, whenever a night fits. Not feeling one of them? You get one swap a week, on any of the three.</p>
 
   <div class="pick-list" id="pick-list"></div>
 
   <div class="spacer"></div>
 
-  <p class="inline-error" id="save-error" hidden>Couldn't save that — check your connection and try again. Your ranking is kept, it just hasn't reached us yet.</p>
+  <p class="inline-error" id="save-error" hidden>Couldn't save that. Check your connection and try again. Your ranking is kept, it just hasn't reached us yet.</p>
   <button type="button" class="btn-primary" id="continue-btn">Set this week's line-up</button>
-  <p class="helper-note">Change it anytime — nothing is locked in.</p>
+  <p class="helper-note">Change it anytime. Nothing is locked in.</p>
 </main>
 
 <script src="app.js"></script>
@@ -197,10 +197,14 @@
       // Editing a week under way keeps what's been asked; this used to reset
       // a counter to 0, so a week finished after an edit still looked
       // unfinished and "Pick again" re-showed the same three.
-      const newState = CFC.patch({
+      const changes = {
         weeklyPick: CFC.buildWeeklyPick(CFC.load(), order.map(Number), active, swapUsed),
         pendingPick: null, // confirmed: nothing pending any more
-      });
+      };
+      // The start of the family's first two weeks (low-stakes questions only).
+      const firstPickAt = CFC.firstPickAtFor(CFC.load());
+      if (firstPickAt) changes.firstPickAt = firstPickAt;
+      const newState = CFC.patch(changes);
       try {
         await CFC.submitPick(newState, rankedQuestions, active);
         location.href = CFC.resumeUrl(newState);

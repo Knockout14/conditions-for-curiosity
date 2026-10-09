@@ -121,6 +121,62 @@ check((await (await weeklyCandidates(post({ ageBand: "5-6" }))).json()).length =
   check(r.length === 1 && !excluded.includes(r[0].id), "weekly-candidates: excludeIds respected; a 100k-long asked list is handled");
 }
 
+// ---- weekly-candidates: retired questions, the first two weeks, the Imagine cap
+{
+  const realBank = globalThis.__TEST_BANK;
+  const DAY = 24 * 60 * 60 * 1000;
+  const ago = (days) => new Date(Date.now() - days * DAY).toISOString();
+  // 30 servable questions, ages 3-8 so every band sees them: 20 low and 10
+  // medium; the first 6 are Imagine. Plus a retired low-stakes question.
+  const tagged = Array.from({ length: 30 }, (_, i) => ({
+    id: 100 + i, anchor: i % 2 ? "RAW" : "FOUND", ages: "3-8",
+    domain: i % 3 === 0 ? "General" : "Math", text: `t${i}`, bigIdea: "b",
+    category: i < 6 ? "Imagine" : "Notice", stakes: i < 20 ? "low" : "medium",
+    seed: "s", prep: "p",
+  }));
+  const retiredQ = { ...tagged[10], id: 200, retired: true };
+  const taggedById = new Map([...tagged, retiredQ].map((q) => [q.id, q]));
+  globalThis.__TEST_BANK = [...tagged, retiredQ];
+  const draws = async (body, n = 80) => {
+    const out = [];
+    for (let t = 0; t < n; t++) out.push((await (await weeklyCandidates(post(body))).json()).map((c) => taggedById.get(c.id)));
+    return out;
+  };
+  const anyNonLow = (ds) => ds.some((d) => d.some((q) => q.stakes !== "low"));
+  const allLow = (ds) => ds.every((d) => d.length === 3 && d.every((q) => q.stakes === "low"));
+
+  check(!(await draws({ ageBand: "5-6", askedQuestionIds: [100] })).some((d) => d.some((q) => q.retired)),
+    "weekly-candidates: a retired question is never served");
+  check(allLow(await draws({ ageBand: "5-6" })), "weekly-candidates: a new family (nothing asked, no start date) gets only low-stakes questions");
+  check(allLow(await draws({ ageBand: "3-4", firstPickAt: ago(3) })), "weekly-candidates: 3 days after its first pick, only low-stakes questions");
+  check(allLow(await draws({ ageBand: "7-8", firstPickAt: ago(13), askedQuestionIds: [100, 101, 102] })), "weekly-candidates: day 13 is still inside the first two weeks");
+  check(anyNonLow(await draws({ ageBand: "5-6", firstPickAt: ago(15), askedQuestionIds: [100] })), "weekly-candidates: after 14 days, all stakes are allowed");
+  check(anyNonLow(await draws({ ageBand: "5-6", askedQuestionIds: [100] })), "weekly-candidates: a family already mid-use (asked, no start date) gets no restriction");
+  check(allLow(await draws({ ageBand: "5-6", firstPickAt: "banana" })), "weekly-candidates: an unreadable start date counts as none (new family, so low only)");
+  check(anyNonLow(await draws({ ageBand: "5-6", firstPickAt: "banana", askedQuestionIds: [100] })), "weekly-candidates: an unreadable start date counts as none (mid-use, so unrestricted)");
+  check(allLow(await draws({ ageBand: "5-6", firstPickAt: new Date(Date.now() + 5 * DAY).toISOString() })), "weekly-candidates: a start date in the future counts as new");
+
+  // Imagine: at most one in a pick of three; a swap respects the cards on the table.
+  const picks = await draws({ ageBand: "5-6", firstPickAt: ago(30) }, 200);
+  check(picks.every((d) => d.filter((q) => q.category === "Imagine").length <= 1), "weekly-candidates: at most one Imagine question in a weekly pick (200 draws)");
+  check(picks.some((d) => d.some((q) => q.category === "Imagine")), "weekly-candidates: Imagine questions are still offered");
+  const swaps = [];
+  for (let t = 0; t < 100; t++) {
+    swaps.push(...(await (await weeklyCandidates(post({ ageBand: "5-6", firstPickAt: ago(30), count: 1, excludeIds: [100, 150, 151] }))).json()));
+  }
+  check(swaps.every((c) => taggedById.get(c.id).category !== "Imagine"), "weekly-candidates: a swap never adds a second Imagine question (one is already on the table)");
+
+  // Fallbacks: never an empty or short answer.
+  globalThis.__TEST_BANK = tagged.map(({ stakes, ...q }) => q);
+  check((await draws({ ageBand: "5-6" }, 20)).every((d) => d.length === 3), "weekly-candidates: a bank with no stakes tags yet still returns three (the filter is skipped)");
+  globalThis.__TEST_BANK = tagged.map((q) => ({ ...q, category: "Imagine" }));
+  check((await draws({ ageBand: "5-6", firstPickAt: ago(30) }, 20)).every((d) => d.length === 3), "weekly-candidates: if nearly everything is Imagine, the cap gives way rather than returning a short pick");
+  globalThis.__TEST_BANK = tagged.map((q, i) => ({ ...q, stakes: i < 2 ? "low" : "medium" }));
+  check((await draws({ ageBand: "5-6" }, 20)).every((d) => d.length === 3), "weekly-candidates: too few low-stakes questions to fill a pick, so the filter is skipped");
+
+  globalThis.__TEST_BANK = realBank;
+}
+
 // ---- questions-by-ids
 check((await questionsByIds(get())).status === 405, "questions-by-ids: GET -> 405");
 

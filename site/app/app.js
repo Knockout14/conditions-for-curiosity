@@ -254,6 +254,7 @@
     return postJSON("/api/weekly-candidates", {
       ageBand: state.ageBand,
       askedQuestionIds: state.askedQuestionIds || [],
+      firstPickAt: state.firstPickAt,
     });
   }
 
@@ -273,6 +274,7 @@
     return postJSON("/api/weekly-candidates", {
       ageBand: state.ageBand,
       askedQuestionIds: state.askedQuestionIds || [],
+      firstPickAt: state.firstPickAt,
       excludeIds,
       count: 1,
     }).then((r) => r[0] || null);
@@ -342,12 +344,17 @@
      it's crossed off this week and excluded from future weeks' sampling. */
   function markQuestionAsked(state, questionId) {
     const weekAsked = weekAskedIds(state);
-    return patch({
+    const changes = {
       askedQuestionIds: (state.askedQuestionIds || []).concat(questionId),
       weeklyPick: Object.assign({}, state.weeklyPick, {
         askedIds: weekAsked.includes(questionId) ? weekAsked : weekAsked.concat(questionId),
       }),
-    });
+    };
+    // A family that confirmed its first pick before firstPickAt existed:
+    // the first question it asks fixes its start date to that pick.
+    const first = firstPickAtFor(state, state.weeklyPick && state.weeklyPick.pickedAt);
+    if (first && !state.firstPickAt) changes.firstPickAt = first;
+    return patch(changes);
   }
 
   /* ── candidates not yet confirmed ──
@@ -374,6 +381,18 @@
     const changes = { name, email, ageBand };
     if (before.ageBand && before.ageBand !== ageBand) changes.pendingPick = null;
     return patch(changes);
+  }
+
+  /* When this family's first two weeks began: its first confirmed pick.
+     The sampler offers only low-stakes questions until two weeks after
+     this date. Returns the saved date if there is one; otherwise `fallback`
+     (default: now) for a family that has asked nothing yet; otherwise
+     nothing, which marks a family already mid-use before this existed, so
+     it gets no restriction. */
+  function firstPickAtFor(state, fallback) {
+    if (state.firstPickAt) return state.firstPickAt;
+    if ((state.askedQuestionIds || []).length) return undefined;
+    return fallback || new Date().toISOString();
   }
 
   /* The weeklyPick record pick.html saves. A fresh pick starts with nothing
@@ -612,6 +631,7 @@
     weekAskedIds,
     isWeekDone,
     markQuestionAsked,
+    firstPickAtFor,
     buildWeeklyPick,
     pendingPick,
     savePendingPick,

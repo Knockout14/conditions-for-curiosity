@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#050C16">
-<title>Afterward — Conditions for Curiosity</title>
+<title>Afterward: Conditions for Curiosity</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="../favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
@@ -33,16 +33,17 @@
   } else if (state) {
     const q = current.question;
 
-    // Only four categories exist across the whole bank — a short, honest
+    // Five categories exist across the whole bank (Imagine is the newest): a short, honest
     // "why" per category rather than 165 bespoke paragraphs, paired with
     // the question's own citation.
     const WHY = {
-      Notice: "Naming what you noticed models the exact habit you want them to build — attention is contagious before it's ever taught.",
-      "Not-knowing": "Admitting you don't know keeps a kid trusting your answers later — a confidently wrong one costs more, even when it feels harder to say.",
+      Notice: "Naming what you noticed models the exact habit you want them to build. Attention is contagious before it's ever taught.",
+      "Not-knowing": "Admitting you don't know keeps a kid trusting your answers later. A confidently wrong one costs more, even when it feels harder to say.",
       Memory: "You went first. A kid who hears an adult be specific and honest about their own life keeps trusting that adult's answers.",
-      "Adult-life": "Letting them see you as a whole person — not just an authority — is what makes the exchange actually reciprocal.",
+      "Adult-life": "Letting them see you as a whole person, not just an authority, is what makes the exchange actually reciprocal.",
+      Imagine: "Going first with a playful answer tells a kid that wondering out loud is safe. A little silliness is a change of pace, not the goal.",
     };
-    const why = WHY[q.category] || "Answering first, honestly, is the whole mechanism — everything else follows from that.";
+    const why = WHY[q.category] || "Answering first, honestly, is the whole mechanism. Everything else follows from that.";
 
     document.getElementById("screen").innerHTML = `
       <h1 class="eyebrow">Afterward</h1>
@@ -65,7 +66,7 @@
         <p>${why}</p>
         ${q.citation ? `<div class="citation">${CFC.escapeHtml(q.citation)}</div>` : ""}
         ${q.seed ? `
-        <p style="margin-top:14px">You've both already answered, so this can't script anyone — it's not the "right" answer, just another angle:</p>
+        <p style="margin-top:14px">You've both already answered, so this can't script anyone. It's not the "right" answer, just another angle:</p>
         <p style="margin-top:6px"><strong>One possible answer:</strong> ${CFC.escapeHtml(q.seed)}</p>` : ""}
       </details>
 

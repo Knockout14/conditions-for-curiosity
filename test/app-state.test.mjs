@@ -108,6 +108,40 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(true, "pending: malformed saved values are ignored, so the screen just draws fresh");
 }
 
+// ---- the first two weeks start at a family's first confirmed pick
+{
+  const { CFC } = boot({ stored: { ...base, askedQuestionIds: [] } });
+  const first = CFC.firstPickAtFor(CFC.load());
+  check(typeof first === "string" && Math.abs(Date.now() - Date.parse(first)) < 5000, "first weeks: a new family's first pick starts the window now");
+}
+{
+  const { CFC } = boot({ stored: { ...base, firstPickAt: "2026-10-01T00:00:00.000Z", askedQuestionIds: [4] } });
+  check(CFC.firstPickAtFor(CFC.load()) === "2026-10-01T00:00:00.000Z", "first weeks: a saved start date is never overwritten");
+}
+{
+  const { CFC } = boot({ stored: { ...base, askedQuestionIds: [4, 5] } });
+  check(CFC.firstPickAtFor(CFC.load()) === undefined, "first weeks: a family already mid-use gets no start date, so no restriction");
+}
+{
+  // Confirmed a pick before start dates existed, asked nothing yet: the first
+  // question asked fixes the start to that pick's date.
+  const { CFC } = boot({ stored: { ...base, askedQuestionIds: [], weeklyPick: { questionIds: [1, 2, 3], askedIds: [], pickedAt: "2026-10-05T10:00:00.000Z" } } });
+  CFC.markQuestionAsked(CFC.load(), 1);
+  check(CFC.load().firstPickAt === "2026-10-05T10:00:00.000Z", "first weeks: a pick from before start dates existed backfills on the first question asked");
+}
+{
+  const { CFC } = boot({ stored: { ...base, askedQuestionIds: [9], weeklyPick: { questionIds: [1, 2, 3], askedIds: [], pickedAt: "2026-10-05T10:00:00.000Z" } } });
+  CFC.markQuestionAsked(CFC.load(), 1);
+  check(CFC.load().firstPickAt === undefined, "first weeks: a family that had asked before is not given a start date later");
+}
+{
+  const { CFC, calls } = boot({ stored: { ...base, firstPickAt: "2026-10-01T00:00:00.000Z", askedQuestionIds: [4] } });
+  await CFC.fetchWeeklyCandidates(CFC.load());
+  await CFC.fetchReplacementCandidate(CFC.load(), [1, 2]);
+  const sent = calls.filter((c) => c.url === "/api/weekly-candidates");
+  check(sent.length === 2 && sent.every((c) => c.body.firstPickAt === "2026-10-01T00:00:00.000Z"), "first weeks: both candidate requests send the start date");
+}
+
 // ---- a fresh pick starts empty, even after the pool runs out
 {
   // Ages 3–4 have 47 questions, so after ~15 weeks the sampler re-offers
