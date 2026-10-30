@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { getStore } from "@netlify/blobs";
 
 // Coarse per-identity-per-day request cap, backed by a Netlify Blobs
@@ -21,13 +21,21 @@ import { getStore } from "@netlify/blobs";
 // the app when the cap resets, so it can say so plainly, and the first
 // refusal per network per day is logged, so real families hitting the
 // limit show up in the Function logs.
-function getIdentity(req) {
-  return req.headers.get("x-nf-client-connection-ip") || "unknown";
+//
+// The stored identity is never the IP itself: a keyed hash that changes every
+// day, so a counter can't be read back as an address or linked across days.
+// The key is the service-account secret only because it's already a private
+// value here; nothing is ever signed or decrypted with this hash, and the
+// result only has to stay stable for one day.
+function getIdentity(req, day) {
+  const ip = req.headers.get("x-nf-client-connection-ip") || "unknown";
+  const secret = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_B64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || "";
+  return createHmac("sha256", secret).update(`${day}:${ip}`).digest("hex").slice(0, 32);
 }
 
 export async function checkRateLimit(req, bucket, limit) {
-  const identity = getIdentity(req);
-  const day = new Date().toISOString().slice(0, 10); // UTC date — counters reset daily by construction, no cleanup job needed
+  const day = new Date().toISOString().slice(0, 10); // UTC date — counters reset daily by construction; cleanup-rate-limits removes old ones
+  const identity = getIdentity(req, day);
   const key = `${bucket}:${day}:${identity}`;
 
   const store = getStore("rate-limits");
@@ -61,6 +69,21 @@ async function recordRefusal(day, bucket) {
   } catch (e) {
     console.error(`rate-limit-stats: ${e && e.message ? e.message : String(e)}`);
   }
+}
+
+// A counter is only ever read on its own day, so anything older is removed.
+// Its key is `<bucket>:<YYYY-MM-DD>:<identity>`. Keys that don't match are left
+// alone. Returns how many were removed. The refusal stats above stay: they
+// hold no network information and are the lasting record.
+export async function removeOldCounters(today = new Date().toISOString().slice(0, 10)) {
+  const store = getStore("rate-limits");
+  const { blobs } = await store.list();
+  const old = blobs.map((b) => b.key).filter((key) => {
+    const day = key.split(":")[1] || "";
+    return /^\d{4}-\d{2}-\d{2}$/.test(day) && day < today;
+  });
+  await Promise.all(old.map((key) => store.delete(key)));
+  return old.length;
 }
 
 // The 429 every endpoint returns. Retry-After is the seconds until the

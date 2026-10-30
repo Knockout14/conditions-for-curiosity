@@ -1,6 +1,6 @@
 # Status: Conditions for Curiosity
 
-**As of October 7, 2026.** The short, current picture for the podcast site and the question app:
+**As of October 30, 2026.** The short, current picture for the podcast site and the question app:
 where things stand, what was decided and why, and what's next. Kept up to date at the end of each
 work session. The decision-by-decision history lives in [`status-2026-09-01.md`](status-2026-09-01.md);
 the system review that started this phase is the "Conditions for Curiosity — System Review" doc
@@ -22,6 +22,7 @@ next milestones and KO's to-dos for them are in the pilot's own status doc.
 
 | Date | Decision | Why | Impact |
 |---|---|---|---|
+| Oct 30 | **Failed circle-backs are kept on the device and resent** from the next app screen. | The screen promised "your answer isn't lost," but a closed tab lost it. | Deployed. Reset clears anything waiting. |
 | Oct 7 | **Pilot specifics live in the private pilot repo**; this public repo only points there. | Its address and internals had gone into these docs. | Moved; this repo stays a clean portfolio of the public project. |
 | Oct 7 | **Highlights first, full history on request** (a product principle, applied first in the pilot). | A long history, or anything like a trajectory, can overwhelm parents and sway what they look for. | Applies to any future screen that shows history in either app. |
 | Oct 6 | Keep `.claude/launch.json` committed; ignore `.claude/settings.local.json`; icons moved to `brand/`. | Shared preview setup, no secrets; personal settings stay local. | Any Claude Code session gets the same previews. |
@@ -56,7 +57,13 @@ From the system review's evaluation plan:
 - **Script injection (XSS):** the question app builds HTML by hand with an escaping helper: correct
   everywhere reviewed, but it relies on remembering to use it.
 - **The Sheet:** every write is RAW, so a value starting with `=` stays text.
-- **Still to add:** a Content Security Policy (only run scripts from our own site).
+- **Headers (deployed Oct 30):** `site/_headers` sets frame and content-type protection
+  for the whole site, and a Content Security Policy on `/app/*` that runs scripts from this site only.
+  Inline styles are still allowed. Fonts still come from Google; self-hosting them is next.
+- **IP addresses (deployed Oct 30):** rate-limit counters hold a daily keyed hash, and a
+  daily function deletes older counters, including the ones from before this change.
+- **Login:** planned, see the private review. Until then, anyone can still write to the Sheet within
+  the rate limits.
 
 ## Smaller open items
 
@@ -71,5 +78,7 @@ From the system review's evaluation plan:
 
 - **Deploys:** about 50 a month, shared by both sites. Commit and push only finished, reviewed
   work. Changes outside `site/` use `[skip netlify]` in the commit message so they cost no deploy.
-- **Tests:** `npm test` (110 checks). All pass.
+- **Tests:** `npm test` (146 checks). All pass. CI (`.github/workflows/test.yml`) and the Netlify build
+  both run them, so a failing test stops a deploy. Deploy previews and branch deploys don't use the
+  deploy budget.
 - **`npm run limits`** also reads other sites' ids from `scripts/limits.local.json` (gitignored).

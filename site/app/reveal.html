@@ -21,63 +21,6 @@
 <main class="screen" id="screen"></main>
 
 <script src="app.js"></script>
-<script>
-  const state = CFC.requireOnboarding();
-  const current = CFC.loadCurrentQuestion();
-
-  // Only reachable right after question.html sets an adult answer —
-  // never store the child's words here (that stays theirs); a stray or
-  // stale visit just restarts from whatever's next.
-  if (!current || current.adultAnswer === undefined) {
-    location.replace("open.html");
-  } else if (state) {
-    const q = current.question;
-
-    // Five categories exist across the whole bank (Imagine is the newest): a short, honest
-    // "why" per category rather than 165 bespoke paragraphs, paired with
-    // the question's own citation.
-    const WHY = {
-      Notice: "Naming what you noticed models the exact habit you want them to build. Attention is contagious before it's ever taught.",
-      "Not-knowing": "Admitting you don't know keeps a kid trusting your answers later. A confidently wrong one costs more, even when it feels harder to say.",
-      Memory: "You went first. A kid who hears an adult be specific and honest about their own life keeps trusting that adult's answers.",
-      "Adult-life": "Letting them see you as a whole person, not just an authority, is what makes the exchange actually reciprocal.",
-      Imagine: "Going first with a playful answer tells a kid that wondering out loud is safe. A little silliness is a change of pace, not the goal.",
-    };
-    const why = WHY[q.category] || "Answering first, honestly, is the whole mechanism. Everything else follows from that.";
-
-    document.getElementById("screen").innerHTML = `
-      <h1 class="eyebrow">Afterward</h1>
-
-      <div style="margin-top:24px">
-        <div class="quote-block">
-          <span class="quote-label">You said</span>
-          ${current.adultAnswer ? CFC.escapeHtml(current.adultAnswer) : "(no answer typed)"}
-        </div>
-        <div class="quote-block">
-          <span class="quote-label">Their turn</span>
-          You don't need to write it down unless you want to.
-        </div>
-      </div>
-
-      <div class="spacer"></div>
-
-      <details class="why-box">
-        <summary>Why this one works</summary>
-        <p>${why}</p>
-        ${q.citation ? `<div class="citation">${CFC.escapeHtml(q.citation)}</div>` : ""}
-        ${q.seed ? `
-        <p style="margin-top:14px">You've both already answered, so this can't script anyone. It's not the "right" answer, just another angle:</p>
-        <p style="margin-top:6px"><strong>One possible answer:</strong> ${CFC.escapeHtml(q.seed)}</p>` : ""}
-      </details>
-
-      <div class="actions" style="margin-top:20px">
-        <button type="button" class="btn-primary" id="continue-btn">Continue</button>
-      </div>`;
-
-    document.getElementById("continue-btn").addEventListener("click", () => {
-      location.href = "circleback.html";
-    });
-  }
-</script>
+<script src="reveal.js"></script>
 </body>
 </html>

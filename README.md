@@ -16,12 +16,13 @@ games, lives in its own repo and shares the backend's spreadsheet.
 site/                     static HTML/CSS/JS, the only folder Netlify publishes
   index.html, model.html  podcast site; model.html is a hand-drawn <canvas> "curiosity sphere"
   app/                    the companion app: plain multi-page HTML + one shared app.js
-netlify/functions/        6 Netlify Functions (Node, ESM)
+netlify/functions/        7 Netlify Functions (Node, ESM)
   weekly-candidates       samples this week's 3 candidate questions
   questions-by-ids        full fields for a family's confirmed questions
   submit-pick, submit-circleback, submit-weeksummary
                           append rows to a private Google Sheet
   remember-state          returns the app's state as a server-set cookie (see below)
+  cleanup-rate-limits     daily: deletes rate-limit counters from earlier days
   _lib/                   shared: input bounds, rate limiting, Sheets client, bank rules
 test/                     offline tests (no network, no credentials)
 scripts/                  rate-limit-report.mjs (`npm run limits`)
@@ -30,7 +31,7 @@ DESIGN.md                 the visual system the CSS follows
 ```
 
 - **No framework, no build step for the site.** Hand-written HTML and CSS; tokens are CSS custom
-  properties. The app is 10 small pages sharing one script.
+  properties. The app is 10 small pages sharing one script, each with its own page script.
 - **No accounts.** A family is a random session id on their device. Progress lives in
   `localStorage`; what the adult chooses to submit goes to a private Google Sheet through the
   Functions, with a hand-signed service-account JWT instead of the `googleapis` package.
@@ -47,6 +48,10 @@ DESIGN.md                 the visual system the CSS follows
   resets in local time instead of "check your connection." Each network's first refusal per day is
   counted (never its IP) so `npm run limits` shows whether real families are hitting the caps. The
   per-IP limits are a stopgap until there's login.
+- **No inline scripts in the app,** so its Content Security Policy (`site/_headers`) can allow scripts
+  from this site only. A test keeps it that way.
+- **Rate-limit counters never hold an IP:** the identity is a keyed hash that changes daily, and old
+  counters are deleted every day.
 - **Surviving Safari's 7-day storage wipe.** Safari deletes `localStorage` after 7 days of use
   without a visit, a real risk for a weekly app. Every save also round-trips the state through
   `remember-state`, which hands it back as a server-set cookie (Safari doesn't cap those), and the

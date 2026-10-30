@@ -383,12 +383,18 @@ check((await remember({ sessionId: SESSION, name: huge })).status === 413, "reme
           contents: `export const getStore = (name) => ({
             get: async (k) => globalThis.__TEST_COUNTERS.get(name + "::" + k) ?? null,
             set: async (k, v) => { globalThis.__TEST_COUNTERS.set(name + "::" + k, v); },
+            delete: async (k) => { globalThis.__TEST_COUNTERS.delete(name + "::" + k); },
+            list: async () => ({
+              blobs: [...globalThis.__TEST_COUNTERS.keys()]
+                .filter((k) => k.startsWith(name + "::"))
+                .map((k) => ({ key: k.slice(name.length + 2) })),
+            }),
           });`,
         }));
       },
     }],
   });
-  const { checkRateLimit, tooManyRequests } = await import(pathToFileURL(file).href);
+  const { checkRateLimit, tooManyRequests, removeOldCounters } = await import(pathToFileURL(file).href);
   const from = (ip) => new Request("https://x/api", { method: "POST", headers: { "x-nf-client-connection-ip": ip } });
 
   const warned = [];
@@ -420,6 +426,22 @@ check((await remember({ sessionId: SESSION, name: huge })).status === 413, "reme
   const { summarize, formatReport } = await import(pathToFileURL(path.join(root, "scripts/rate-limit-report.mjs")).href);
   const rows = summarize([...globalThis.__TEST_COUNTERS.keys()].filter((k) => k.startsWith("rate-limit-stats::")).map((k) => k.split("::")[1]));
   check(same(rows, [{ day: today, bucket: "submit-pick", networks: 2 }]), "report: two networks refused on one endpoint read as 2");
+
+  const counterKeys = () => [...globalThis.__TEST_COUNTERS.keys()].filter((k) => k.startsWith("rate-limits::"));
+  check(counterKeys().length === 2 && !counterKeys().some((k) => k.includes("203.0.113.7") || k.includes("198.51.100.2")),
+    "rate limiter: counters are kept per network, with no IP address in the key");
+
+  // The clean-up: older counters go (including ones from before the hash),
+  // today's stay, the lasting stats stay, and anything unrecognized stays.
+  const set = (k) => globalThis.__TEST_COUNTERS.set(k, "1");
+  set("rate-limits::submit-pick:2026-09-22:203.0.113.7");
+  set("rate-limits::submit-pick:2026-09-22:2001:db8::1");
+  set("rate-limits::not-a-counter");
+  const removed = await removeOldCounters(today);
+  const left = [...globalThis.__TEST_COUNTERS.keys()];
+  check(removed === 2 && !left.some((k) => k.includes("2026-09-22")), "clean-up: counters from earlier days are removed, IPv6 keys included");
+  check(counterKeys().filter((k) => k.includes(today)).length === 2 && left.includes("rate-limits::not-a-counter"), "clean-up: today's counters and unrecognized keys stay");
+  check(left.some((k) => k.startsWith("rate-limit-stats::")), "clean-up: the lasting refusal stats stay");
 }
 
 // ---- the report's grouping and wording (scripts/rate-limit-report.mjs)

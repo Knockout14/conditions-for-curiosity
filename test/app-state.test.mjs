@@ -224,5 +224,71 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(s.sessionId && s.sessionId !== SESSION && !s.name, "restore: a damaged cookie is ignored and the app starts fresh");
 }
 
+// ---- a circle-back that fails to save is kept and sent later
+{
+  const pick = { questionIds: [1, 2, 3], askedIds: [1], pickedAt: "t0" };
+  const app = boot({ stored: { ...base, weeklyPick: pick } });
+  const onCircleBack = (ok) => {
+    app.win.fetch = async (url, init = {}) => {
+      app.calls.push({ url, body: init.body ? JSON.parse(init.body) : null });
+      return { ok, status: ok ? 200 : 502, headers: { get: () => null }, json: async () => ({ ok: true }) };
+    };
+  };
+  const unsent = () => JSON.parse(app.win.localStorage.getItem("cfc_unsent_circlebacks") || "{}");
+  const sends = () => app.calls.filter((c) => c.url === "/api/submit-circleback");
+
+  onCircleBack(false);
+  const state = app.CFC.load();
+  let failed = false;
+  await app.CFC.submitCircleBack(state, { question: Q(1), note: "first try" }).catch(() => { failed = true; });
+  check(failed && Object.values(unsent())[0]?.note === "first try", "unsent: a failed save still rejects, and the answer stays on the device");
+
+  await app.CFC.submitCircleBack(state, { question: Q(1), note: "edited" }).catch(() => {});
+  check(Object.keys(unsent()).length === 1 && Object.values(unsent())[0].note === "edited", "unsent: 'Try again' with an edited note replaces the kept copy");
+
+  // A later visit: a fresh page on a working connection, same storage.
+  const kept = app.win.localStorage.getItem("cfc_unsent_circlebacks");
+  const later = boot({ stored: { ...base, weeklyPick: pick } });
+  later.win.localStorage.setItem("cfc_unsent_circlebacks", kept);
+  vm.runInContext(APP_JS, later.win);
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
+  const resent = later.calls.filter((c) => c.url === "/api/submit-circleback");
+  check(resent.length === 1 && resent[0].body.note === "edited" && resent[0].body.sessionId === SESSION, "unsent: the next app screen sends it once");
+  check(later.win.localStorage.getItem("cfc_unsent_circlebacks") === null, "unsent: …and clears it once delivered");
+
+  // On the circle-back screen itself, nothing is resent behind its back.
+  const onScreen = boot({ stored: { ...base, weeklyPick: pick } });
+  onScreen.win.localStorage.setItem("cfc_unsent_circlebacks", kept);
+  onScreen.win.location.pathname = "/app/circleback.html";
+  vm.runInContext(APP_JS, onScreen.win);
+  await new Promise((r) => setTimeout(r, 0));
+  check(!onScreen.calls.some((c) => c.url === "/api/submit-circleback"), "unsent: the circle-back screen doesn't resend on load");
+
+  onCircleBack(true);
+  await app.CFC.submitCircleBack(state, { question: Q(1), note: "edited" });
+  check(Object.keys(unsent()).length === 0, "unsent: a successful save leaves nothing waiting");
+  check(sends().length === 3, "unsent: each attempt is one request");
+}
+
+// ---- no inline scripts in the app, so the Content-Security-Policy can forbid them
+{
+  const dir = path.join(root, "site/app");
+  const pages = fs.readdirSync(dir).filter((f) => f.endsWith(".html"));
+  const bad = pages.filter((f) => {
+    const html = fs.readFileSync(path.join(dir, f), "utf8");
+    return /<script(?![^>]*\ssrc=)[^>]*>/i.test(html) || /<[^>]+\son[a-z]+\s*=/i.test(html);
+  });
+  check(pages.length === 10 && bad.length === 0, `csp: no app page has an inline script or inline handler${bad.length ? `: ${bad.join(", ")}` : ""}`);
+  const missing = pages.filter((f) => {
+    const srcs = [...fs.readFileSync(path.join(dir, f), "utf8").matchAll(/<script[^>]*\ssrc="([^"]+)"/g)].map((m) => m[1]);
+    return srcs.some((s) => !fs.existsSync(path.join(dir, s)));
+  });
+  check(missing.length === 0, `csp: every script an app page loads exists${missing.length ? `: ${missing.join(", ")}` : ""}`);
+  const headers = fs.readFileSync(path.join(root, "site/_headers"), "utf8");
+  check(/\/app\/\*[\s\S]*Content-Security-Policy:[^\n]*script-src 'self'(?! 'unsafe)/.test(headers), "csp: the app's policy allows scripts from this site only");
+  check(/\/\*[\s\S]*X-Frame-Options: DENY/.test(headers) && /X-Content-Type-Options: nosniff/.test(headers), "headers: frame and content-type protection are set for the whole site");
+}
+
 console.log(failures ? `\n${failures} failed` : "\nAll passed");
 process.exit(failures ? 1 : 0);

@@ -3,6 +3,8 @@
   # package files) stays off the web. Never point this back at "." — that
   # served internal docs and function source until 2026-09-28.
   publish = "site"
+  # A failing test stops the deploy, and the live site stays as it was.
+  command = "npm test"
   functions = "netlify/functions"
 
 [functions]

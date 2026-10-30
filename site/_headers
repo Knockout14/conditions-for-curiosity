@@ -1,0 +1,13 @@
+# Security headers Netlify adds to every page it serves.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+# The app, where families type names, emails and notes: scripts from this site
+# only, nothing can be framed, and data can only go back to this site. Inline
+# styles are still allowed because the screens use style attributes; moving
+# those out would let this tighten further. Fonts come from Google for now.
+/app/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'

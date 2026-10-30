@@ -12,9 +12,12 @@ import { isSessionId } from "./_lib/input.mjs";
 // back empty.
 //
 // Nothing is stored or logged: the state goes in, the same bytes come back
-// out as a cookie on the caller's own device. There's no rate limit, since
-// a call has no effect beyond the caller's own browser, and limiting it
-// would cost more (Blobs reads and writes) than the call itself.
+// out as a cookie on the caller's own device. A call has no effect beyond the
+// caller's own browser, so there's no daily counter (Blobs reads and writes
+// would cost more than the call). The only risk is a flood running up hosting
+// usage, so Netlify's own limiter refuses bursts before this code runs. A
+// family saves a few times per screen, so 120 a minute leaves room for a
+// group on one Wi-Fi.
 
 const COOKIE = "cfc_state";
 // A cookie holds about 4 KB. 2800 bytes of JSON is about 3.7 KB as base64,
@@ -65,4 +68,7 @@ export default async (req) => {
   });
 };
 
-export const config = { path: "/api/remember-state" };
+export const config = {
+  path: "/api/remember-state",
+  rateLimit: { windowLimit: 120, windowSize: 60, aggregateBy: ["ip", "domain"] },
+};

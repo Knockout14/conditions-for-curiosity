@@ -463,6 +463,7 @@
       if (!ok) return;
       try {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(UNSENT_KEY);
         sessionStorage.removeItem(SESSION_KEY);
       } catch (e) {}
       clearBackup(); // or index.html would just restore everything from it
@@ -477,14 +478,63 @@
      markQuestionAsked, called by the caller before this), so a swallowed
      failure here used to mean "done." screen with nothing actually saved —
      this now rejects instead, and the caller shows that rather than
-     silently moving on. */
+     silently moving on.
+     The question is crossed off before this call because the family did ask
+     it, whatever the network does next. So the answer is kept on the device
+     until it's delivered: if the save fails and they leave, the next app
+     screen they open sends it (resendUnsentCircleBacks). The screen promises
+     "your answer isn't lost," and before this a closed tab lost it. Keyed by
+     pick and question, so "Try again" with an edited note replaces the copy
+     rather than sending both. */
+  const UNSENT_KEY = "cfc_unsent_circlebacks";
+  function readUnsent() {
+    try {
+      const items = JSON.parse(localStorage.getItem(UNSENT_KEY));
+      return items && typeof items === "object" && !Array.isArray(items) ? items : {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function writeUnsent(items) {
+    try {
+      if (Object.keys(items).length) localStorage.setItem(UNSENT_KEY, JSON.stringify(items));
+      else localStorage.removeItem(UNSENT_KEY);
+    } catch (e) {}
+  }
+  function forgetUnsent(key) {
+    const items = readUnsent();
+    delete items[key];
+    writeUnsent(items);
+  }
+
   function submitCircleBack(state, payload) {
-    return postJSON("/api/submit-circleback", {
+    const body = {
       sessionId: state.sessionId,
       name: state.name,
       email: state.email,
       ageBand: state.ageBand,
       ...payload,
+    };
+    const key = `${state.weeklyPick && state.weeklyPick.pickedAt}:${payload.question && payload.question.id}`;
+    writeUnsent(Object.assign(readUnsent(), { [key]: body }));
+    return postJSON("/api/submit-circleback", body).then((result) => {
+      forgetUnsent(key);
+      return result;
+    });
+  }
+
+  // Nothing is waiting almost every time, and then this makes no request. A
+  // refusal that a retry can't fix (400) is dropped, since it would otherwise
+  // retry forever; a rate limit, server error or lost connection stays for
+  // the next screen.
+  function resendUnsentCircleBacks() {
+    Object.entries(readUnsent()).forEach(([key, body]) => {
+      postJSON("/api/submit-circleback", body)
+        .then(() => forgetUnsent(key))
+        .catch((e) => {
+          console.error("resending a circle-back failed:", e);
+          if (e.status === 400) forgetUnsent(key);
+        });
     });
   }
 
@@ -649,4 +699,8 @@
   // by pathname rather than a per-screen call so every screen still just
   // loads the same app.js with nothing extra to remember.
   if (/details\.html$/.test(location.pathname)) wireResetLink();
+
+  // Not on the circle-back screen itself: its own Save and "Try again" are
+  // already handling whatever's there, and two sends would write two rows.
+  if (!/circleback\.html$/.test(location.pathname)) resendUnsentCircleBacks();
 })(window);

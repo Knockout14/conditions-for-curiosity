@@ -15,8 +15,8 @@ setup, workflow) stay in that repo, never in this public one.
 | Repo | `C:\Users\konei\code\conditions-for-curiosity` (GitHub `Knockout14/conditions-for-curiosity`, **public**, a portfolio) |
 | Live | https://conditionsforcuriosity.netlify.app (site + question app at `/app/`) |
 | Netlify site id | `572736e1-b8ce-464c-9adc-88f6f34d755a` (linked locally) |
-| Stack | Static HTML/CSS/vanilla JS in `site/` (the only published folder); 6 Netlify Functions in `netlify/functions/` (shared rules in `_lib/`) |
-| Tests | `npm test` (110 checks: `test/functions.test.mjs`; `test/app-state.test.mjs` runs `site/app/app.js` in a vm sandbox) |
+| Stack | Static HTML/CSS/vanilla JS in `site/` (the only published folder); 7 Netlify Functions in `netlify/functions/` (shared rules in `_lib/`) |
+| Tests | `npm test` (also runs in GitHub Actions and in the Netlify build, where a failure stops the deploy: `test/functions.test.mjs`; `test/app-state.test.mjs` runs `site/app/app.js` in a vm sandbox) |
 | Also | `npm run limits` (rate-limit refusals per site; other sites' ids come from the gitignored `scripts/limits.local.json`); `README.md`; `DESIGN.md` (the visual system; it wins over generic design advice); `docs/status-2026-09-01.md` (the long engineering log) |
 
 **Backend:** a private Google Sheet via one service account (shared with the pilot), plus Netlify
