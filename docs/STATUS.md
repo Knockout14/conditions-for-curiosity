@@ -22,6 +22,7 @@ next milestones and KO's to-dos for them are in the pilot's own status doc.
 
 | Date | Decision | Why | Impact |
 |---|---|---|---|
+| Oct 30 | **Optional guide for the adult** at `/guide` (`site/app/guide.html`), linked from the done screen. | Same text as the Articulate course, built natively so families never get a trial-built course. | Deployed. Saves and sends nothing. |
 | Oct 30 | **Failed circle-backs are kept on the device and resent** from the next app screen. | The screen promised "your answer isn't lost," but a closed tab lost it. | Deployed. Reset clears anything waiting. |
 | Oct 7 | **Pilot specifics live in the private pilot repo**; this public repo only points there. | Its address and internals had gone into these docs. | Moved; this repo stays a clean portfolio of the public project. |
 | Oct 7 | **Highlights first, full history on request** (a product principle, applied first in the pilot). | A long history, or anything like a trajectory, can overwhelm parents and sway what they look for. | Applies to any future screen that shows history in either app. |

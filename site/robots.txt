@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /app/guide.html
 Disallow: /app/
 
 Sitemap: https://conditionsforcuriosity.netlify.app/sitemap.xml

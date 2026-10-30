@@ -9,3 +9,9 @@
 
 [functions]
   node_bundler = "esbuild"
+
+# The short link to share the optional guide directly.
+[[redirects]]
+  from = "/guide"
+  to = "/app/guide.html"
+  status = 301

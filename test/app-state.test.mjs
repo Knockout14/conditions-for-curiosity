@@ -279,7 +279,7 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
     const html = fs.readFileSync(path.join(dir, f), "utf8");
     return /<script(?![^>]*\ssrc=)[^>]*>/i.test(html) || /<[^>]+\son[a-z]+\s*=/i.test(html);
   });
-  check(pages.length === 10 && bad.length === 0, `csp: no app page has an inline script or inline handler${bad.length ? `: ${bad.join(", ")}` : ""}`);
+  check(pages.length === 11 && bad.length === 0, `csp: no app page has an inline script or inline handler${bad.length ? `: ${bad.join(", ")}` : ""}`);
   const missing = pages.filter((f) => {
     const srcs = [...fs.readFileSync(path.join(dir, f), "utf8").matchAll(/<script[^>]*\ssrc="([^"]+)"/g)].map((m) => m[1]);
     return srcs.some((s) => !fs.existsSync(path.join(dir, s)));
@@ -288,6 +288,15 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   const headers = fs.readFileSync(path.join(root, "site/_headers"), "utf8");
   check(/\/app\/\*[\s\S]*Content-Security-Policy:[^\n]*script-src 'self'(?! 'unsafe)/.test(headers), "csp: the app's policy allows scripts from this site only");
   check(/\/\*[\s\S]*X-Frame-Options: DENY/.test(headers) && /X-Content-Type-Options: nosniff/.test(headers), "headers: frame and content-type protection are set for the whole site");
+  const guide = fs.readFileSync(path.join(dir, "guide.html"), "utf8");
+  const guideJs = fs.readFileSync(path.join(dir, "guide.js"), "utf8");
+  check(!guide.includes("app.js") && !/fetch|localStorage|sessionStorage|cookie|XMLHttpRequest|sendBeacon/.test(guideJs), "guide: saves nothing, sends nothing");
+  check(!/[–—]/.test(guide), "guide: no em or en dashes");
+  const fbIds = new Set([...guide.matchAll(/class="guide-fb" id="([^"]+)"/g)].map((m) => m[1]));
+  const targets = [...guide.matchAll(/data-fb="([^"]+)"/g)].map((m) => m[1]);
+  check(targets.length === 30 && targets.every((t) => fbIds.has(t)), "guide: every option opens feedback that exists");
+  check(fs.readFileSync(path.join(dir, "done.html"), "utf8").includes('href="guide.html"'), "guide: linked from tonight's done screen");
+  check(/from = "\/guide"\s+to = "\/app\/guide\.html"/.test(fs.readFileSync(path.join(root, "netlify.toml"), "utf8")), "guide: the short link points at the page");
 }
 
 console.log(failures ? `\n${failures} failed` : "\nAll passed");
