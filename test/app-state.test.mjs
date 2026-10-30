@@ -295,6 +295,8 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   const fbIds = new Set([...guide.matchAll(/class="guide-fb" id="([^"]+)"/g)].map((m) => m[1]));
   const targets = [...guide.matchAll(/data-fb="([^"]+)"/g)].map((m) => m[1]);
   check(targets.length === 30 && targets.every((t) => fbIds.has(t)), "guide: every option opens feedback that exists");
+  check((guide.match(/class="guide-card guide-slide"/g) || []).length === 6 && (guide.match(/data-next hidden/g) || []).length === 5, "guide: six swipe cards, a Next on all but the last");
+  check(/id="s6" hidden>.*<\/p>\s+<button[^>]*data-done hidden>That's it &darr;<\/button>/.test(guide), "guide: the last card ends with That's it and a down arrow");
   check(fs.readFileSync(path.join(dir, "done.html"), "utf8").includes('href="guide.html"'), "guide: linked from tonight's done screen");
   check(/from = "\/guide"\s+to = "\/app\/guide\.html"/.test(fs.readFileSync(path.join(root, "netlify.toml"), "utf8")), "guide: the short link points at the page");
 }

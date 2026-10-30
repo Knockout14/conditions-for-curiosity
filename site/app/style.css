@@ -672,6 +672,36 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 .guide-question{margin:18px 0}
 .guide-card{margin-top:12px}
 .guide-card + .guide-card{margin-top:20px}
+/* Six-answer sort: runs to the screen's right edge so the next card peeks in. */
+.guide-swipe-wrap{margin-top:18px}
+.guide-count{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--off-instruct);margin:0 0 10px}
+.guide-swipe{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-right:-28px;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.guide-swipe::-webkit-scrollbar{display:none}
+.guide-swipe::after{content:"";flex:0 0 calc(14% - 12px)}
+.guide-card.guide-slide{
+  flex:0 0 86%;
+  margin:0;
+  padding:14px;
+  border:1px solid rgba(246,245,242,.14);
+  border-radius:2px;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+.guide-sort{flex-wrap:wrap}
+.guide-sort .check-option{flex:1 1 120px;width:auto}
+.guide-next{display:block;margin:14px 0 0;font-size:13px}
+.guide-next[hidden]{display:none}
+.guide-swipe-wrap + .guide-label{scroll-margin-top:24px}
 .guide-quote{font-size:15px;line-height:1.6;color:var(--off);margin:0 0 10px}
 .guide-sort{display:flex;gap:8px}
 .guide-sort .check-option{justify-content:center;text-align:center}

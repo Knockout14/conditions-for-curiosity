@@ -86,58 +86,69 @@
     <p class="question-text guide-question">Where do you think puddles go when the sun comes out?</p>
     <p class="guide-body">Now sort six adult answers to the same question. Go by how it sounds, not by whether it's right.</p>
 
-    <div class="guide-card" data-choice>
-      <p class="guide-quote">"I think the water goes up into the air, but I've never actually watched it happen, so I'm not sure. Yesterday a puddle by my bus stop got smaller and I couldn't tell when."</p>
-      <div class="guide-sort">
-        <button type="button" class="check-option" data-right data-fb="s1">Sounds like finding out</button>
-        <button type="button" class="check-option" data-fb="s1">Sounds like teaching</button>
-      </div>
-      <p class="guide-fb" id="s1" hidden><strong>Finding out.</strong> It makes a guess, says it's unsure, and shares one real detail. The guess may even be right. It still sounds like finding out, because it stays open.</p>
-    </div>
+    <div class="guide-swipe-wrap" data-swipe>
+      <p class="guide-count" aria-live="polite"><span data-count>1</span> of 6</p>
+      <div class="guide-swipe" data-track tabindex="0" role="group" aria-label="Six adult answers to sort">
+        <div class="guide-card guide-slide" data-choice>
+          <p class="guide-quote">"I think the water goes up into the air, but I've never actually watched it happen, so I'm not sure. Yesterday a puddle by my bus stop got smaller and I couldn't tell when."</p>
+          <div class="guide-sort">
+            <button type="button" class="check-option" data-right data-fb="s1">Sounds like finding out</button>
+            <button type="button" class="check-option" data-fb="s1">Sounds like teaching</button>
+          </div>
+          <p class="guide-fb" id="s1" hidden><strong>Finding out.</strong> It makes a guess, says it's unsure, and shares one real detail. The guess may even be right. It still sounds like finding out, because it stays open.</p>
+          <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
+        </div>
 
-    <div class="guide-card" data-choice>
-      <p class="guide-quote">"It soaks into the ground. That's where all puddles go."</p>
-      <div class="guide-sort">
-        <button type="button" class="check-option" data-fb="s2">Sounds like finding out</button>
-        <button type="button" class="check-option" data-right data-fb="s2">Sounds like teaching</button>
-      </div>
-      <p class="guide-fb" id="s2" hidden><strong>Teaching.</strong> It closes the question with a flat "that's it." The tone gives it away, not whether the fact is right.</p>
-    </div>
+        <div class="guide-card guide-slide" data-choice>
+          <p class="guide-quote">"It soaks into the ground. That's where all puddles go."</p>
+          <div class="guide-sort">
+            <button type="button" class="check-option" data-fb="s2">Sounds like finding out</button>
+            <button type="button" class="check-option" data-right data-fb="s2">Sounds like teaching</button>
+          </div>
+          <p class="guide-fb" id="s2" hidden><strong>Teaching.</strong> It closes the question with a flat "that's it." The tone gives it away, not whether the fact is right.</p>
+          <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
+        </div>
 
-    <div class="guide-card" data-choice>
-      <p class="guide-quote">"When I was little I thought the sun drank them. Now I honestly don't know. I'd guess it's some mix of up into the air and down into the ground."</p>
-      <div class="guide-sort">
-        <button type="button" class="check-option" data-right data-fb="s3">Sounds like finding out</button>
-        <button type="button" class="check-option" data-fb="s3">Sounds like teaching</button>
-      </div>
-      <p class="guide-fb" id="s3" hidden><strong>Finding out.</strong> A memory, an honest "I don't know," and a loose guess. Nothing to repeat back.</p>
-    </div>
+        <div class="guide-card guide-slide" data-choice>
+          <p class="guide-quote">"When I was little I thought the sun drank them. Now I honestly don't know. I'd guess it's some mix of up into the air and down into the ground."</p>
+          <div class="guide-sort">
+            <button type="button" class="check-option" data-right data-fb="s3">Sounds like finding out</button>
+            <button type="button" class="check-option" data-fb="s3">Sounds like teaching</button>
+          </div>
+          <p class="guide-fb" id="s3" hidden><strong>Finding out.</strong> A memory, an honest "I don't know," and a loose guess. Nothing to repeat back.</p>
+          <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
+        </div>
 
-    <div class="guide-card" data-choice>
-      <p class="guide-quote">"The heat of the sun turns the water into vapor. It's called evaporation. Say it with me."</p>
-      <div class="guide-sort">
-        <button type="button" class="check-option" data-fb="s4">Sounds like finding out</button>
-        <button type="button" class="check-option" data-right data-fb="s4">Sounds like teaching</button>
-      </div>
-      <p class="guide-fb" id="s4" hidden><strong>Teaching.</strong> The facts may be fine, but it hands over a word and asks them to say it back. That's a quiz in a friendly voice.</p>
-    </div>
+        <div class="guide-card guide-slide" data-choice>
+          <p class="guide-quote">"The heat of the sun turns the water into vapor. It's called evaporation. Say it with me."</p>
+          <div class="guide-sort">
+            <button type="button" class="check-option" data-fb="s4">Sounds like finding out</button>
+            <button type="button" class="check-option" data-right data-fb="s4">Sounds like teaching</button>
+          </div>
+          <p class="guide-fb" id="s4" hidden><strong>Teaching.</strong> The facts may be fine, but it hands over a word and asks them to say it back. That's a quiz in a friendly voice.</p>
+          <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
+        </div>
 
-    <div class="guide-card" data-choice>
-      <p class="guide-quote">"Not sure. I notice they disappear faster on sunny days, but I can't say what that tells me."</p>
-      <div class="guide-sort">
-        <button type="button" class="check-option" data-right data-fb="s5">Sounds like finding out</button>
-        <button type="button" class="check-option" data-fb="s5">Sounds like teaching</button>
-      </div>
-      <p class="guide-fb" id="s5" hidden><strong>Finding out.</strong> Short, shares something noticed, and admits where the thinking stops. Short is fine.</p>
-    </div>
+        <div class="guide-card guide-slide" data-choice>
+          <p class="guide-quote">"Not sure. I notice they disappear faster on sunny days, but I can't say what that tells me."</p>
+          <div class="guide-sort">
+            <button type="button" class="check-option" data-right data-fb="s5">Sounds like finding out</button>
+            <button type="button" class="check-option" data-fb="s5">Sounds like teaching</button>
+          </div>
+          <p class="guide-fb" id="s5" hidden><strong>Finding out.</strong> Short, shares something noticed, and admits where the thinking stops. Short is fine.</p>
+          <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
+        </div>
 
-    <div class="guide-card" data-choice>
-      <p class="guide-quote">"Remember the water cycle? Water goes up, makes clouds and comes back as rain. So where do puddles come from?"</p>
-      <div class="guide-sort">
-        <button type="button" class="check-option" data-fb="s6">Sounds like finding out</button>
-        <button type="button" class="check-option" data-right data-fb="s6">Sounds like teaching</button>
+        <div class="guide-card guide-slide" data-choice>
+          <p class="guide-quote">"Remember the water cycle? Water goes up, makes clouds and comes back as rain. So where do puddles come from?"</p>
+          <div class="guide-sort">
+            <button type="button" class="check-option" data-fb="s6">Sounds like finding out</button>
+            <button type="button" class="check-option" data-right data-fb="s6">Sounds like teaching</button>
+          </div>
+          <p class="guide-fb" id="s6" hidden><strong>Teaching.</strong> It recaps a lesson and ends with a question that has a right answer. That's a quiz, even when it's kind.</p>
+          <button type="button" class="link-secondary guide-next" data-done hidden>That's it &darr;</button>
+        </div>
       </div>
-      <p class="guide-fb" id="s6" hidden><strong>Teaching.</strong> It recaps a lesson and ends with a question that has a right answer. That's a quiz, even when it's kind.</p>
     </div>
 
     <p class="guide-label">What to listen for</p>
