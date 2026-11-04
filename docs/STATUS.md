@@ -1,6 +1,6 @@
 # Status: Conditions for Curiosity
 
-**As of October 30, 2026.** The short, current picture for the podcast site and the question app:
+**As of November 4, 2026.** The short, current picture for the podcast site and the question app:
 where things stand, what was decided and why, and what's next. Kept up to date at the end of each
 work session. The decision-by-decision history lives in [`status-2026-09-01.md`](status-2026-09-01.md);
 the system review that started this phase is the "Conditions for Curiosity — System Review" doc
@@ -22,6 +22,7 @@ next milestones and KO's to-dos for them are in the pilot's own status doc.
 
 | Date | Decision | Why | Impact |
 |---|---|---|---|
+| Nov 4 | **Home page reworked for a first-time visitor:** hero says who Kevin is and what to do first (episode 1, about 6 min); a "Nothing here takes long" strip; experience lines; the idea; research as three plain bullets with the study table in a fold; what to do next (answer too and go first, then three orientations that are not steps); episode list with minutes from the RSS feed; the model cut to one line. "Who this is for" cut. Footer links get the gold focus ring on all five pages. | A web-builder friend could not tell what the site was ("a lot of things at once"). Structure and copy changed; the visual system did not. | "20 years in education", never "in classrooms". New `try_app_click` label `ways_in` for the app row in the strip. The mobile sticky bar now hides from mid-page on, once the app button has been passed. |
 | Nov 3 | **Shorter first run (UX review, option A):** no episode 5 gate and no check before the first question. The details screen carries the one rule ("you answer too, and you go first") with links to the Storyline course and episode 5; the three-question check is offered from the done screen. A new week's pick goes straight to tonight's question. | Five screens before a first question; the gate saved nothing useful and its rule repeats in the question flow; KO doesn't use the check columns now, and the course is the better readiness step. | Path is details, pick, tonight, question. Check columns stay blank until someone takes it (they used to read "no"). `episode5` and `onboardingComplete` are no longer read. Ships in the deploy after Nov 12. |
 | Oct 30 | **Optional guide for the adult** at `/guide` (`site/app/guide.html`), linked from the done screen. | Same text as the Articulate course, built natively so families never get a trial-built course. | Deployed. Saves and sends nothing. |
 | Oct 30 | **Failed circle-backs are kept on the device and resent** from the next app screen. | The screen promised "your answer isn't lost," but a closed tab lost it. | Deployed. Reset clears anything waiting. |
