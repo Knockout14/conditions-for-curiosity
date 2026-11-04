@@ -35,7 +35,7 @@ if (!current) {
     <div class="answer-field">
       <label class="field-label" for="answer">Your answer (go first)</label>
       <textarea class="field-input" id="answer" maxlength="4000" placeholder="Say it in your own words"></textarea>
-      <p class="voice-hint">💡 Faster than typing: tap the mic on your keyboard and just say it.</p>
+      <p class="voice-hint"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>Faster than typing: tap the mic on your keyboard and just say it.</p>
     </div>
 
     <div class="hint-row">

@@ -25,6 +25,7 @@ state && (async function load() {
   const pending = active ? null : CFC.pendingPick(CFC.load());
   let candidates;
   let fromPending = false;
+  const stopLoading = CFC.showLoading(list, "Getting three questions to choose from");
   try {
     if (active) {
       candidates = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
@@ -36,10 +37,12 @@ state && (async function load() {
     }
     if (!active && !fromPending) candidates = await CFC.fetchWeeklyCandidates(state);
   } catch (e) {
+    stopLoading();
     console.error("fetching pick candidates failed:", e);
     CFC.renderLoadError(list, `Couldn't load this week's candidates. ${CFC.failureReason(e)}`, load);
     return;
   }
+  stopLoading();
   const byId = new Map(candidates.map((q) => [String(q.id), q]));
 
   let order = candidates.map((q) => String(q.id));
@@ -173,7 +176,9 @@ state && (async function load() {
     const newState = CFC.patch(changes);
     try {
       await CFC.submitPick(newState, rankedQuestions, active);
-      location.href = CFC.resumeUrl(newState);
+      // A new week goes straight to its first question; the week summary is
+      // one tap away from there. Editing a week under way goes back to it.
+      location.href = active ? CFC.resumeUrl(newState) : "open.html";
     } catch (e) {
       console.error("submitPick failed:", e);
       continueBtn.disabled = false;

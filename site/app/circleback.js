@@ -16,7 +16,7 @@ if (!current || current.adultAnswer === undefined) {
     btn.setAttribute("aria-pressed", "true");
     other.classList.remove("selected");
     other.setAttribute("aria-pressed", "false");
-    doneBtn.disabled = false;
+    errorEl.hidden = true;
   }
   yesBtn.addEventListener("click", () => select(true, yesBtn, noBtn));
   noBtn.addEventListener("click", () => select(false, noBtn, yesBtn));
@@ -31,6 +31,13 @@ if (!current || current.adultAnswer === undefined) {
 
   doneBtn.addEventListener("click", () => {
     if (doneBtn.disabled) return;
+    // The button stays tappable (a greyed one reads as frozen); it says what's missing instead.
+    if (childAskedQuestion === null) {
+      errorEl.textContent = "Tap Yes or No above, then you're done.";
+      errorEl.hidden = false;
+      yesBtn.focus();
+      return;
+    }
     if (!lockedState) lockedState = CFC.markQuestionAsked(state, current.question.id);
     attemptSave();
   });

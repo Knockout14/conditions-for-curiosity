@@ -50,9 +50,14 @@ Rules:
   400 by default (500 for `h3`). Italic + gold is the emphasis move: `h1 em { font-style: italic; color: var(--gold) }`.
 - **Karla** — everything else. Body is **400** everywhere (moved from 300 on 2026-10-01 for legibility on dark).
   500 for interactive labels, 600 for labels and buttons. Karla loads 400/500/600 only — no 300, no 700.
-- **The label style** (eyebrows, tags, buttons, "Listen"): Karla 600, 10.5–14px, uppercase,
-  letter-spacing `.06em` (buttons) → `.24em` (eyebrows). This small tracked-caps voice is the
-  counterweight to the serif — keep it consistent rather than inventing new label treatments.
+- **The label style** (eyebrows, section tags, table headers, small annotations like "the hinge"):
+  Karla 600, 11px, uppercase, letter-spacing `.12em`–`.24em`. This small tracked-caps voice is the
+  counterweight to the serif — keep it for labels only.
+- **Buttons and links are sentence case** (changed 2026-11-03): Karla 600, 13–15px, letter-spacing
+  `.01em`. Caps on every button and link read as a template habit and are harder to read.
+- **Arrows mark a forward move only:** the section's main button to another page, or "Next" in a
+  sequence. Not on "Listen", "Back", email links, follow links or inline status messages. Arrows
+  inside content (the study table, the pull quote) are notation, not links, and stay.
 
 | Role | Size | Notes |
 |---|---|---|
@@ -92,7 +97,8 @@ Rules:
 
 ## Components (existing — reuse before inventing)
 
-- **`.cta`** — gold fill, navy text, uppercase Karla 600, `14px 24px`, arrow `<span>→</span>`.
+- **`.cta`** — gold fill, navy text, sentence-case Karla 600 at 15px, padding `14px 24px`; arrow
+  `<span>→</span>` only when it moves forward to another page (see the arrow rule above).
   Hover: `--warm` + `translateX(3px)`. One per section, max.
 - **`.follow`** — text link with 1px underline border, gold; `.follow.alt` is the muted variant.
 - **`.cadence`** — the claim list: Playfair, left hairline, last item in gold.
@@ -110,8 +116,10 @@ Rules:
 Motion here is **settling, not performing**. It confirms an action or eases content into place, then gets out of the way.
 
 - Easing: `cubic-bezier(.2, .7, .3, 1)` for entrances; `ease` for hovers.
-- Durations: hovers **140–200ms**; entrances **~780ms**.
-- Entrance: `.reveal` — fade + 14px rise, staggered **~60ms** per element, hero only.
+- Durations: hovers **150–200ms**; the hero entrance **300ms**.
+- Entrance: `.reveal` on the hero's `.inner` only: one fade + 6px rise for the whole block,
+  300ms. No line-by-line stagger (changed 2026-11-03: the stagger read as a generated-landing-page
+  signature and left the headline invisible for most of a second on slow phones).
   Don't scatter scroll-triggered reveals down the whole page.
 - Hover moves are small and directional: `translateX(3px)`, `padding-left` +10px, opacity fades.
   No scaling, bouncing, tilting, or parallax.

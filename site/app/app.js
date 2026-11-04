@@ -31,6 +31,17 @@
     document.getElementById("load-retry-btn").addEventListener("click", onRetry);
   }
 
+  /* One quiet line while those same screens wait on the network. It only
+     appears if the wait passes 400ms, so a fast load never flickers. The
+     screen's own render (or renderLoadError) replaces it; call the returned
+     function first so a late timer can't put it back. */
+  function showLoading(container, message) {
+    const timer = setTimeout(() => {
+      container.innerHTML = `<p class="body-copy loading-line" role="status">${escapeHtml(message)}</p>`;
+    }, 400);
+    return () => clearTimeout(timer);
+  }
+
   function escapeHtml(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
       "&": "&amp;",
@@ -666,6 +677,7 @@
   global.CFC = {
     escapeHtml,
     renderLoadError,
+    showLoading,
     failureReason,
     load,
     save,

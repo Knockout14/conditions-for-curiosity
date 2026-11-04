@@ -5,13 +5,16 @@ if (CFC.resumeUrl(state) !== "complete.html") {
   (async function load() {
     const screen = document.getElementById("screen");
     let questions;
+    const stopLoading = CFC.showLoading(screen, "Getting tonight's question");
     try {
       questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
     } catch (e) {
+      stopLoading();
       console.error("fetchQuestionsByIds failed:", e);
       CFC.renderLoadError(screen, `Couldn't load tonight's question. ${CFC.failureReason(e)}`, load);
       return;
     }
+    stopLoading();
     const next = CFC.nextQuestion(state, questions);
     const ORDINALS = ["one", "two", "three"];
 
@@ -57,6 +60,7 @@ if (CFC.resumeUrl(state) !== "complete.html") {
       <div class="actions">
         <button type="button" class="btn-primary" id="begin-btn">Begin question ${ORDINALS[next.index]} of three</button>
         <p class="helper-caption">About 90 seconds</p>
+        <a class="link-secondary" href="complete.html">See this week's three</a>
       </div>`;
 
     document.getElementById("begin-btn").addEventListener("click", () => (location.href = "question.html"));

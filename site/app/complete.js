@@ -14,13 +14,16 @@ if (CFC.resumeUrl(state) !== "complete.html") {
   (async function load() {
     const screen = document.getElementById("screen");
     let questions;
+    const stopLoading = CFC.showLoading(screen, "Getting this week's three");
     try {
       questions = await CFC.fetchQuestionsByIds(state.weeklyPick.questionIds);
     } catch (e) {
+      stopLoading();
       console.error("fetchQuestionsByIds failed:", e);
       CFC.renderLoadError(screen, `Couldn't load this week's three. ${CFC.failureReason(e)}`, load);
       return;
     }
+    stopLoading();
     // This week's asks only (see weekAskedIds in app.js): a question
     // re-offered after the pool ran out isn't "done" just because it was
     // asked in some earlier week.
@@ -62,7 +65,7 @@ if (CFC.resumeUrl(state) !== "complete.html") {
       ${
         allDone
           ? `<div class="actions" style="margin-bottom:20px">
-               <a class="link-secondary" href="open.html">Set a reminder for next week &rarr;</a>
+               <a class="link-secondary" href="open.html">Set a reminder for next week</a>
              </div>`
           : `<div class="actions" style="margin-bottom:20px">
                <button type="button" class="btn-primary" id="begin-btn">Begin tonight's question</button>
