@@ -123,6 +123,8 @@ Motion here is **settling, not performing**. It confirms an action or eases cont
   Don't scatter scroll-triggered reveals down the whole page.
 - Hover moves are small and directional: `translateX(3px)`, `padding-left` +10px, opacity fades.
   No scaling, bouncing, tilting, or parallax.
+- Question app screens cross-fade on navigation: `@view-transition` in `site/app/style.css`, the
+  default root fade at 200ms, opacity only, off under reduced motion. No slides between screens.
 - **Reduced motion is mandatory.** Every page that animates must ship the `prefers-reduced-motion`
   block — including forcing `.reveal` to `opacity:1; transform:none`, or the hero stays invisible.
   JS animation (the sphere's auto-spin) must check `matchMedia` too.

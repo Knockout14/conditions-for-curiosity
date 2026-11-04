@@ -22,6 +22,7 @@ next milestones and KO's to-dos for them are in the pilot's own status doc.
 
 | Date | Decision | Why | Impact |
 |---|---|---|---|
+| Nov 3 | **Shorter first run (UX review, option A):** no episode 5 gate and no check before the first question. The details screen carries the one rule ("you answer too, and you go first") with links to the Storyline course and episode 5; the three-question check is offered from the done screen. A new week's pick goes straight to tonight's question. | Five screens before a first question; the gate saved nothing useful and its rule repeats in the question flow; KO doesn't use the check columns now, and the course is the better readiness step. | Path is details, pick, tonight, question. Check columns stay blank until someone takes it (they used to read "no"). `episode5` and `onboardingComplete` are no longer read. Ships in the deploy after Nov 12. |
 | Oct 30 | **Optional guide for the adult** at `/guide` (`site/app/guide.html`), linked from the done screen. | Same text as the Articulate course, built natively so families never get a trial-built course. | Deployed. Saves and sends nothing. |
 | Oct 30 | **Failed circle-backs are kept on the device and resent** from the next app screen. | The screen promised "your answer isn't lost," but a closed tab lost it. | Deployed. Reset clears anything waiting. |
 | Oct 7 | **Pilot specifics live in the private pilot repo**; this public repo only points there. | Its address and internals had gone into these docs. | Moved; this repo stays a clean portfolio of the public project. |

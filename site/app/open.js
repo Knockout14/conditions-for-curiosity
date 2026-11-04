@@ -55,7 +55,7 @@ if (CFC.resumeUrl(state) !== "complete.html") {
       <p class="eyebrow">Conditions for Curiosity</p>
       <div class="center-stack">
         <h1 class="headline">Tonight, ask <em>one</em> thing.</h1>
-        <p class="body-copy">Question ${ORDINALS[next.index]} of the three you picked. You answer first, always. No streak, no score.</p>
+        <p class="body-copy">Question ${ORDINALS[next.index]} of the three you picked. You answer first, always.</p>
       </div>
       <div class="actions">
         <button type="button" class="btn-primary" id="begin-btn">Begin question ${ORDINALS[next.index]} of three</button>

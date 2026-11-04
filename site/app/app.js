@@ -170,9 +170,7 @@
      step rather than a generic fallback. */
   function requireOnboarding() {
     const state = load();
-    if (!state.episode5) return void location.replace("index.html");
     if (!(state.name && state.ageBand)) return void location.replace("details.html");
-    if (!state.onboardingComplete) return void location.replace("check.html");
     return state;
   }
 
@@ -181,10 +179,11 @@
      your details from check/pick/confirm returns you to wherever you'd
      actually gotten to, instead of re-running the whole sequence — and
      so a page can guard itself by checking "is this actually my step." */
+  // Onboarding is just details, then the pick (KO, 2026-11-03): the episode 5
+  // gate became a line on the details screen, and the three-question check is
+  // offered after a night instead of before the first one.
   function resumeUrl(state) {
-    if (!state.episode5) return "index.html";
     if (!(state.name && state.ageBand)) return "details.html";
-    if (!state.onboardingComplete) return "check.html";
     if (!state.weeklyPick) return "pick.html";
     return "complete.html";
   }

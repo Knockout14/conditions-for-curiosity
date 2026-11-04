@@ -239,6 +239,11 @@ for (const [name, fn] of [["submit-pick", submitPick], ["submit-circleback", sub
     "submit-pick: a real pick -> the same 15-column row as before");
 }
 {
+  // The check is optional after a night (2026-11-03): no answers yet -> blank cells, not "no".
+  const r = await send(submitPick, { sessionId: SESSION, name: "Priya", ageBand: "5-6", questions: [Q(1), Q(2), Q(6)], isEdit: false });
+  check(r.status === 200 && r.row.row.slice(6, 9).every((c) => c === ""), "submit-pick: check not taken -> its three cells are blank");
+}
+{
   const r = await send(submitPick, {
     sessionId: SESSION, name: huge, email: huge, ageBand: "3-99", isEdit: "yes",
     questions: Array.from({ length: 50 }, (_, i) => ({ id: i, text: huge, domain: huge, bigIdea: { x: 1 } })),

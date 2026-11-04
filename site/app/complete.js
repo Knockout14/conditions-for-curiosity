@@ -1,6 +1,5 @@
-// This is the resting state — reachable only once episode5, details,
-// the check, a pick, and the commitment step are all done. Anything
-// short of that bounces to wherever's actually next.
+// This is the resting state — reachable only once details and a pick are
+// done. Anything short of that bounces to wherever's actually next.
 const state = CFC.load();
 if (CFC.resumeUrl(state) !== "complete.html") {
   location.replace(CFC.resumeUrl(state));

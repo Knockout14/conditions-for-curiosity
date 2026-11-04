@@ -7,6 +7,9 @@ import { isSessionId, ageBand, text, tagFor, errorMessage, QUESTION_TEXT } from 
 // permissive for any older client-side state that only sent whichever
 // keys were actually answered.
 function checkCol(v) {
+  // Not taken (the check is optional, after a night, since 2026-11-03): leave
+  // the cell blank rather than reading as a wrong answer.
+  if (v === undefined || v === null) return "";
   if (v === "skipped") return "skipped";
   return v?.correct ? "yes" : "no";
 }

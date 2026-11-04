@@ -45,6 +45,14 @@ const Q = (id) => ({ id, text: `q${id}`, domain: "Math", bigIdea: "b" });
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4", onboardingComplete: true };
 
+// ---- onboarding is details, then the pick (no episode 5 gate, no check first)
+{
+  const { CFC } = boot({ stored: { sessionId: SESSION } });
+  check(CFC.resumeUrl(CFC.load()) === "details.html", "onboarding: a new visitor starts at details");
+  CFC.patch({ name: "Priya", ageBand: "3-4" });
+  check(CFC.resumeUrl(CFC.load()) === "pick.html", "onboarding: after details comes the pick, with no gate or check");
+}
+
 // ---- the mid-week edit (used to reset a counter, so the week never finished)
 {
   const { CFC } = boot({ stored: { ...base, askedQuestionIds: [], weeklyPick: { questionIds: [1, 2, 3], askedIds: [], pickedAt: "t0" } } });
@@ -297,7 +305,11 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(targets.length === 30 && targets.every((t) => fbIds.has(t)), "guide: every option opens feedback that exists");
   check((guide.match(/class="guide-card guide-slide"/g) || []).length === 6 && (guide.match(/data-next hidden/g) || []).length === 5, "guide: six swipe cards, a Next on all but the last");
   check(/id="s6" hidden>.*<\/p>\s+<button[^>]*data-done hidden>That's it &darr;<\/button>/.test(guide), "guide: the last card ends with That's it and a down arrow");
-  check(fs.readFileSync(path.join(dir, "done.html"), "utf8").includes('href="guide.html"'), "guide: linked from tonight's done screen");
+  // Since 2026-11-03 the done screen offers the 1-minute check and the Storyline
+  // course; this page stays live behind its short link.
+  const done = fs.readFileSync(path.join(dir, "done.html"), "utf8");
+  check(done.includes('href="check.html"') && done.includes('href="https://question-night-your-part.netlify.app"'),
+    "done screen: offers the 1-minute check and the 7-minute course");
   check(/from = "\/guide"\s+to = "\/app\/guide\.html"/.test(fs.readFileSync(path.join(root, "netlify.toml"), "utf8")), "guide: the short link points at the page");
 }
 

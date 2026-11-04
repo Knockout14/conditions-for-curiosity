@@ -1,5 +1,3 @@
-CFC.requireStep((s) => s.episode5, "index.html");
-
 const form = document.getElementById("details-form");
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");

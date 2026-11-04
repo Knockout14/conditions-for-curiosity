@@ -94,6 +94,8 @@
   .site-footer p{margin:0;font-size:12.5px;color:var(--ink-soft)}
   .site-footer a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--rule)}
   .site-footer a:hover{color:var(--ochre)}
+  .site-footer a,.backlink{position:relative}
+  .site-footer a::after,.backlink::after{content:"";position:absolute;inset:-14px -2px}
   .nextline{margin-top:36px;font-size:13.5px;color:var(--ink-soft)}
   .nextline a{color:var(--ochre);text-decoration:none;border-bottom:1px solid rgba(237,193,96,.35)}
   .nextline a:hover{color:var(--warm);border-color:var(--warm)}

@@ -92,6 +92,10 @@ a:hover{color:var(--warm)}
   line-height:1.55;
   color:var(--off-mute);
 }
+/* The one rule on the details screen: the app's main idea, so it reads first. */
+.lede.rule{font-size:15px;color:var(--off)}
+.readiness-note{margin:10px 0 22px;font-size:13px;line-height:1.55;color:var(--off-instruct)}
+.inline-link{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 
 .center-stack{
   flex:1;
@@ -703,3 +707,12 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 .guide .check-option{font-size:14px;color:var(--off);min-height:44px}
 .guide-fb{font-size:14px;line-height:1.6;color:rgba(246,245,242,.86);margin:10px 0 0}
 .voice-hint svg{vertical-align:-2px;margin-right:6px}
+
+/* ── screen-to-screen fade (cross-document view transitions) ──
+   Browsers without support just navigate as before. */
+@view-transition{navigation:auto}
+::view-transition-old(root),
+::view-transition-new(root){animation-duration:200ms}
+@media (prefers-reduced-motion:reduce){
+  @view-transition{navigation:none}
+}
