@@ -305,11 +305,14 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(targets.length === 30 && targets.every((t) => fbIds.has(t)), "guide: every option opens feedback that exists");
   check((guide.match(/class="guide-card guide-slide"/g) || []).length === 6 && (guide.match(/data-next hidden/g) || []).length === 5, "guide: six swipe cards, a Next on all but the last");
   check(/id="s6" hidden>.*<\/p>\s+<button[^>]*data-done hidden>That's it &darr;<\/button>/.test(guide), "guide: the last card ends with That's it and a down arrow");
-  // Since 2026-11-03 the done screen offers the 1-minute check and the Storyline
-  // course; this page stays live behind its short link.
+  // Since 2026-11-09 families get this guide, not the Storyline course: the
+  // trial ended, so the course is frozen and stays a portfolio piece.
   const done = fs.readFileSync(path.join(dir, "done.html"), "utf8");
-  check(done.includes('href="check.html"') && done.includes('href="https://question-night-your-part.netlify.app"'),
+  check(done.includes('href="check.html"') && done.includes('href="guide.html"'),
     "done screen: offers the 1-minute check and the 7-minute course");
+  const familyPages = ["details.html", "done.html"].map((f) => fs.readFileSync(path.join(dir, f), "utf8"))
+    .concat(fs.readFileSync(path.join(root, "site", "index.html"), "utf8"));
+  check(familyPages.every((p) => !p.includes("question-night-your-part")), "course links: families get the guide, not the frozen Storyline course");
   check(/from = "\/guide"\s+to = "\/app\/guide\.html"/.test(fs.readFileSync(path.join(root, "netlify.toml"), "utf8")), "guide: the short link points at the page");
 }
 
