@@ -634,7 +634,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
   justify-content:center;
 }
 
-/* ── optional guide (one long page, nothing saved) ── */
+/* ── optional guide (one step at a time with JS, one long page without; nothing saved) ── */
 .guide-section{padding:30px 0;border-bottom:1px solid var(--line)}
 .guide-section:first-child{padding-top:0}
 .guide-section:last-child{border-bottom:none;padding-bottom:0}
@@ -706,6 +706,39 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 .guide-sort .check-option{justify-content:center;text-align:center}
 .guide .check-option{font-size:14px;color:var(--off);min-height:44px}
 .guide-fb{font-size:14px;line-height:1.6;color:rgba(246,245,242,.86);margin:10px 0 0}
+/* A tapped option in the guide gets one neutral style, whatever it says:
+   the guide never shows right or wrong. Scoped to .guide so the question
+   app's own check screens keep their feedback colors. */
+.guide .check-option.tapped{border:1.6px solid var(--gold);background:none;color:var(--off)}
+.guide .check-option:hover{border-color:var(--input-border-gold)}
+.guide .check-option.tapped:hover{border-color:var(--gold)}
+.guide-hint{font-size:13px;line-height:1.5;color:var(--off-instruct);margin:10px 0 0}
+.guide-part{margin-top:40px}
+.guide-label-top{margin-top:0}
+.guide-cta{margin-top:20px}
+.guide.is-stepping .guide-nav .guide-cta{margin-top:0;align-self:stretch}
+.guide-privacy{font-size:14px}
+.guide-privacy .link-secondary{font-size:inherit;letter-spacing:.01em}
+.guide-skip{display:inline-block;align-self:auto;text-align:left;margin:0 0 4px;padding:12px 0 3px}
+
+/* One step at a time, once guide.js has run. Without it the page stays one
+   long scroll and none of this applies. */
+.guide-progress{display:none}
+.guide.is-stepping .guide-progress{display:block;margin:0 0 28px}
+.guide-step-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--off-instruct);margin:0 0 8px}
+.guide-bar{height:1px;background:var(--line)}
+.guide-bar span{display:block;height:1px;width:0;background:var(--gold)}
+.guide.is-stepping .guide-section{padding:0;border-bottom:none;flex:1;display:flex;flex-direction:column}
+.guide.is-stepping .guide-section[hidden]{display:none}
+.guide.is-stepping .guide-section.is-entering{animation:guide-fade 200ms cubic-bezier(.2,.7,.3,1)}
+@keyframes guide-fade{from{opacity:0}to{opacity:1}}
+[data-step-focus]:focus{outline:none}
+.guide-nav{display:none}
+.guide.is-stepping .guide-nav{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:auto;padding-top:32px}
+.guide-nav .link-secondary{display:flex;align-items:center;min-height:44px;padding:0 4px;border-bottom:none;text-decoration:underline;text-decoration-color:rgba(237,193,96,.35);text-underline-offset:4px;font-size:13px}
+@media (prefers-reduced-motion:reduce){
+  .guide.is-stepping .guide-section.is-entering{animation:none}
+}
 .voice-hint svg{vertical-align:-2px;margin-right:6px}
 
 /* ── screen-to-screen fade (cross-document view transitions) ──
