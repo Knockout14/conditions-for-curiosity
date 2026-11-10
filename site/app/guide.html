@@ -29,9 +29,9 @@
 <body>
 
 <main class="screen guide">
-  <header class="guide-section">
+  <header class="guide-section" data-step id="step-1">
     <p class="eyebrow">Conditions for Curiosity</p>
-    <h1 class="headline">Question Night: Your Part</h1>
+    <h1 class="headline" data-step-focus>Question Night: Your Part</h1>
     <p class="guide-body guide-strong">A short guide for the adult who asks.</p>
     <p class="guide-body">For parents, caregivers and teachers of kids 3 to 8 who use the Question Night app.</p>
     <p class="guide-body">A question you both answer is a conversation, not a quiz. This shows you how to keep it that way. About 7 minutes. Optional, and nothing is graded.</p>
@@ -44,15 +44,13 @@
     </ol>
   </header>
 
-  <section class="guide-section">
+  <section class="guide-section" data-step id="step-2">
     <p class="eyebrow">The one rule</p>
-    <h2 class="guide-h2">You answer too, and you go first.</h2>
+    <h2 class="guide-h2" data-step-focus>You answer too, and you go first.</h2>
     <p class="guide-h2 guide-gold">You're finding out how they think, not teaching.</p>
     <p class="guide-body">Answering first, honestly, is the whole idea. The rest of this course is practice.</p>
-  </section>
 
-  <section class="guide-section">
-    <p class="eyebrow">Why it's built this way</p>
+    <p class="eyebrow guide-part">Why it's built this way</p>
     <h2 class="guide-h2">A question you also answer can't become a quiz.</h2>
     <p class="guide-body">You can't quiz someone while you're sharing something of your own.</p>
     <p class="guide-body">And when you go first and say something unsure, your kid sees that not knowing is allowed here.</p>
@@ -79,9 +77,9 @@
     </details>
   </section>
 
-  <section class="guide-section">
+  <section class="guide-section" data-step id="step-3">
     <p class="eyebrow">Finding out or teaching?</p>
-    <h2 class="guide-h2">Same question, six answers.</h2>
+    <h2 class="guide-h2" data-step-focus>Same question, six answers.</h2>
     <p class="guide-body">First, answer it yourself, in your head or out loud. Take ten seconds.</p>
     <p class="question-text guide-question">Where do you think puddles go when the sun comes out?</p>
     <p class="guide-body">Now sort six adult answers to the same question.</p>
@@ -93,7 +91,7 @@
         <div class="guide-card guide-slide" data-choice>
           <p class="guide-quote">"I think the water goes up into the air, but I've never actually watched it happen, so I'm not sure. Yesterday a puddle by my bus stop got smaller and I couldn't tell when."</p>
           <div class="guide-sort">
-            <button type="button" class="check-option" data-right data-fb="s1">Sounds like finding out</button>
+            <button type="button" class="check-option" data-fb="s1">Sounds like finding out</button>
             <button type="button" class="check-option" data-fb="s1">Sounds like teaching</button>
           </div>
           <p class="guide-fb" id="s1" hidden><strong>Finding out.</strong> It makes a guess, says it's unsure, and shares one real detail. The guess may even be right. It still sounds like finding out, because it stays open.</p>
@@ -104,7 +102,7 @@
           <p class="guide-quote">"It soaks into the ground. That's where all puddles go."</p>
           <div class="guide-sort">
             <button type="button" class="check-option" data-fb="s2">Sounds like finding out</button>
-            <button type="button" class="check-option" data-right data-fb="s2">Sounds like teaching</button>
+            <button type="button" class="check-option" data-fb="s2">Sounds like teaching</button>
           </div>
           <p class="guide-fb" id="s2" hidden><strong>Teaching.</strong> It closes the question with a flat "that's it." The tone gives it away, not whether the fact is right.</p>
           <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
@@ -113,7 +111,7 @@
         <div class="guide-card guide-slide" data-choice>
           <p class="guide-quote">"When I was little I thought the sun drank them. Now I honestly don't know. I'd guess it's some mix of up into the air and down into the ground."</p>
           <div class="guide-sort">
-            <button type="button" class="check-option" data-right data-fb="s3">Sounds like finding out</button>
+            <button type="button" class="check-option" data-fb="s3">Sounds like finding out</button>
             <button type="button" class="check-option" data-fb="s3">Sounds like teaching</button>
           </div>
           <p class="guide-fb" id="s3" hidden><strong>Finding out.</strong> A memory, an honest "I don't know," and a loose guess. Nothing to repeat back.</p>
@@ -124,7 +122,7 @@
           <p class="guide-quote">"The heat of the sun turns the water into vapor. It's called evaporation. Say it with me."</p>
           <div class="guide-sort">
             <button type="button" class="check-option" data-fb="s4">Sounds like finding out</button>
-            <button type="button" class="check-option" data-right data-fb="s4">Sounds like teaching</button>
+            <button type="button" class="check-option" data-fb="s4">Sounds like teaching</button>
           </div>
           <p class="guide-fb" id="s4" hidden><strong>Teaching.</strong> The facts may be fine, but it hands over a word and asks them to say it back. That's a quiz in a friendly voice.</p>
           <button type="button" class="link-secondary guide-next" data-next hidden>Next answer &rarr;</button>
@@ -133,7 +131,7 @@
         <div class="guide-card guide-slide" data-choice>
           <p class="guide-quote">"Not sure. I notice they disappear faster on sunny days, but I can't say what that tells me."</p>
           <div class="guide-sort">
-            <button type="button" class="check-option" data-right data-fb="s5">Sounds like finding out</button>
+            <button type="button" class="check-option" data-fb="s5">Sounds like finding out</button>
             <button type="button" class="check-option" data-fb="s5">Sounds like teaching</button>
           </div>
           <p class="guide-fb" id="s5" hidden><strong>Finding out.</strong> Short, shares something noticed, and admits where the thinking stops. Short is fine.</p>
@@ -144,62 +142,67 @@
           <p class="guide-quote">"Remember the water cycle? Water goes up, makes clouds and comes back as rain. So where do puddles come from?"</p>
           <div class="guide-sort">
             <button type="button" class="check-option" data-fb="s6">Sounds like finding out</button>
-            <button type="button" class="check-option" data-right data-fb="s6">Sounds like teaching</button>
+            <button type="button" class="check-option" data-fb="s6">Sounds like teaching</button>
           </div>
           <p class="guide-fb" id="s6" hidden><strong>Teaching.</strong> It recaps a lesson and ends with a question that has a right answer. That's a quiz, even when it's kind.</p>
-          <button type="button" class="link-secondary guide-next" data-done hidden>That's it &darr;</button>
+          <button type="button" class="link-secondary guide-next" data-done hidden>That's it &rarr;</button>
         </div>
       </div>
     </div>
+  </section>
 
-    <p class="guide-label">What to listen for</p>
+  <section class="guide-section" data-step id="step-4">
+    <p class="guide-label guide-label-top" data-step-focus>What to listen for</p>
     <p class="guide-body"><strong>Finding out sounds like:</strong> a guess or a memory, an honest "I'm not sure," a real detail from your own day, and nothing for them to repeat back.</p>
     <p class="guide-body"><strong>Teaching sounds like:</strong> a flat "that's it," a new word to say back, or a question with a right answer on the end.</p>
     <p class="guide-body">A correct fact can still sound like teaching. And you don't have to fake not knowing. Say what you think, once, and leave it open.</p>
   </section>
 
-  <section class="guide-section">
-    <p class="eyebrow">Moment 1 of 3: "I don't know"</p>
+  <section class="guide-section" data-step id="step-5">
+    <p class="eyebrow" data-step-focus>Moment 1 of 3: "I don't know"</p>
     <p class="guide-body">You asked, "What do you think the moon is made of?" You answered first. Your kid, 5 or 6 years old, shrugs and says, "I don't know."</p>
     <h2 class="guide-prompt">What do you do next?</h2>
     <div class="guide-card" data-choice>
       <div class="check-options">
         <button type="button" class="check-option" data-fb="m1a">"Let me tell you what the moon is really made of."</button>
-        <button type="button" class="check-option" data-right data-fb="m1b">"That's okay. Honestly, I'm not sure either."</button>
+        <button type="button" class="check-option" data-fb="m1b">"That's okay. Honestly, I'm not sure either."</button>
         <button type="button" class="check-option" data-fb="m1c">"Come on, you know this. Just take a guess."</button>
       </div>
+      <p class="guide-hint">Tap the others to see what each one does.</p>
       <p class="guide-fb" id="m1a" hidden><strong>That's the explaining reflex.</strong> It rescues them from not knowing, and it also ends the wondering. You've moved from finding out to teaching.</p>
       <p class="guide-fb" id="m1b" hidden><strong>A curious next move.</strong> You took "I don't know" as a real answer and were honest about your own. They don't owe you anything more. They can add something now, later, or never.</p>
       <p class="guide-fb" id="m1c" hidden><strong>That's the quiz reflex.</strong> A guess on demand feels like a test, and "I don't know" was an honest answer.</p>
     </div>
   </section>
 
-  <section class="guide-section">
-    <p class="eyebrow">Moment 2 of 3: A surprising answer</p>
+  <section class="guide-section" data-step id="step-6">
+    <p class="eyebrow" data-step-focus>Moment 2 of 3: A surprising answer</p>
     <p class="guide-body">You asked, "What do you think clouds are made of?" You answered first. Your kid, 7 or 8 years old, says, "Cotton. Like a giant pillow."</p>
     <h2 class="guide-prompt">What do you do next?</h2>
     <div class="guide-card" data-choice>
       <div class="check-options">
-        <button type="button" class="check-option" data-right data-fb="m2a">"Cotton. I never pictured that. What's it like up there in your picture?"</button>
+        <button type="button" class="check-option" data-fb="m2a">"Cotton. I never pictured that. What's it like up there in your picture?"</button>
         <button type="button" class="check-option" data-fb="m2b">"Actually, clouds are made of tiny drops of water."</button>
         <button type="button" class="check-option" data-fb="m2c">"Ha, good one. But do you know what they're really made of? Think hard."</button>
       </div>
+      <p class="guide-hint">Tap the others to see what each one does.</p>
       <p class="guide-fb" id="m2a" hidden><strong>A curious next move.</strong> You stayed with their picture instead of checking it. Whether it's right can wait. If it matters, it will come up again.</p>
       <p class="guide-fb" id="m2b" hidden><strong>That's the correcting reflex.</strong> It's quick and well meant, and it turns their idea into a mistake. Question night isn't the place to fix it.</p>
       <p class="guide-fb" id="m2c" hidden><strong>That's the quiz reflex.</strong> It sounds playful, but it has a right answer waiting at the end. They'll hear that their idea was the wrong one.</p>
     </div>
   </section>
 
-  <section class="guide-section">
-    <p class="eyebrow">Moment 3 of 3: Silence</p>
+  <section class="guide-section" data-step id="step-7">
+    <p class="eyebrow" data-step-focus>Moment 3 of 3: Silence</p>
     <p class="guide-body">You asked, "Where do you think shadows go at night?" You answered first. Your kid, 5 or 6 years old, goes quiet and looks up at the ceiling. A few seconds pass.</p>
     <h2 class="guide-prompt">What do you do next?</h2>
     <div class="guide-card" data-choice>
       <div class="check-options">
         <button type="button" class="check-option" data-fb="m3a">"Here's a hint: think about what happens when the lights go out."</button>
         <button type="button" class="check-option" data-fb="m3b">"Okay, easier: do they disappear, or are they still there in the dark?"</button>
-        <button type="button" class="check-option" data-right data-fb="m3c">Say nothing. Stay relaxed, and count slowly to ten in your head.</button>
+        <button type="button" class="check-option" data-fb="m3c">Say nothing. Stay relaxed, and count slowly to ten in your head.</button>
       </div>
+      <p class="guide-hint">Tap the others to see what each one does.</p>
       <p class="guide-fb" id="m3a" hidden><strong>That's the explaining reflex, in disguise.</strong> A hint steers them toward the answer you have in mind. The quiet was theirs to use.</p>
       <p class="guide-fb" id="m3b" hidden><strong>That's the quiz reflex.</strong> Two choices, with one of them likely being right, turn a wondering question into a multiple-choice test.</p>
       <p class="guide-fb" id="m3c" hidden><strong>A curious next move.</strong> Quiet is often thinking. If it's still quiet after ten, you can say, "That's a thinking one. We can come back to it."</p>
@@ -210,9 +213,9 @@
     <p class="guide-body">All three come from caring, and most of us reach for one out of habit. Notice the reach, and let it pass.</p>
   </section>
 
-  <section class="guide-section">
+  <section class="guide-section" data-step id="step-8">
     <p class="eyebrow">After the question</p>
-    <h2 class="guide-h2">When you've both answered, the night is nearly done.</h2>
+    <h2 class="guide-h2" data-step-focus>When you've both answered, the night is nearly done.</h2>
     <p class="guide-body"><strong>Afterward.</strong> You'll see what you wrote. Their turn is theirs. You don't need to write down what they said unless you want to.</p>
     <p class="guide-body"><strong>Why this one works.</strong> A short note, closed by default. It only appears once you've both answered. Open it if you like, and skip it if you don't.</p>
     <p class="guide-body"><strong>One tap.</strong> The app asks one thing: "Did your child ask a question back?" You tap Yes or No. There's an optional note for a word or a sentence of what they said, if you want to keep it. It's fine to skip.</p>
@@ -224,9 +227,9 @@
     <p class="guide-body">Then you're done. Close the app.</p>
   </section>
 
-  <section class="guide-section">
+  <section class="guide-section" data-step id="step-9">
     <p class="eyebrow">Your first week</p>
-    <h2 class="guide-h2">One pick. Then ask when it fits.</h2>
+    <h2 class="guide-h2" data-step-focus>One pick. Then ask when it fits.</h2>
     <ol class="guide-list">
       <li><strong>Pick.</strong> Once a week, the app shows three questions. Put them in the order you like. Not feeling one? You get one swap a week.</li>
       <li><strong>Answer first.</strong> Type (or speak) your answer in your own words before you turn to your kid.</li>
@@ -236,48 +239,58 @@
     <p class="guide-body">Two or three nights in a week is plenty. If a week gets away from you, nothing is lost. There are no streaks to keep.</p>
   </section>
 
-  <section class="guide-section">
-    <p class="eyebrow">Quick check</p>
+  <section class="guide-section" data-step id="step-10">
+    <p class="eyebrow" data-step-focus>Quick check 1 of 3</p>
     <p class="guide-body">Optional, and not graded. Skip it if you like.</p>
+    <a class="link-secondary guide-skip" href="#step-13">Skip the quick check</a>
 
     <h2 class="guide-prompt">Why do you answer first?</h2>
     <div class="guide-card" data-choice>
       <div class="check-options">
         <button type="button" class="check-option" data-fb="q1w">So your kid can copy your answer.</button>
-        <button type="button" class="check-option" data-right data-fb="q1r">So it's clear that wondering out loud, and not knowing, are allowed here.</button>
+        <button type="button" class="check-option" data-fb="q1r">So it's clear that wondering out loud, and not knowing, are allowed here.</button>
         <button type="button" class="check-option" data-fb="q1w">So they know what the right answer is.</button>
       </div>
+      <p class="guide-hint">Tap the others to see what each one does.</p>
       <p class="guide-fb" id="q1r" hidden>That's the idea. Going first is about showing how to answer, not about getting it right. It's a working model, not a proven result.</p>
       <p class="guide-fb" id="q1w" hidden>It's not about the answer itself. Your answer isn't a model to copy or a right answer for them to learn. It shows that answering honestly is allowed.</p>
     </div>
+  </section>
 
+  <section class="guide-section" data-step id="step-11">
+    <p class="eyebrow" data-step-focus>Quick check 2 of 3</p>
     <h2 class="guide-prompt">Which one sounds like finding out?</h2>
     <p class="guide-body">The question was: "Why do leaves fall in the autumn?"</p>
     <div class="guide-card" data-choice>
       <div class="check-options">
         <button type="button" class="check-option" data-fb="q2a">"The tree stops sending water to them. That's called abscission. Can you say it?"</button>
-        <button type="button" class="check-option" data-right data-fb="q2b">"I always figured it was the wind, but leaves fall on calm days too, so I'm not sure."</button>
+        <button type="button" class="check-option" data-fb="q2b">"I always figured it was the wind, but leaves fall on calm days too, so I'm not sure."</button>
         <button type="button" class="check-option" data-fb="q2c">"Before I tell you, can you guess why they fall?"</button>
       </div>
+      <p class="guide-hint">Tap the others to see what each one does.</p>
       <p class="guide-fb" id="q2a" hidden>That one sounds like teaching. It hands over a new word and asks them to say it back.</p>
       <p class="guide-fb" id="q2b" hidden>A guess, a noticed detail, and an honest "not sure." Nothing to repeat back.</p>
       <p class="guide-fb" id="q2c" hidden>That one sounds like teaching. It's a quiz with a right answer waiting at the end.</p>
     </div>
+  </section>
 
+  <section class="guide-section" data-step id="step-12">
+    <p class="eyebrow" data-step-focus>Quick check 3 of 3</p>
     <h2 class="guide-prompt">You tap No on the last screen, because your kid didn't ask a question back. What does that mean?</h2>
     <div class="guide-card" data-choice>
       <div class="check-options">
         <button type="button" class="check-option" data-fb="q3w">The night went badly.</button>
-        <button type="button" class="check-option" data-right data-fb="q3r">Nothing is wrong. No is a fine answer.</button>
+        <button type="button" class="check-option" data-fb="q3r">Nothing is wrong. No is a fine answer.</button>
         <button type="button" class="check-option" data-fb="q3w">You should try harder next time.</button>
       </div>
-      <p class="guide-fb" id="q3r" hidden>Right. It isn't a grade on the night, on you, or on them.</p>
+      <p class="guide-hint">Tap the others to see what each one does.</p>
+      <p class="guide-fb" id="q3r" hidden>It isn't a grade on the night, on you, or on them.</p>
       <p class="guide-fb" id="q3w" hidden>No is a fine answer. Some nights they ask something, and some nights they don't.</p>
     </div>
   </section>
 
-  <section class="guide-section">
-    <p class="eyebrow">That's it</p>
+  <section class="guide-section" data-step id="step-13">
+    <p class="eyebrow" data-step-focus>That's it</p>
     <p class="guide-h2">You answer too, and you go first. <span class="guide-gold">You're finding out how they think, not teaching.</span></p>
     <p class="guide-body">Open the app whenever it's a good night to ask.</p>
     <div class="actions">
