@@ -326,7 +326,7 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   // trial ended, so the course is frozen and stays a portfolio piece.
   const done = fs.readFileSync(path.join(dir, "done.html"), "utf8");
   check(done.includes('href="check.html"') && done.includes('href="guide.html"'),
-    "done screen: offers the 1-minute check and the 7-minute course");
+    "done screen: offers the 1-minute check and the 6-minute course");
   const familyPages = ["details.html", "done.html"].map((f) => fs.readFileSync(path.join(dir, f), "utf8"))
     .concat(fs.readFileSync(path.join(root, "site", "index.html"), "utf8"));
   check(familyPages.every((p) => !p.includes("question-night-your-part")), "course links: families get the guide, not the frozen Storyline course");
