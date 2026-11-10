@@ -715,6 +715,10 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 .guide-hint{font-size:13px;line-height:1.5;color:var(--off-instruct);margin:10px 0 0}
 .guide-part{margin-top:40px}
 .guide-label-top{margin-top:0}
+.guide-cta{margin-top:20px}
+.guide.is-stepping .guide-nav .guide-cta{margin-top:0;align-self:stretch}
+.guide-privacy{font-size:14px}
+.guide-privacy .link-secondary{font-size:inherit;letter-spacing:.01em}
 .guide-skip{display:inline-block;align-self:auto;text-align:left;margin:0 0 4px;padding:12px 0 3px}
 
 /* One step at a time, once guide.js has run. Without it the page stays one

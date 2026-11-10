@@ -313,13 +313,14 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(stepBlocks.length === 13 && stepBlocks.every((b) => (b.match(/data-step-focus/g) || []).length === 1), "guide: every step has one heading to move focus to");
   check(/class="guide-swipe-wrap"/.test(stepBlocks[2]) && !/class="guide-swipe-wrap"/.test(stepBlocks.filter((_, i) => i !== 2).join("")), "guide: the six-card sort is all of step 3");
   check(/href="#step-13">Skip the quick check</.test(stepBlocks[9]), "guide: the quick check can be skipped to the last step");
-  check(/class="btn-primary" href="index\.html">Open the question app</.test(stepBlocks[12]) && /href="\.\.\/privacy\.html"/.test(stepBlocks[12]) && /<summary>Sources<\/summary>/.test(stepBlocks[12]), "guide: the last step opens the app and links privacy and sources");
+  check(/class="btn-primary guide-cta" href="index\.html" data-step-cta>Open the question app &rarr;</.test(stepBlocks[12]) && guideJs.includes("[data-step-cta]") && /href="\.\.\/privacy\.html"/.test(stepBlocks[12]) && /<summary>Sources<\/summary>/.test(stepBlocks[12]), "guide: the last step opens the app from the Next spot and links privacy and sources");
   check((guide.match(/class="guide-hint">Tap the others to see what each one does\.</g) || []).length === 6, "guide: every choice group says the others can be tapped too");
   // Nothing in the guide looks or reads like a grade.
   check(!/\b(correct|incorrect)\b/.test(guideJs.replace(/\/\*[\s\S]*?\*\//g, "")) && !guide.includes("data-right"), "guide: taps get no right or wrong class, and no option is marked right");
   check(!/>\s*(Right|Correct|Wrong|Incorrect|Try again)\b/i.test(guide) && !/\bscore\b/i.test(guide.replace("It doesn't score them", "")), "guide: no feedback opens with Right, Correct, Wrong or Try again, and nothing is scored");
   check(/\.guide \.check-option\.tapped\{[^}]*var\(--gold\)/.test(css) && /\.check-option\.correct\{[^}]*var\(--green\)/.test(css) && /\.check-option\.incorrect\{[^}]*var\(--coral\)/.test(css), "guide: one neutral gold tap style, and the app's own check keeps its colors");
   check(/@media \(prefers-reduced-motion:reduce\)\{\s*\.guide\.is-stepping \.guide-section\.is-entering\{animation:none\}/.test(css), "guide: the step fade is off under reduced motion");
+  check(/addEventListener\("touchend"/.test(guideJs) && /closest\("\[data-track\]"\)/.test(guideJs) && /passive: true/.test(guideJs), "guide: swiping turns steps, but not inside the six-answer sort, and never blocks scrolling");
   check(/location\.hash/.test(guideJs) && /pushState/.test(guideJs) && guideJs.includes('classList.add("is-stepping")'), "guide: steps live in the URL hash, and the long page is the default until the script runs");
   // Since 2026-11-09 families get this guide, not the Storyline course: the
   // trial ended, so the course is frozen and stays a portfolio piece.
