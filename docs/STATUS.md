@@ -1,6 +1,6 @@
 # Status: Conditions for Curiosity
 
-**As of November 10, 2026.** The short, current picture for the podcast site and the question app:
+**As of November 11, 2026.** The short, current picture for the podcast site and the question app:
 where things stand, what was decided and why, and what's next. Kept up to date at the end of each
 work session. The decision-by-decision history lives in [`status-2026-09-01.md`](status-2026-09-01.md);
 the system review that started this phase is the "Conditions for Curiosity — System Review" doc
@@ -22,6 +22,7 @@ next milestones and KO's to-dos for them are in the pilot's own status doc.
 
 | Date | Decision | Why | Impact |
 |---|---|---|---|
+| Nov 11 | **The guide's sort is four answers, not six** (branch `guide-four-cards`). Kept: the bus-stop guess (finding out), "soaks into the ground" (teaching), "the sun drank them" (finding out), the water-cycle recap (teaching). Dropped: "say it with me" (teaching) and "faster on sunny days" (finding out). | KO, walking through it again: six felt long for what it teaches. Dropping one of each keeps two finding out and two teaching; "faster on sunny days" was a shorter card 1, and "say it with me" overlapped the water-cycle card, which is the subtler one (a question that is really a quiz). | "A word to repeat" / "a word to say back" came out of the step 3 intro and step 4 summary, since no card shows it now. Same 13 steps; tests updated for four cards. |
 | Nov 10 | **The guide goes one step at a time, with no grading look** (branch `guide-stepper`, not merged). 13 steps, Next and Back, "Step N of 13", the step in the URL hash (`#step-7`) so refresh, the device's Back button and direct links work. A tapped option gets one gold border (no green, red, check or cross); "Right." is gone from the quick check; each choice group says "Tap the others to see what each one does." With JavaScript off it is still one long page. | KO: the long scroll read as a wall of text, and the check/cross icons gave a graded feel that clashes with "any answer counts." Same words otherwise; no study wording touched. Scope: `guide-stepper-scope-2026-11-10.md` (Cowork HQ). | Still saves and sends nothing; tests now cover the 13 steps, neutral taps, the skip link, and that the app's own check keeps its colors. Same day, after KO's phone test: copy trimmed step by step with KO (about 1,800 words to 1,450 counting every feedback line; reading time now "about 6 minutes", also on the home, details and done pages; study wording, "What the app keeps" and the working-model lines unchanged), swipe left/right between steps (not inside the sort, not from screen edges), and "Open the question app →" moved into the Next spot on step 13. Still to do: the "7 minutes" mentions on the home, details and done pages; a fresh review before merge. KO's phone test (Instagram's browser and the phone's own): swiping works, and a refresh keeps the current step, as intended. Merge is a production deploy (15 credits): on or after Nov 12. |
 | Nov 9 | **Families get the native guide (`/guide`, `site/app/guide.html`), not the Storyline course.** All five course links (details screen, done screen, three on the home page) now open the guide in the same tab. | The Articulate trial ended, so the Storyline course (question-night-your-part.netlify.app) can no longer be edited. The guide can, and it is the version future parent feedback will change. Same day, both took the same reviewer-feedback edits (opening, shorter "why" screen, sort criteria). | The guide is the one family version and the only one that changes. The Storyline course is frozen at v06 and lives on as a portfolio piece, linked from kevinoneil.netlify.app. Known difference: the guide's "After the question" ends "Then you're done. Close the app."; the course still has the older no-streak line. |
 | Nov 4 | **Home page reworked for a first-time visitor:** hero says who Kevin is and what to do first (episode 1, about 6 min); a "Nothing here takes long" strip; experience lines; the idea; research as three plain bullets with the study table in a fold; what to do next (answer too and go first, then three orientations that are not steps); episode list with minutes from the RSS feed; the model cut to one line. "Who this is for" cut. Footer links get the gold focus ring on all five pages. | A web-builder friend could not tell what the site was ("a lot of things at once"). Structure and copy changed; the visual system did not. | "20 years in education", never "in classrooms". New `try_app_click` label `ways_in` for the app row in the strip. The mobile sticky bar now hides from mid-page on, once the app button has been passed. |
@@ -71,10 +72,6 @@ From the system review's evaluation plan:
   the rate limits.
 
 ## Smaller open items
-
-- Guide, step 3 sort: option to cut from six cards to four by dropping cards 3 (the sun drank them) and 5
-  (faster on sunny days), which overlap most with card 1. Kept for now (Nov 10); revisit if testers find
-  the sort long or tiring for what it teaches.
 
 - `site/app/reveal.html` renders `q.citation`, but `questions-by-ids` never returns it: return it or
   drop the dead code.

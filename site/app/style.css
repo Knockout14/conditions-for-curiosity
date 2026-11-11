@@ -671,7 +671,7 @@ textarea.field-input::placeholder{color:rgba(246,245,242,.32)}
 .guide-question{margin:18px 0}
 .guide-card{margin-top:12px}
 .guide-card + .guide-card{margin-top:20px}
-/* Six-answer sort: runs to the screen's right edge so the next card peeks in. */
+/* Four-answer sort: runs to the screen's right edge so the next card peeks in. */
 .guide-swipe-wrap{margin-top:18px}
 .guide-count{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--off-instruct);margin:0 0 10px}
 .guide-swipe{
