@@ -303,15 +303,15 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(!/[–—]/.test(guide), "guide: no em or en dashes");
   const fbIds = new Set([...guide.matchAll(/class="guide-fb" id="([^"]+)"/g)].map((m) => m[1]));
   const targets = [...guide.matchAll(/data-fb="([^"]+)"/g)].map((m) => m[1]);
-  check(targets.length === 30 && targets.every((t) => fbIds.has(t)), "guide: every option opens feedback that exists");
-  check((guide.match(/class="guide-card guide-slide"/g) || []).length === 6 && (guide.match(/data-next hidden/g) || []).length === 5, "guide: six swipe cards, a Next on all but the last");
+  check(targets.length === 26 && targets.every((t) => fbIds.has(t)), "guide: every option opens feedback that exists");
+  check((guide.match(/class="guide-card guide-slide"/g) || []).length === 4 && (guide.match(/data-next hidden/g) || []).length === 3, "guide: four swipe cards, a Next on all but the last");
   // Since 2026-11-10 the guide is a stepper: the last card moves on to the next step, so its arrow points forward.
-  check(/id="s6" hidden>.*<\/p>\s+<button[^>]*data-done hidden>That's it &rarr;<\/button>/.test(guide), "guide: the last card ends with That's it and a forward arrow");
+  check(/id="s4" hidden>.*<\/p>\s+<button[^>]*data-done hidden>That's it &rarr;<\/button>/.test(guide), "guide: the last card ends with That's it and a forward arrow");
   const stepIds = [...guide.matchAll(/data-step id="step-(\d+)"/g)].map((m) => Number(m[1]));
   check(stepIds.length === 13 && stepIds.every((n, i) => n === i + 1), "guide: 13 steps, numbered in order");
   const stepBlocks = guide.split(/(?=<(?:header|section) class="guide-section" data-step)/).slice(1);
   check(stepBlocks.length === 13 && stepBlocks.every((b) => (b.match(/data-step-focus/g) || []).length === 1), "guide: every step has one heading to move focus to");
-  check(/class="guide-swipe-wrap"/.test(stepBlocks[2]) && !/class="guide-swipe-wrap"/.test(stepBlocks.filter((_, i) => i !== 2).join("")), "guide: the six-card sort is all of step 3");
+  check(/class="guide-swipe-wrap"/.test(stepBlocks[2]) && !/class="guide-swipe-wrap"/.test(stepBlocks.filter((_, i) => i !== 2).join("")), "guide: the four-card sort is all of step 3");
   check(/href="#step-13">Skip the quick check</.test(stepBlocks[9]), "guide: the quick check can be skipped to the last step");
   check(/class="btn-primary guide-cta" href="index\.html" data-step-cta>Open the question app &rarr;</.test(stepBlocks[12]) && guideJs.includes("[data-step-cta]") && /href="\.\.\/privacy\.html"/.test(stepBlocks[12]) && /<summary>Sources<\/summary>/.test(stepBlocks[12]), "guide: the last step opens the app from the Next spot and links privacy and sources");
   check((guide.match(/class="guide-hint">Tap the others to see what each one does\.</g) || []).length === 6, "guide: every choice group says the others can be tapped too");
@@ -320,7 +320,7 @@ const base = { sessionId: SESSION, episode5: true, name: "Priya", ageBand: "3-4"
   check(!/>\s*(Right|Correct|Wrong|Incorrect|Try again)\b/i.test(guide) && !/\bscore\b/i.test(guide.replace("It doesn't score them", "")), "guide: no feedback opens with Right, Correct, Wrong or Try again, and nothing is scored");
   check(/\.guide \.check-option\.tapped\{[^}]*var\(--gold\)/.test(css) && /\.check-option\.correct\{[^}]*var\(--green\)/.test(css) && /\.check-option\.incorrect\{[^}]*var\(--coral\)/.test(css), "guide: one neutral gold tap style, and the app's own check keeps its colors");
   check(/@media \(prefers-reduced-motion:reduce\)\{\s*\.guide\.is-stepping \.guide-section\.is-entering\{animation:none\}/.test(css), "guide: the step fade is off under reduced motion");
-  check(/addEventListener\("touchend"/.test(guideJs) && /closest\("\[data-track\]"\)/.test(guideJs) && /passive: true/.test(guideJs), "guide: swiping turns steps, but not inside the six-answer sort, and never blocks scrolling");
+  check(/addEventListener\("touchend"/.test(guideJs) && /closest\("\[data-track\]"\)/.test(guideJs) && /passive: true/.test(guideJs), "guide: swiping turns steps, but not inside the four-answer sort, and never blocks scrolling");
   check(/location\.hash/.test(guideJs) && /pushState/.test(guideJs) && guideJs.includes('classList.add("is-stepping")'), "guide: steps live in the URL hash, and the long page is the default until the script runs");
   // Since 2026-11-09 families get this guide, not the Storyline course: the
   // trial ended, so the course is frozen and stays a portfolio piece.

@@ -115,7 +115,7 @@ function show(n, moveFocus) {
 
 /* Swipe left for the next step, right for the one before. Only a quick,
    clearly sideways swipe counts, so scrolling a step never turns the page.
-   Ignored inside the six-answer sort (it has its own swipe) and near the
+   Ignored inside the four-answer sort (it has its own swipe) and near the
    screen's edges, where phones and in-app browsers use the swipe for Back. */
 let touch = null;
 guide.addEventListener("touchstart", (e) => {
@@ -144,7 +144,7 @@ const sync = () => { if (fromHash() !== shown) show(fromHash(), true); };
 window.addEventListener("popstate", sync);
 window.addEventListener("hashchange", sync);
 
-/* The six-answer sort: swipe, or tap Next once an answer is sorted. Swiping
+/* The four-answer sort: swipe, or tap Next once an answer is sorted. Swiping
    also skips ahead without sorting, because nothing here is ever locked.
    Card positions are measured only while the sort is on screen: a hidden
    step reports offsetLeft 0 for everything. */
